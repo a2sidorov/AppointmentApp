@@ -1,0 +1,45 @@
+* {box-sizing: border-box;}
+ul {list-style-type: none;}
+body {
+    font-size: 10px;
+}
+.form {
+    width: 20%;
+    display: inline-block;
+    float: left;
+}
+.form input {
+    margin: 20px;
+    display: block;
+}
+.calendar {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto;
+}
+.calendar ul {
+    padding: 0;
+}
+.time {
+    display: inline-block;
+}
+.time li {
+    background-color: #1abc9c;
+    border: 1px solid rgba(0, 0, 0, 0.8);
+    text-align: center;
+    padding: 10px;
+}
+.time li:hover {
+    background-color: #00b36b;
+    cursor: pointer;
+}
+.nextweek {
+    float: right;
+}
+.prevweek {
+    float: right;
+}
+
+
+
+
+

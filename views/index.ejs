@@ -1,20 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta 		>
-	<title>Calendar</title>
+	<meta charset="utf-8">
+	<title>Book a visit</title>
+	<link rel="stylesheet" type="text/css" href="public/style.css">
 </head>
 <body>
-	<ul>
-		<li>Mon</li>
-		<li>Tue</li>
-		<li>Wen</li>
-		<li>Thu</li>
-		<li>Fri</li>
-		<li>Sat</li>
-		<li>Sun</li>
-	</ul>
-
-
+	<div class = "form">
+		<form action="/" method="post">
+			<input type="text" name="name" placeholder="Name">
+			<input type="tel" name="phone" placeholder="Phone">
+			<input type="email" name="email" placeholder="Email">
+			<input type="text" name="reason" placeholder="Reason for visit">
+			<input type="number" name="ins" placeholder="Insurance">
+			<input id="bookTime" type="text" name="time" placeholder="Date and time">
+			<input type="submit" value="Book Now">
+		</form>
+	</div>
+	<div class = "calendar" id="times">
+		<% for(let i = 0; i < week.length; i++){ %>
+		<ul class="time">
+			<% for(let j = 0; j < week[i].length; j++){ %>
+				<li onclick="bookTime.value = (`${this.parentElement.firstElementChild.innerHTML} ${this.innerHTML}`);"><%= week[i][j]%></li>
+			<% } %>
+		</ul>
+		<% } %>
+	</div>
+	<form class="nextweek" action="/nextweek" method="get">
+		<input type="submit" name="" value="Next Week">		
+	</form>
+	<form class="prevweek" action="/prevweek" method="get">
+		<input type="submit" name="" value="Prev Week">		
+	</form>
+	<script type="text/javascript" src="public/script.js">
+		
+	</script>
 </body>
 </html>
