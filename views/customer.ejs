@@ -6,8 +6,11 @@
 	<link rel="stylesheet" type="text/css" href="public/style.css">
 </head>
 <body>
+	<div class="header">
+		<a href="/">Sign in</a>
+	</div>
 	<div class = "form">
-		<form action="/" method="post">
+		<form action="/customer" method="post">
 			<input type="text" name="name" placeholder="Name">
 			<input type="tel" name="phone" placeholder="Phone">
 			<input type="email" name="email" placeholder="Email">
@@ -32,8 +35,9 @@
 	<form class="prevweek" action="/prevweek" method="get">
 		<input type="submit" name="" value="Prev Week">		
 	</form>
-	<script type="text/javascript" src="public/script.js">
-		
-	</script>
+	<form class="signin" action="/prevweek" method="get">
+		<input type="submit" name="" value="Prev Week">		
+	</form>
+
 </body>
 </html>

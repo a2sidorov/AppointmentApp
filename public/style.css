@@ -3,6 +3,14 @@ ul {list-style-type: none;}
 body {
     font-size: 10px;
 }
+.header{
+    overflow: hidden;
+}
+.header a{
+    float: right;
+    display: block;
+}
+
 .form {
     width: 20%;
     display: inline-block;
