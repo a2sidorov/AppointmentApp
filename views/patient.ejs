@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Book a visit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="public/style.css">
+</head>
+<body>
+  <div class="grid-container">
+    <!-- top part -->
+    <div class="item1">
+      <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+    </div>
+    <!-- Selecting a doctor -->
+    <div class="dropdown">
+      <div class="dropdown-item">
+        Amanda Smith </br> <i>Dentist</i>
+      </div>
+      <button class="dropdown-btn" id="dropdown-btnId" onclick="dropdown()">&#8963;</button>
+      <div id="dropdown-contentId" class="dropdown-content">
+        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
+        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
+        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
+        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
+      </div>
+    </div>
+
+    
+    <!-- Calendar -->
+    <div class="box">
+
+      <p>Today, <%= today %></p>
+
+      <div class="month"> 
+        <ul>
+          <li class="prev">&#60;</li>
+          <li class="next">&#62;</li>
+          <li>August</li>
+        </ul>
+      </div>
+
+      <ul class="days"> 
+        <% for (i = 0; i < week.length; i++) { %>
+        <li><%= week[i][0] %> %></li>
+        <% } %>
+        <li><span class="active">10</span></li>
+      </ul>
+
+    </div>
+    <!-- Time table before noon -->
+    <div class="box">
+
+      <p>Before noon</p>
+
+      <ul class="times">
+        <li>8:00</li>
+        <li>9:00</li>
+        <li>10:00</li>
+        <li>11:00</li>
+        <li>12:00</li>
+        <li>1:00</li>
+        <li>2:00</li>
+        <li>3:00</li>
+        <li>4:00</li>
+      </ul>
+
+    </div>
+    <!-- Time table before noon -->
+    <div class="box">
+
+      <p>After noon</p>
+
+      <ul class="times">
+        <li>8:00</li>
+        <li>9:00</li>
+        <li>10:00</li>
+        <li>11:00</li>
+        <li>12:00</li>
+        <li>1:00</li>
+        <li>2:00</li>
+        <li>3:00</li>
+        <li>4:00</li>
+      </ul>
+
+    </div>
+    <!-- Reason for visit -->
+    <div class="box">
+
+      <p>Reason for visit</p>
+
+      <form action="/" method="post">
+        <textarea rows="4" name="reason"></textarea>
+ 
+      </form>
+
+    </div>
+    <!-- Buttons-->
+    <button class="bookBtn" type="submit">Book Now</button>
+    <button class="cancelBtn" >Cancel</button>
+
+  </div>
+  <script>
+    function dropdown() {
+      console.log('works');
+      document.getElementById("dropdown-contentId").classList.toggle('show');
+    }
+
+    //Close the dropdown menu if the user clicks outside of it
+    window.onclick = function(event) {
+      
+    if (!event.target.matches('.dropdown-btn')) {
+      console.log(event.target);
+      const dropdowns = document.getElementsByClassName('dropdown-content');
+      let i;
+      for (i = 0; i < dropdowns.length; i++) {
+        if (dropdowns[i].classList.contains('show')) {
+          dropdowns[i].classList.remove('show');
+        }
+      }
+      }
+    }
+  
+  </script>
+</body>
+</html>

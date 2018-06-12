@@ -3,42 +3,71 @@
 <head>
 	<meta charset="utf-8">
 	<title>Book a visit</title>
-	<link rel="stylesheet" type="text/css" href="public/style.css">
+	<link rel="stylesheet" type="text/css" href="public/login-style.css">
 </head>
 <body>
-	<div class="header">
+	<div class = "container">
 		<a href="/logout">Sign out</a>
-	</div>
-	<div class="box">
-		<div class = "form">
-			<form action="/" method="post">
-				<input type="text" name="name" placeholder="Name">
-				<input type="tel" name="phone" placeholder="Phone">
-				<input type="email" name="email" placeholder="Email">
-				<input type="text" name="reason" placeholder="Reason for visit">
-				<input type="number" name="ins" placeholder="Insurance">
-				<input id="bookTime" type="text" name="time" placeholder="Date and time">
-				<input type="submit" value="Book Now">
+		<a href="/profile">Profile</a>
+			<form action="/:username" method="post">
+        <label for="customerName">Patient's name</label>
+				<input id="customerName" type="text" name="name">
+
+        <label for="customerTel">Patient's tel. number</label>
+				<input id="customerTel" type="tel" name="phone">
+
+        <label for="customerEmail">Patient's email</label>
+				<input id="customerEmail" type="email" name="email">
+
+        <label for="customerReason">Reason for visit</label>
+				<input id="customerReason" type="text" name="reason">
+
+        <label for="customerIns">Insurance number</label>
+				<input id="customerIns" type="number" name="ins">
+
+        <label for="customerTime">Date and time</label>
+				<input id="customerTime" type="text" name="time">
+
+				<button type="submit">Book now</button>
+
+        <button type="submit">Update patient data</button>
 			</form>
-		</div>
-		<div class = "calendar" id="times">
-			<% for(let i = 0; i < week.length; i++){ %>
-			<ul class="time">
-				<% for(let j = 0; j < week[i].length; j++){ %>
-					<li onclick="bookTime.value = (`${this.parentElement.firstElementChild.innerHTML} ${this.innerHTML}`);"><%= week[i][j]%></li>
-				<% } %>
+			<% for (let i = 0; i < week.length; i++) { %>
+			<ul>
+				<% for (let j = 0; j < week[i].length; j++) { %>
+          <% if (j === 0) { %>
+          <li><%= week[i][j] %></li>
+          <% } else if (week[i][j] === 'closed') { %>
+          <li class="closed"><%= week[i][j] %></li>
+					<% } else if (typeof week[i][j] === 'object') { %>
+					<li class="appointment" data-customer="<%= JSON.stringify(week[i][j]) %>" onclick="
+				    let data = JSON.parse(this.getAttribute('data-customer'));
+				    customerName.value = data.name;
+				    customerTel.value = data.phone;
+				    customerEmail.value = data.email;
+				    customerReason.value = data.reason;
+				    customerIns.value = data.ins;
+				    customerTime.value = data.time;
+					"><%= week[i][j].name %></li>
+					<% } else { %>
+					<li class="time" onclick="
+            customerName.value = '';
+            customerTel.value = '';
+            customerEmail.value = '';
+            customerReason.value = '';
+            customerIns.value = '';
+            customerTime.value = (`${this.parentElement.firstElementChild.innerHTML} ${this.innerHTML}`);
+            "><%= week[i][j] %></li>
+					<% } %>
+				<% } %> 
 			</ul>
 			<% } %>
-		</div>
-		<form class="nextweek" action="/nextweek" method="get">
-			<input type="submit" name="" value="Next Week">		
+		<form class="nextweek" action="/<%= username %>/nextweek" method="get">
+      <button type="submit">Next Week</button>
 		</form>
-		<form class="prevweek" action="/prevweek" method="get">
-			<input type="submit" name="" value="Prev Week">		
+		<form class="prevweek" action="/<%= username %>/prevweek" method="get">
+      <button type="submit">Prev Week</button>	
 		</form>
-		<form class="move" action="/move" method="put">
-			<input type="submit" name="" value="Move">		
-		</form>
-	</div>
+  </div>
 </body>
 </html>

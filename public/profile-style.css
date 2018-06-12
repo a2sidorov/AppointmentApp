@@ -1,0 +1,19 @@
+* {box-sizing: border-box;}
+ul {list-style-type: none;}
+
+.days {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto;
+}
+button{
+	cursor: pointer;
+}
+
+.header{
+    overflow: hidden;
+}
+.header a{
+    padding: 5px;
+    float: right;
+    display: block;
+}

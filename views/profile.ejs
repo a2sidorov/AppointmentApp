@@ -3,16 +3,88 @@
 <head>
 	<title>User profile</title>
 	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="public/profile-style.css">
 </head>
 <body>
-	<h3>Profile page</h3>
-	<a href="/logout">Logout</a>
-	<p>
-		<strong>id</strong>: <%= user._id %><br>
-		<strong>username</strong>: <%= user.local.username %><br>
-		<strong>email</strong>: <%= user.local.email %><br>
-		<strong>password</strong>: <%= user.local.password %>
-	</p>
+	<div class="header">
+		<a href="/logout">Sign out</a>
+		<a href="/<%= user.local.username %>">Schedule</a>
+	</div>
+	<div>
+		<h4>Profile page</h4>
+		<p>
+			<strong>id</strong>: <%= user._id %><br>
+			<strong>username</strong>: <%= user.local.username %><br>
+			<strong>email</strong>: <%= user.local.email %><br>
+			<strong>password</strong>: <%= user.local.password %> <br>
+			<strong>days</strong>: <%= user.days %> <br>
+			<strong>time</strong>: <%= user.times %> 
+		</p>
+	</div>
+	<hr>
+		<h4>Check work days</h4>
+		<form action="/<%= user._id %>" method="post" id="form1"> 
+			<% const week = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];%>
+			<% for(let i  = 0; i < week.length; i++) { %>
+				<% if (user.workdays.includes(week[i])) { %>
+					<input type="checkbox" name="workdays" value="<%= week[i] %>" checked>
+          <label><%= week[i] %></label>
+          <br>
+				<% } else { %>
+					<input type="checkbox" name="workdays" value="<%= week[i] %>">
+          <label><%= week[i] %></label>
+          <br>
+				<% } %>
+			<% } %>
+		<h4>Enter daily schedule</h4>
+			<div id="times" >
+				<% for(let i = 0; i < user.times.length; i++) { %>
+					<input type="text" name="time" value="<%= user.times[i] %>"><br>
+				<% } %>
+			</div>
+      <button type="button" onclick="addTime()">Add Time</button>
+      <button type="button" onclick="removeTime()">Remove Time</button>
 
+    <h4>Exception time</h4>
+    <div id="excTime">
+      <% for (let i = 0; i < user.exceptionTimes.length; i++) { %>
+        <input type="text" name="exceptionTimes" value="<%= user.exceptionTimes[i] %>">
+        <br>
+      <% } %> 
+    </div>
+      <button type="button" onclick="addExcTime()">Add Exception Time</button>
+      <button type="button" onclick="removeExcTime()">Remove Exception Time</button>
+		
+    
+    <h4>Upcoming holidays</h4>
+      <div id="holidays">
+        <% for (let i = 0; i < allHolidays.length; i++) { %>
+          <% if (user.holidays.includes(allHolidays[i].date)) { %>
+            <input type="checkbox" name="holidays" value="<%= allHolidays[i].date %>" checked> 
+            <label><%= allHolidays[i].event %></label>
+            <label>(<%= allHolidays[i].date %>)</label>
+            <br>
+          <% } else { %>
+            <input type="checkbox" name="holidays" value="<%= allHolidays[i].date %>">
+            <label><%= allHolidays[i].event %></label>
+            <label>(<%= allHolidays[i].date %>)</label>
+            <br>
+          <% } %>
+        <% } %>
+      </div>
+
+    <h4>Exception day</h4>
+    <div id="excDate">
+      <% for (let i = 0; i < user.exceptionDates.length; i++) { %>
+        <input type="date" name="exceptionDates" value="<%= user.exceptionDates[i] %>">
+        <br>
+      <% } %> 
+    </div>
+      <button type="button" onclick="addExcDate()">Add Exception Date</button>
+      <button type="button" onclick="removeExcDate()">Remove Exception Date</button>
+    </form>
+		<hr>
+		<button form="form1">Save</button>
+	<script type="text/javascript" src="public/profile-script.js"></script>
 </body>
 </html>

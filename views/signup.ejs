@@ -2,22 +2,33 @@
 <html>
 <head>
 	<title>Sign Up</title>
-	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+  <link rel="stylesheet" type="text/css" href="public/login-style.css">
 </head>
 <body>
-	<form action="/signup" method="post">
-		<label>Username</label>
-		<input type="text" name="username">
-		<label>Email</label>
-		<input type="text" name="email">
-		<label>Password</label>
-		<input type="password" name="password">
-		<input type="submit" name="Signup">
-	</form>
-	<p>Already have an account? <a href="/">Login</a></p>
-	<% if (message.length > 0) { %>
-		<div><%= message %></div>
-		<% } %>
+  <h4>Medapp</h4>
 
+	<form action="/signup" method="post">
+    <div class="container">
+  		<label>Username</label>
+  		<input type="text" name="username" required>
+  		<label>Email</label>
+  		<input type="text" name="email" required>
+  		<label>Password</label>
+  		<input type="password" name="password" required>
+      <label>Confirm Password</label>
+      <input type="password" name="confirm" required>
+      <button type="submit">Signup</button>
+    </div>
+
+    <div class="container" style="background-color:#f1f1f1">
+      <p>Already have an account? <a href="/">Login</a></p>
+    </div>
+    
+    <% if (message) { %>
+		  <div class="flash"><%= message %></div>
+		<% } %>
+  </form>
+  
 </body>
 </html>

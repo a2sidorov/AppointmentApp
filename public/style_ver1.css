@@ -1,0 +1,69 @@
+* {box-sizing: border-box;}
+ul {list-style-type: none;}
+body {
+    font-size: 10px;
+}
+button {
+  margin: 5px;
+}
+.header{
+    overflow: hidden;
+}
+.header a{
+    padding: 5px;
+    float: right;
+    display: block;
+}
+
+.form {
+    width: 20%;
+    display: inline-block;
+    float: left;
+}
+.form input {
+    margin: 20px;
+    display: block;
+}
+.calendar {
+    display: grid;
+    grid-template-columns: auto auto auto auto auto auto auto;
+    grid-row-gap: 0px;
+
+}
+.calendar ul {
+    padding: 0;
+}
+ul {
+    display: inline-block;
+}
+ul li {
+    background-color: #4CAF50;
+    text-align: center;
+    padding: 10px;
+}
+.time:hover {
+  background-color: #4eb785;
+  cursor: pointer;
+}
+
+.nextweek {
+    float: right;
+}
+.prevweek {
+    float: right;
+}
+.appointment {
+    background-color: #1abc9c;
+}
+.appointment:hover {
+  background-color: #4eb785;
+  cursor: pointer;
+}
+.closed {
+  background-color: #bccea5;
+}
+
+
+
+
+
