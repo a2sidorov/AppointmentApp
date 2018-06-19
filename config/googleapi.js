@@ -7,7 +7,7 @@ const filePath = path.join(__dirname, 'holidays');
 
 const calendar = google.calendar({
   version: 'v3',
-  auth: 'AIzaSyBcwlvqsSPbyk8AJNR1oLAs3EaTC81tUfQ'
+  auth: ''
 });
 
 
