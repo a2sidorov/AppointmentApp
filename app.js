@@ -16,11 +16,12 @@ mongoose.connect('mongodb://localhost/mydb');
 
 require('./config/passport')(passport);
 
+
 app.set('view engine', 'ejs');
 app.set('views', __dirname + '/views');
 
-
-app.use('/public', express.static('public'));
+app.use('/public', express.static(path.join(__dirname, '/public')))
+app.use('/:username/public', express.static(path.join(__dirname, '/public')))
 app.use(favicon(path.join(__dirname, '/public/favicon.ico')));
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true}));

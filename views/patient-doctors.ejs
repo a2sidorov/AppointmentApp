@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Doctors</title>
+  <% include head %>
+</head>
+<body>
+
+  <% include navbar %>
+
+  <!--------------------------->
+  <!-- Upcoming appointments -->
+  <!--------------------------->
+  <div class="grid-container">
+
+    <!-- Top part -->
+    <div class="header">
+
+      <% include header %>
+
+    </div>
+
+    <!-- Page title -->
+    <div class="header">
+
+      <H2>My doctors</H2>
+
+    </div>
+
+    <!-- List of upcoming appointments -->
+      <!-- example 1 -->
+    <div class="dropdown">
+
+      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
+      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
+
+      <div id="dropdown-contentId" class="dropdown-content">
+
+       <span>info</span>
+
+      </div>
+
+    </div>
+      <!-- example 2 -->
+    <div class="dropdown">
+
+      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
+      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
+
+      <div id="dropdown-contentId" class="dropdown-content">
+
+       <span>info</span>
+
+      </div>
+
+    </div>
+
+    <div class="addBtn">
+      <button class="material-icons" onclick="dropdown()">add</button>
+    </div>
+
+    <!-- Page title -->
+    <div class="header">
+
+      <H2>Doctors near you</H2>
+
+    </div>
+    <!-- List of previous appointments -->
+    <div class="dropdown">
+
+      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
+      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
+
+      <div id="dropdown-contentId" class="dropdown-content">
+
+       <span>info</span>
+
+      </div>
+
+    </div>
+      <!-- example 2 -->
+    <div class="dropdown">
+
+      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
+      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
+
+      <div id="dropdown-contentId" class="dropdown-content">
+
+       <span>info</span>
+
+      </div>
+
+    </div>
+    
+
+
+
+
+  <script src="public/script.js"></script>
+</body>
+</html>

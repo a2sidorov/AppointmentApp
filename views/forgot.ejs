@@ -2,26 +2,36 @@
 <html>
 <head>
   <title></title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
-  <link rel="stylesheet" type="text/css" href="public/login-style.css">
+  <% include head %>
 </head>
 <body>
-  <h4>Password recovery</h4>
-  <form action="/forgot" method="post">
-    <div class="container">
+
+  <div class="grid-container">
+
+    <div class="login">
+
+    <div class="header">
+
+        <H2>Password recovery</H2>
+
+    </div> 
+
+    <form action="/forgot" method="post">
+
       <label>Email</label>
       <input type="email" name="email" placeholder="Enter your email">
-      <button type="submit">Reset password</button>
-    </div>
 
-    <div class="container" style="background-color:#f1f1f1">
-      <button type="button" class="cancelbtn">Cancel</button>
-    </div>
+      <button type="submit">Reset password</button>
+
+    </form>
+
+    <button type="button" class="cancelBtn">Cancel</button>
+
+    <% if (message) { %>
+      <div class="flash"><%= message %></div>
+    <% } %>
+  
   </div>
 
-  <% if (message) { %>
-    <div class="flash"><%= message %></div>
-    <% } %>
-  </form>
 </body>
 </html>

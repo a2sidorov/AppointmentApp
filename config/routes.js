@@ -1,5 +1,5 @@
 'use strict';
-const Customer = require('../models/customer');
+
 const User = require('../models/user');
 const holidays = require('./googleapi');
 const crypto = require('crypto');
@@ -19,35 +19,39 @@ module.exports = function(app, passport) {
   let timeArr = [];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  /* GET login page. */
+  /* GET Login page. */
   app.get('/', (req, res) => {
   	res.render('login', {
   		message: req.flash('loginMessage')
   	});
   });
 
-  /* Handle Login POST */
+  /* POST Login */
   app.post('/login', function(req, res, next) {
     passport.authenticate('local-login', function(err, user, info) {
       if (err) return next(err);
       if (!user) return res.redirect('/');
       req.logIn(user, function(err) {
         if (err) return next(err);
-        
-        console.log(req.session);
-        return res.redirect('/' + req.body.username);
+        if (req.body.rememberme === 'on') {
+          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+        } 
+        if (req.body.rememberme !== 'on') {
+          req.session.cookie.maxAge = null;
+        }
+        return res.redirect('/' + user.local.username);
       });
    })(req, res, next);
   });
 
-  //password recovery page
+  /* GET Password recovery page */
   app.get('/forgot', (req, res) => {
     res.render('forgot', {
       message: req.flash('info')
     });
   });
 
-  //password recovery request
+  /* POST Password recovery */
   app.post('/forgot', (req, res) => {
     User.findOne({ 'local.email': req.body.email }, (err, user) => {
       if (err) throw err;
@@ -69,7 +73,7 @@ module.exports = function(app, passport) {
               service: 'gmail',
               auth: {
                 user: 'a2mail4dev@gmail.com',
-                pass: 'noldor1986'
+                pass: ''
               }
             });
             const mailOptions = {
@@ -96,11 +100,9 @@ module.exports = function(app, passport) {
         });
       } 
     });
-    //req.flash('works');
-    //res.send(req.body.email);
   });
 
-  //reset page
+  /* GET Password reset page */
   app.get('/reset/:token', (req, res) => {
     User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
       if (!user) {
@@ -119,7 +121,7 @@ module.exports = function(app, passport) {
     });
   });
 
-  //reset request
+  /* POST Password reset */
   app.post('/reset/:token', (req, res) => {
     User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
       if (err) throw err;
@@ -177,14 +179,32 @@ module.exports = function(app, passport) {
   	});
   });
 
-  /* Handle Registration POST */
-  app.post('/signup', passport.authenticate('local-signup', {
-  	successRedirect : '/profile',
-  	failureRedirect : '/signup',
-  	failureFlash : true
-  }));
+  /* POST Sign up */
+  // app.post('/signup', passport.authenticate('local-signup', {
+  // 	successRedirect : '/profile',
+  // 	failureRedirect : '/signup',
+  // 	failureFlash : true
+  // }));
+  //--------------------------------
+  app.post('/signup', function(req, res, next) {
+    passport.authenticate('local-signup', function(err, user, info) {
+      if (err) return next(err);
+      if (!user) return res.redirect('/signup');
+      req.logIn(user, function(err) {
+        if (err) return next(err);
+        if (user.isDoctor) { 
+          return res.redirect('/profile');
+        } else {
+          return res.redirect('/'+ user.local.username);
+        }
+      });
+   })(req, res, next);
+  });
 
-  //profile page
+  //--------------------------------
+
+
+  /* GET Profile page */
   app.get('/profile', isLoggedIn, (req, res) => {
     holidays((data) => {
       res.render('profile', {
@@ -194,7 +214,7 @@ module.exports = function(app, passport) {
     });
   });
 
-  //updating user profile
+  /* POST Profile update */
   app.post('/:id', isLoggedIn, function(req, res) {
   	User.findById(req.params.id, function (err, user) {
   		if (err) return handleError(err);
@@ -211,7 +231,7 @@ module.exports = function(app, passport) {
   });
 
 
-  //logout request
+  /* GET Log Out */
   app.get('/logout', function(req, res){
   	req.logout();
   	res.redirect('/');
@@ -223,28 +243,40 @@ module.exports = function(app, passport) {
       res.redirect('/');
   }
 
-  //route for a doctor
+  /* GET Home page for patients */
   app.get('/:username', (req, res) => {
   	if (req.isAuthenticated()) {
   		User.findOne({ 'local.username': req.params.username }, (err, user) => {
   			if (err) throw err;
-        console.log(req.session);
-        res.render('user', {
-          week: user.createSchedule(year, month, curMonday, true),
+        res.render('patient-home', {
           username: req.params.username,
-          });
-        });	
+        });
+      });	
     } else {
-  		User.findOne({ 'local.username': req.params.username }, (err, user) => {
-  			if (err) throw err;
-        console.log(req.session);
-  			res.render('patient', {
-  				week: user.createMonthSchedule(year, month, curMonday),
+      res.redirect('/');
+    }
+  });
+
+  app.get('/:username/book', (req, res) => {
+    User.findOne({ 'local.username': req.params.username }, (err, user) => {
+        if (err) throw err;
+        res.render('patient-booking', {
+          week: user.createMonthSchedule(year, month, curMonday),
           today: `${months[month]} ${today}`,
-  				username: req.params.username,
-  			});
-  		});	
-  	}	
+          username: req.params.username,
+        });
+    }); 
+  });
+
+  app.get('/:username/doctors', (req, res) => {
+    User.findOne({ 'local.username': req.params.username }, (err, user) => {
+        if (err) throw err;
+        res.render('patient-doctors', {
+          week: user.createMonthSchedule(year, month, curMonday),
+          today: `${months[month]} ${today}`,
+          username: req.params.username,
+        });
+    }); 
   });
 
   app.get('/:username/nextweek', (req, res) => {

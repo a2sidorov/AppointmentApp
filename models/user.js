@@ -3,7 +3,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt-nodejs');
 const holidays = require('../config/googleapi');
-const Customers = require('./customer');
 
 
 const userSchema = mongoose.Schema({
@@ -14,6 +13,7 @@ const userSchema = mongoose.Schema({
     resetPasswordToken: String,
     resetPasswordExpires: Date
 	},
+  isDoctor: Boolean,
 	workdays: Array,
 	times: Array,
   exceptionTimes: Array,

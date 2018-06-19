@@ -1,0 +1,30 @@
+<!-- views/partials/navbar.ejs -->
+
+<nav id="mySidenav" class="sidenav">
+
+  <div class="user">
+
+    <i class="material-icons">account_circle</i>
+    <span><%= username %></span>
+
+  </div>
+
+  <div class="sidenav-items">
+
+    <a href="/<%= username %>"><i class="material-icons">account_circle</i><span>Upcoming appointments</span></a>
+    <a href="/<%= username %>/book"><i class="material-icons">account_circle</i><span>Book an appointment</span></a>
+    <a href="/<%= username %>/doctors"><i class="material-icons">account_circle</i><span>Doctors</span></a>
+    <a href="#"><i class="material-icons">account_circle</i><span>Reports [need to dev] </span></a>
+    <a href="#"><i class="material-icons">account_circle</i><span>Payments [need to dev]</span></a>
+
+  </div> 
+
+  <div class="footer">
+      
+    <a href=""><i class="material-icons">account_circle</i><span>Help</span></a>
+    <a class="terms" href="">Terms</a>
+    <a class="privacy" href="">Privacy</a>
+        
+  </div> 
+
+</nav>

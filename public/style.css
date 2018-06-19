@@ -4,54 +4,172 @@
   box-sizing: border-box;
   list-style-type: none;
   color: #777;
-  font-family: 'Montserrat', sans-serif;
-  font-size:12px;
-
+  font-family: 'Lato', Arial;
+  font-size:14px;
 }
+
 /* Mobile Styles */
 @media only screen and (max-width: 425px) {
+
+  /* Login page */
+  .login .header h2 {
+    padding: 20px 0px;
+    text-align: center;
+  }
+  .login {
+    border-bottom: 1px solid #f1f1f1;
+  }
+  .login input[type=text], input[type=password], input[type=email] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+  }
+  .login form button {
+    width: 100%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: none;
+  }
+  .recovery {
+    width: 90%;
+    margin: auto;
+  }
+  .recovery p {
+    padding-top: 10px;
+  }
+
+
+  /* Sidenav */
+  .sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 1;
+    background-color: #767774;
+
+    overflow-x: hidden;
+    padding-top: 20px;
+    transition: 0.3s;
+    white-space: nowrap;
+  }
+  .sidenav .user {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f1f1;
+  }
+  .sidenav .user * {
+    padding: 0px 0px 0px 10px;
+    color: #ffffff;
+    font-size: 18px;
+    vertical-align: middle;
+  }
+  .sidenav .user i {
+    font-size:40px;
+  }
+  .sidenav .sidenav-items a {
+    display: block;
+  }
+   .sidenav .sidenav-items a * {
+    vertical-align: middle;
+    text-align: left;
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .sidenav .sidenav-items a i {
+    padding: 10px 0px 10px 15px;
+  }
+  .sidenav .sidenav-items a span {
+    padding: 10px 0px 10px 10px;
+  }
+  .sidenav .footer {
+    width: 250px;
+    position: absolute;
+    bottom: 0;
+  }
+  .sidenav .footer * {
+    font-size: 12px;
+    vertical-align: middle;
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .sidenav .footer a i {
+    padding: 5px 0px 5px 10px;
+  }
+  .sidenav .footer a span {
+    padding: 5px 0px 5px 5px;
+  }
+  .sidenav .footer a {
+    display: inline-block;
+    width: 83.3px;
+    text-align: center;
+  }
+  .sidenav .footer a:first-child {
+    text-align: left;
+  }
+  /*------------------*/
+  /* Home page        */
+  /*------------------*/
   .grid-container {
     display: grid;
     grid-row-gap: 15px;
-  }
-  .header {
-    border: 1px solid #f1f1f1;
     width: 90%;
     margin: auto;
   }
-  .header span {
-    padding:;
+  .addBtn {
+    text-align: center;
+    font-size: 30px;
   }
+  .header button {
+    padding-top: 10px;
+    font-size: 30px;
+  }
+  .header h2 {
+    text-align: left;
+  }
+  .dropdown-item span {
+    display: block;
+    padding: 5px 0px 5px 20px;
+    text-decoration: none;
+  }
+
+  /*------------------*/
+  /* Appointment page */
+  /*------------------*/
   .box {
     border: 1px solid #f1f1f1;
-    width: 90%;
-    margin: auto;
   }
   .dropdown {
     border: 1px solid #f1f1f1;
-    width: 90%;
-    margin: auto;
+
   }
   .dropdown-item {
-    float: left;
-    width: 80%;
-    padding-top: 3px;
+    display: inline-block;
     padding-left: 20px;
+    width: 80%;
   }
-  .dropdown-btn {
-    padding-top: 5px;
+  .dropdown-item i {
+    font-size: 10px
+  }
+  #dropdown-btnId {
+    display: inline-block;
     width: 20%;
-    height: 30px;
-    font-size: 25px;
+    font-size: 35px;
   }
   .dropdown-content {
-    clear: both;
     display: none;
   }
   .dropdown .dropdown-content a {
+    display: block;
     padding: 5px 0px 5px 20px;
     text-decoration: none;
-    display: block;
+  }
+  .dropdown .dropdown-content a i {
+    font-size: 10px
+  }
+  .dropdown .dropdown-content span {
+    padding: 5px 0px 5px 20px;
   }
   .dropdown .show {
     display: block;
@@ -70,28 +188,20 @@
     margin-bottom: 15px;
   }
 
-  /* Month header */
+  /* Month */
   .month {
       width: 100%;
       text-align: center;
   }
-
-  /* Month list */
-  .month ul {
-      margin: 0;
-      padding: 0;
+  .month * {
+    vertical-align: middle;
+    display: inline-block;
   }
-
-  /* Previous button inside month header */
-  .month .prev {
-      float: left;
-      padding-left: 75px;
+  .month span {
+    font-size: 18px;
   }
-
-  /* Next button */
-  .month .next {
-      float: right;
-      padding-right: 75px;
+  .month span {
+    padding: 0px 10px; 
   }
 
   /* Days (1-31) */
@@ -121,14 +231,13 @@
     margin-bottom: 5px;
     
   }
-  .bookBtn {
+  .submitBtn {
   background-color: #4CAF50;
   color: white;
   padding: 10px;
   margin: auto;
   border: none;
-  cursor: pointer;
-  width: 90%;
+  width: 100%;
   }
   .cancelBtn {
   background-color: #f44336;
@@ -137,8 +246,7 @@
   margin: auto;
   margin-bottom: 20px;
   border: none;
-  cursor: pointer;
-  width: 90%;
+  width: 100%;
   }
 }
 
