@@ -13,16 +13,21 @@ const userSchema = mongoose.Schema({
     resetPasswordToken: String,
     resetPasswordExpires: Date
 	},
-  isDoctor: Boolean,
+  firstname: String,
+  lastname: String,
+  service: String,
+  location: String,
+  businesses: Array,
+  isBusiness: Boolean,
+  workhours: Array,
 	workdays: Array,
-	times: Array,
-  exceptionTimes: Array,
   holidays: Array,
   exceptionDates: Array,
-  customers: Array,
+  clients: Array,
 });
 
 //adding a method to create a time table
+/*
 userSchema.methods.createSchedule = function (year, month, curMonday, user) {
   let week = [];
   let times = [];
@@ -74,24 +79,38 @@ function getWeekDay (date) {
 	let dayNum = date.getDay();
 	return dayNames[dayNum];
 }
-
+*/
 //adding a method to create a month time table
 userSchema.methods.createMonthSchedule = function (year, month, curMonday, user) {
-  let week = [];
+  let days = [];
   let times = [];
   let date;
   let customerTimes = [];
   let mm, dd;
-  let lastDay = new Date(year, month, 0).getDate();
+  let lastDay = new Date(year, month + 1, 0).getDate();
+  let firstMonday = new Date(year, month, 1).getDay();
+  firstMonday = (firstMonday === 0) ? 7 : firstMonday;
+  console.log(firstMonday)
 
+  /*
   for (let i = 0; i < this.customers.length; i++) {
     customerTimes.push(this.customers[i].time);
   }
+  */
 
-  for (let d = 1; d <= lastDay; d++) {
-    times = [];
-    date = new Date(year, month, curMonday + d);
-    times.push(d);
+  for (let d = 1 - firstMonday + 1; d <= lastDay; d++) {
+    
+    if (d > 0) {
+      times = [];
+      date = new Date(year, month, d);
+      times.push(d);
+
+      //add times here
+
+    } else {
+      times.push("");
+    }
+    /*
     mm = (date.getMonth() + 1).toString().length === 2 ? (date.getMonth() + 1).toString() : 
     '0' + (date.getMonth() + 1).toString();
     dd = date.getDate().toString().length === 2 ? date.getDate().toString() : '0' + date.getDate().toString();
@@ -100,8 +119,8 @@ userSchema.methods.createMonthSchedule = function (year, month, curMonday, user)
 
       if (this.workdays.includes(getWeekDay(date)) && 
         !this.holidays.includes(date.toDateString()) &&
-        !this.exceptionTimes.includes(`${getWeekDay(date)} ${this.times[i]}`) &&
-        !this.exceptionDates.includes(`${date.getFullYear()}-${mm}-${dd}`)) {
+          !this.exceptionTimes.includes(`${getWeekDay(date)} ${this.times[i]}`) &&
+          !this.exceptionDates.includes(`${date.getFullYear()}-${mm}-${dd}`)) {
 
         if (customerTimes.includes(`${date.toDateString()} ${this.times[i]}`)) {
           for (let j = 0; j < this.customers.length; j++) {
@@ -117,9 +136,10 @@ userSchema.methods.createMonthSchedule = function (year, month, curMonday, user)
         times.push('closed');
       }    
   }
-  week.push(times);
+  */
+  days.push(times);
   }
-  return week;
+  return days;
 }
 
 

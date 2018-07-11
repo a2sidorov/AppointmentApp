@@ -3,7 +3,7 @@
 <head>
 
 	<title>Login</title>
-	<% include head %>
+	<% include partials/head %>
 
 </head>
 <body>
@@ -21,10 +21,10 @@
       <form action="/login" method="post">
       
   		  <label for="username"><b>Username</b></label>
-  		  <input type="text" name="username" placeholder="Enter username or email" required>
+  		  <input type="text" name="username" placeholder="Enter username or email" required value="business1">
 
   		  <label for="password"><b>Password</b></label>
-  		  <input type="password" name="password" placeholder="Enter password" requred>
+  		  <input type="password" name="password" placeholder="Enter password" requred value="noldor">
 
         <button type="submit">Login</button>
         <input type="checkbox" name="rememberme">Remember me

@@ -2,7 +2,7 @@
 <html>
 <head>
 	<title>Sign Up</title>
-	<% include head %>
+	<% include partials/head %>
 </head>
 <body>
 
@@ -24,13 +24,19 @@
   		<label>Email</label>
   		<input type="text" name="email" required>
 
+      <label>First Name</label>
+      <input type="text" name="firstname" required>
+
+      <label>Last Name</label>
+      <input type="text" name="lastname" required>
+
   		<label>Password</label>
   		<input type="password" name="password" required>
 
       <label>Confirm Password</label>
       <input type="password" name="confirm" required>
 
-      <input type="checkbox" name="isDoctor"> I am a doctor
+      <input type="checkbox" name="isBusiness"> I am a business owner
 
       <button type="submit">Signup</button>
 
