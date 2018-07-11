@@ -15,7 +15,7 @@ User.findOne({}, (err, user) => {
 module.exports = function(app, passport) {
 	
   //init data object
-  let curDate = new Date,
+  let curDate = new Date(),
   year = curDate.getFullYear(),
   month = curDate.getMonth(),
   today = curDate.getDate(),
