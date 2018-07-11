@@ -1,15 +1,29 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>User profile</title>
-	<meta charset="utf-8">
-	<link rel="stylesheet" type="text/css" href="public/profile-style.css">
+	<title>Profile</title>
+	<% include head %>
 </head>
 <body>
-	<div class="header">
-		<a href="/logout">Sign out</a>
-		<a href="/<%= user.local.username %>">Schedule</a>
-	</div>
+
+  <% include client-navbar %>
+
+  <div class="grid-container">
+
+    <div class="header">
+
+      <% include header %>
+
+    </div>
+
+    <div class="header">
+
+      <H2>Profile</H2>
+
+		  <a href="/logout">Sign out</a>
+
+    </div>
+
 	<div>
 		<h4>Profile page</h4>
 		<p>
@@ -92,6 +106,7 @@
     </form>
 		<hr>
 		<button form="form1">Save</button>
+  </div>
 	<script type="text/javascript" src="public/profile-script.js"></script>
 </body>
 </html>

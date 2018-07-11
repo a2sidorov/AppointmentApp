@@ -5,16 +5,23 @@ const holidays = require('./googleapi');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
+//logging user list
+User.findOne({}, (err, user) => {
+  if (err) throw err;
+  console.log(user);
+});
+//User.deleteMany({}, function (err) {});
 
 module.exports = function(app, passport) {
 	
   //init data object
-  let curDate = new Date(),
+  let curDate = new Date,
   year = curDate.getFullYear(),
   month = curDate.getMonth(),
   today = curDate.getDate(),
   weekDay = (curDate.getDay() === 0) ? 7 : curDate.getDay(),
-  initMonday = today - weekDay + 1,
+  curMonth = month,
+  curYear = year,
   curMonday = today - weekDay + 1;
   let timeArr = [];
   const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
@@ -147,7 +154,7 @@ module.exports = function(app, passport) {
             service: 'gmail',
             auth: {
               user: 'a2mail4dev@gmail.com',
-              pass: ''
+              pass: 'noldor1986'
             }
           });
           const mailOptions = {
@@ -192,8 +199,8 @@ module.exports = function(app, passport) {
       if (!user) return res.redirect('/signup');
       req.logIn(user, function(err) {
         if (err) return next(err);
-        if (user.isDoctor) { 
-          return res.redirect('/profile');
+        if (user.isBusiness) { 
+          return res.redirect('/' + user.local.username + '/profile');
         } else {
           return res.redirect('/'+ user.local.username);
         }
@@ -205,29 +212,59 @@ module.exports = function(app, passport) {
 
 
   /* GET Profile page */
-  app.get('/profile', isLoggedIn, (req, res) => {
-    holidays((data) => {
-      res.render('profile', {
-      user: req.user,
-      allHolidays: data
-    });
-    });
+  // app.get('/:username/profile', isLoggedIn, (req, res) => {
+  //   holidays((data) => {
+  //     res.render('business-profile', {
+  //     username: req.user.local.username,
+  //     user: req.user,
+  //     allHolidays: data
+  //   });
+  //   });
+  // });
+
+  /* GET Profile page */
+   app.get('/:username/profile', (req, res) => {
+    if (req.isAuthenticated()) {
+      User.findOne({ 'local.username': req.params.username }, (err, user) => {
+        if (err) throw err;
+        holidays((data) => {
+          console.log(data);
+          if (user.isBusiness) {
+          res.render('business-profile', {
+            username: user.local.username,
+            user: user,
+            allHolidays: data,
+          });
+          } else {
+            res.render('client-profile', {
+              username: req.params.username,
+            });
+          }
+        }); 
+      });
+    } else {
+      res.redirect('/');
+    }
   });
+
 
   /* POST Profile update */
   app.post('/:id', isLoggedIn, function(req, res) {
-  	User.findById(req.params.id, function (err, user) {
-  		if (err) return handleError(err);
-  		user.workdays = req.body.workdays;
-      user.times = req.body.time;
-      user.exceptionTimes = req.body.exceptionTimes;
-      user.holidays = req.body.holidays; 
-      user.exceptionDates = req.body.exceptionDates;
-  		user.save((err, update) => {
-  			if (err) return handleError(err);
-  			res.redirect('/profile');
-  		});
-  	});
+  	// User.findById(req.params.id, function (err, user) {
+  	// 	if (err) throw err;
+   //    user.firstname = req.body.firstname;
+   //    user.lastname = req.body.lastname;
+  	// 	user.workdays = req.body.workdays;
+   //    user.times = req.body.time;
+   //    user.exceptionTimes = req.body.exceptionTimes;
+   //    user.holidays = req.body.holidays; 
+   //    user.exceptionDates = req.body.exceptionDates;
+  	// 	user.save((err, update) => {
+  	// 		if (err) return handleError(err);
+  	// 		res.redirect('/:username/profile');
+  	// 	});
+  	// });
+    res.send(req.body);
   });
 
 
@@ -243,14 +280,21 @@ module.exports = function(app, passport) {
       res.redirect('/');
   }
 
-  /* GET Home page for patients */
+  /* GET Home page */
   app.get('/:username', (req, res) => {
   	if (req.isAuthenticated()) {
   		User.findOne({ 'local.username': req.params.username }, (err, user) => {
   			if (err) throw err;
-        res.render('patient-home', {
+
+        if (user.isBusiness) {
+          res.render('business-home', {
+          username: user.local.username,
+          });
+        } else {
+          res.render('client-home', {
           username: req.params.username,
-        });
+          });
+        }
       });	
     } else {
       res.redirect('/');
@@ -260,34 +304,52 @@ module.exports = function(app, passport) {
   app.get('/:username/book', (req, res) => {
     User.findOne({ 'local.username': req.params.username }, (err, user) => {
         if (err) throw err;
-        res.render('patient-booking', {
-          week: user.createMonthSchedule(year, month, curMonday),
-          today: `${months[month]} ${today}`,
+        //console.log(user.createMonthSchedule(year, month, curMonday));
+        res.render('client-booking', {
+          month: months[month],
+          days: user.createMonthSchedule(year, month, curMonday),
+          today: `${months[curMonth]} ${today}`,
           username: req.params.username,
         });
     }); 
   });
 
-  app.get('/:username/doctors', (req, res) => {
+  app.get('/:username/businesss', (req, res) => {
     User.findOne({ 'local.username': req.params.username }, (err, user) => {
         if (err) throw err;
-        res.render('patient-doctors', {
-          week: user.createMonthSchedule(year, month, curMonday),
-          today: `${months[month]} ${today}`,
-          username: req.params.username,
+        User.find({ 'isBusiness': true }, (err, businesss) => {
+          res.render('client-businesss', {
+            mybusinesss: user.businesss,
+            businesss: businesss,
+            username: req.params.username,
+          });
         });
     }); 
   });
 
   app.get('/:username/nextweek', (req, res) => {
-  	curMonday += 7;
-  	res.redirect('/'+ req.params.username);
+    if (month + 1 > 11) {
+      month = 0;
+      year++;
+    } else {
+      month++;
+    }
+    console.log(`${year} ${month} ${curMonth}`);
+  	res.redirect('/' + req.params.username + '/book');
   });
   app.get('/:username/prevweek', (req, res) => {
-  	if(curMonday - 7 >= initMonday) {
-  		curMonday -= 7;
-  	}
-  	res.redirect('/'+ req.params.username);
+    if (year > curYear) {
+      if (month - 1 < 0) {
+        month = 11;
+        year--;
+      } else {
+        month--;
+      }
+    } else if (year == curYear && month - 1 >= curMonth) {
+      month--;
+    }
+    console.log(`${year} ${month} ${curMonth}`);
+  	res.redirect('/' + req.params.username + '/book');
   });
   //---------------------------------------------------------
   // app.post('/:username/newappointment', (req, res) => {

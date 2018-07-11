@@ -27,35 +27,40 @@ passport.use('local-signup', new LocalStrategy({
         if (user) return done(null, false, req.flash('signupMessage', 'That username is already taken.'));
         else {
           User.findOne({ 'local.email': req.body.email }, function(err, email) {
-          if (err) return done(err);
-          if (email) return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
-          else {
-            if (req.body.isDoctor === 'on') {
-              let newUser = new User();
-              newUser.local.username = username;
-              newUser.local.email = req.body.email;
-              newUser.local.password = newUser.generateHash(password);
-              newUser.isDoctor = true;
-              newUser.workdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-              newUser.times = ['8:00 AM', '9:00 AM', '10:00 AM', '11:00 AM', '12:00 AM', 
-                '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
-              newUser.exceptionTimes = ['Friday 5:00 PM'];
-              newUser.exceptionDates = [`${new Date().getFullYear()}-05-04`];
-              newUser.save(function(err) {
-                if (err) throw err;
-                return done(null, newUser);
-                    });
-            } else {
-              let newUser = new User();
-              newUser.local.username = username;
-              newUser.local.email = req.body.email;
-              newUser.local.password = newUser.generateHash(password);
-              newUser.isDoctor = false;
-              newUser.save(function(err) {
-                if (err) throw err;
-                return done(null, newUser);
-              });
-            }
+            if (err) return done(err);
+            if (email) return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
+            else {
+              holidays((data) => {
+              if (req.body.isBusiness === 'on') {
+                let newUser = new User();
+                newUser.local.username = username;
+                newUser.local.email = req.body.email;
+                newUser.local.password = newUser.generateHash(password);
+                newUser.firstname = req.body.firstname;
+                newUser.lastname = req.body.lastname;
+                newUser.isBusiness = true;
+                newUser.workdays = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
+                newUser.workhours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
+                newUser.holidays = data.map(event => {return event.date}); 
+                newUser.exceptionDates = [`${new Date().getFullYear()}-05-04`];
+                newUser.save(function(err) {
+                  if (err) throw err;
+                  return done(null, newUser);
+                      });
+              } else {
+                let newUser = new User();
+                newUser.local.username = username;
+                newUser.local.email = req.body.email;
+                newUser.local.firstname = req.body.firstname;
+                newUser.local.lastname = req.body.lastname;
+                newUser.local.password = newUser.generateHash(password);
+                newUser.isBusiness = false;
+                newUser.save(function(err) {
+                  if (err) throw err;
+                  return done(null, newUser);
+                });
+              }
+            })
           }
           });
         }  

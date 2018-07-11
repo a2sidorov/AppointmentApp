@@ -12,13 +12,15 @@ const favicon = require('serve-favicon');
 const path = require('path');
 
 
-mongoose.connect('mongodb://localhost/mydb');
+//mongoose.connect('mongodb://localhost/mydb');
+mongoose.connect('mongodb+srv://test1:noldor1986@cluster0-fwxgm.mongodb.net/test?retryWrites=true/mydb');
 
 require('./config/passport')(passport);
 
 
 app.set('view engine', 'ejs');
-app.set('views', __dirname + '/views');
+//app.set('views', __dirname + '/views');
+app.set('/views', path.join(__dirname, 'views')); 
 
 app.use('/public', express.static(path.join(__dirname, '/public')))
 app.use('/:username/public', express.static(path.join(__dirname, '/public')))
