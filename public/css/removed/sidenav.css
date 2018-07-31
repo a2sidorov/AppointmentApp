@@ -1,0 +1,69 @@
+/*------------------*/
+  /*    Sidenav       */
+  /*------------------*/
+  .sidenav {
+    height: 100%;
+    width: 0;
+    position: fixed;
+    z-index: 20;
+    background-color: #767774;
+
+    overflow-x: hidden;
+    padding-top: 20px;
+    transition: 0.3s;
+    white-space: nowrap;
+  }
+  .sidenav .user {
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f1f1;
+  }
+  .sidenav .user * {
+    padding: 0px 0px 0px 10px;
+    color: #ffffff;
+    font-size: 18px;
+    vertical-align: middle;
+    text-decoration: none;
+  }
+  .sidenav .user i {
+    font-size:40px;
+  }
+  .sidenav .sidenav-items a {
+    display: block;
+  }
+   .sidenav .sidenav-items a * {
+    vertical-align: middle;
+    text-align: left;
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .sidenav .sidenav-items a i {
+    padding: 10px 0px 10px 15px;
+  }
+  .sidenav .sidenav-items a span {
+    padding: 10px 0px 10px 10px;
+  }
+  .sidenav .footer {
+    width: 250px;
+    position: absolute;
+    bottom: 0;
+  }
+  .sidenav .footer * {
+    font-size: 12px;
+    vertical-align: middle;
+    color: #ffffff;
+    text-decoration: none;
+  }
+  .sidenav .footer a i {
+    padding: 5px 0px 5px 10px;
+  }
+  .sidenav .footer a span {
+    padding: 5px 0px 5px 5px;
+  }
+  .sidenav .footer a {
+    display: inline-block;
+    width: 83.3px;
+    text-align: center;
+  }
+  .sidenav .footer a:first-child {
+    text-align: left;
+  }

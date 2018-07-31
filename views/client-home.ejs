@@ -2,100 +2,29 @@
 <html>
 <head>
   <title>Home</title>
-  <% include head %>
+  <% include partials/head %>
 </head>
 <body>
-
-  <% include client-navbar %>
-
-  <!--------------------------->
-  <!-- Upcoming appointments -->
-  <!--------------------------->
   <div class="grid-container">
-
-    <!-- Top part -->
     <div class="header">
-
-      <% include header %>
-
+      <% include partials/client-navbar %>
     </div>
-
-    <!-- Page title -->
-    <div class="header">
-
-      <H2>Upcoming appointments</H2>
-
-    </div>
-
-    <!-- List of upcoming appointments -->
-      <!-- example 1 -->
-    <div class="dropdown">
-
-      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
-      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
-
-      <div id="dropdown-contentId" class="dropdown-content">
-
-       <span>info</span>
-
+    <div class="upcoming">
+      <div class="title">
+        <H2>Upcoming appointments</H2>
       </div>
-
-    </div>
-      <!-- example 2 -->
-    <div class="dropdown">
-
-      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
-      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
-
-      <div id="dropdown-contentId" class="dropdown-content">
-
-       <span>info</span>
-
+      <div>
+        <% user.appointments.forEach((appointment) => { %>
+          <li><%= appointment.date %> <%= appointment.time %></li>
+        <% }); %>
       </div>
-
     </div>
-
-    <div class="addBtn">
-      <button class="material-icons" onclick="dropdown()">add</button>
-    </div>
-
-    <!-- Page title -->
-    <div class="header">
-
-      <H2>Previous appointments</H2>
-
-    </div>
-    <!-- List of previous appointments -->
-    <div class="dropdown">
-
-      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
-      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
-
-      <div id="dropdown-contentId" class="dropdown-content">
-
-       <span>info</span>
-
+    <div class="previous">
+      <div class="title">
+        <H2>Previous appointments</H2>
       </div>
-
     </div>
-      <!-- example 2 -->
-    <div class="dropdown">
-
-      <span class="dropdown-item">Today - 11:00 AM</br><i>Amanda Smith</i></span><!--
-      --><button id="dropdown-btnId" class="material-icons" onclick="dropdown()">expand_more</button>
-
-      <div id="dropdown-contentId" class="dropdown-content">
-
-       <span>info</span>
-
-      </div>
-
-    </div>
-    
-
-
-
-
+  </div>
   <script src="public/script.js"></script>
 </body>
 </html>

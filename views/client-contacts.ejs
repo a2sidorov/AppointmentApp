@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Doctors</title>
+  <% include partials/head %>
+</head>
+<body>
+  
+  <div class="grid-container">
+    <div class="header">
+      <% include partials/client-navbar %>
+    </div>
+    <div class="contacts-list">
+      <H2>My contacts</H2>
+      <ul>
+        <% contacts.forEach((contact) => { %>
+          <li><a href="/search/<%= contact._id %>"><%= contact.local.username %></a></li>
+        <% }); %>
+      </ul>
+    </div>
+  </div> 
+  <script src="/public/script.js"></script>
+</body>
+</html>
