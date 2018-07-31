@@ -1,64 +1,70 @@
 'use strict';
 
 const User = require('../models/user');
+const Business = require('../models/business');
+const Appointment = require('../models/appointment');
 const holidays = require('./googleapi');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const share = require('../public/share');
 
+let DateObj;
+// let Month = new Date().getMonth();
+// let Year = new Date().getFullYear();
 //logging user list
-User.findOne({}, (err, user) => {
+Appointment.find({}, (err, user) => {
   if (err) throw err;
   console.log(user);
 });
-//User.deleteMany({}, function (err) {});
+//Appointment.deleteMany({}, function (err) {});
 
 module.exports = function(app, passport) {
 	
   //init data object
-  let curDate = new Date(),
-  year = curDate.getFullYear(),
-  month = curDate.getMonth(),
-  today = curDate.getDate(),
-  weekDay = (curDate.getDay() === 0) ? 7 : curDate.getDay(),
-  curMonth = month,
-  curYear = year,
-  curMonday = today - weekDay + 1;
-  let timeArr = [];
-  const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  // let curDate = new Date(),
+  // year = curDate.getFullYear(),
+  // month = curDate.getMonth(),
+  // today = curDate.getDate(),
+  // weekDay = (curDate.getDay() === 0) ? 7 : curDate.getDay(),
+  // curMonth = month,
+  // curYear = year,
+  // curMonday = today - weekDay + 1;
+  // let timeArr = [];
+  // const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
-  /* GET Login page. */
+  /* GET login page. */
   app.get('/', (req, res) => {
   	res.render('login', {
   		message: req.flash('loginMessage')
   	});
   });
 
-  /* POST Login */
+  /* POST login */
   app.post('/login', function(req, res, next) {
     passport.authenticate('local-login', function(err, user, info) {
       if (err) return next(err);
       if (!user) return res.redirect('/');
       req.logIn(user, function(err) {
         if (err) return next(err);
-        if (req.body.rememberme === 'on') {
-          req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-        } 
-        if (req.body.rememberme !== 'on') {
-          req.session.cookie.maxAge = null;
-        }
-        return res.redirect('/' + user.local.username);
+        // if (req.body.rememberme === 'on') {
+        //   req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
+        // } 
+        // if (req.body.rememberme !== 'on') {
+        //   req.session.cookie.maxAge = null;
+        // }
+        return res.redirect('/home');
       });
    })(req, res, next);
   });
 
-  /* GET Password recovery page */
+  /* GET password recovery page */
   app.get('/forgot', (req, res) => {
     res.render('forgot', {
       message: req.flash('info')
     });
   });
 
-  /* POST Password recovery */
+  /* POST password recovery */
   app.post('/forgot', (req, res) => {
     User.findOne({ 'local.email': req.body.email }, (err, user) => {
       if (err) throw err;
@@ -102,14 +108,13 @@ module.exports = function(app, passport) {
               });
             }
           });
-
           });
         });
       } 
     });
   });
 
-  /* GET Password reset page */
+  /* GET password reset page */
   app.get('/reset/:token', (req, res) => {
     User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
       if (!user) {
@@ -173,222 +178,281 @@ module.exports = function(app, passport) {
                 message: req.flash('info')
               });
             }
+          });
         });
-      })
-    }
+      }
+    });
   });
-});
 
-  /* GET Registration Page */
+  /* GET registration Page */
   app.get('/signup',(req, res) => {
   	res.render('signup', {
   		message: req.flash('signupMessage')
   	});
   });
 
-  /* POST Sign up */
-  // app.post('/signup', passport.authenticate('local-signup', {
-  // 	successRedirect : '/profile',
-  // 	failureRedirect : '/signup',
-  // 	failureFlash : true
-  // }));
-  //--------------------------------
+  /* POST sign up */
   app.post('/signup', function(req, res, next) {
     passport.authenticate('local-signup', function(err, user, info) {
       if (err) return next(err);
       if (!user) return res.redirect('/signup');
       req.logIn(user, function(err) {
         if (err) return next(err);
-        if (user.isBusiness) { 
-          return res.redirect('/' + user.local.username + '/profile');
-        } else {
-          return res.redirect('/'+ user.local.username);
-        }
+        return res.redirect('/home');
       });
    })(req, res, next);
   });
 
-  //--------------------------------
-
-
-  /* GET Profile page */
-  // app.get('/:username/profile', isLoggedIn, (req, res) => {
-  //   holidays((data) => {
-  //     res.render('business-profile', {
-  //     username: req.user.local.username,
-  //     user: req.user,
-  //     allHolidays: data
-  //   });
-  //   });
-  // });
-
-  /* GET Profile page */
-   app.get('/:username/profile', (req, res) => {
-    if (req.isAuthenticated()) {
-      User.findOne({ 'local.username': req.params.username }, (err, user) => {
-        if (err) throw err;
-        holidays((data) => {
-          console.log(data);
-          if (user.isBusiness) {
-          res.render('business-profile', {
-            username: user.local.username,
-            user: user,
-            allHolidays: data,
-          });
-          } else {
-            res.render('client-profile', {
-              username: req.params.username,
-            });
-          }
-        }); 
+  /* GET business/client home page */
+  app.get('/home', isLoggedIn, (req, res) => {
+    if (req.user.kind === 'Business') {
+      res.render('business-home', {
+        business: req.user,
       });
     } else {
-      res.redirect('/');
+      res.render('client-home', {
+        user: req.user,
+      });
     }
   });
 
-
-  /* POST Profile update */
-  app.post('/:id', isLoggedIn, function(req, res) {
-  	// User.findById(req.params.id, function (err, user) {
-  	// 	if (err) throw err;
-   //    user.firstname = req.body.firstname;
-   //    user.lastname = req.body.lastname;
-  	// 	user.workdays = req.body.workdays;
-   //    user.times = req.body.time;
-   //    user.exceptionTimes = req.body.exceptionTimes;
-   //    user.holidays = req.body.holidays; 
-   //    user.exceptionDates = req.body.exceptionDates;
-  	// 	user.save((err, update) => {
-  	// 		if (err) return handleError(err);
-  	// 		res.redirect('/:username/profile');
-  	// 	});
-  	// });
-    res.send(req.body);
-  });
-
-
-  /* GET Log Out */
-  app.get('/logout', function(req, res){
-  	req.logout();
-  	res.redirect('/');
-  });
-  function isLoggedIn(req, res, next) {
-      if (req.isAuthenticated()) {
-          return next();
-      }
-      res.redirect('/');
-  }
-
-  /* GET Home page */
-  app.get('/:username', (req, res) => {
-  	if (req.isAuthenticated()) {
-  		User.findOne({ 'local.username': req.params.username }, (err, user) => {
-  			if (err) throw err;
-
-        if (user.isBusiness) {
-          res.render('business-home', {
-          username: user.local.username,
-          });
-        } else {
-          res.render('client-home', {
-          username: req.params.username,
-          });
-        }
-      });	
-    } else {
-      res.redirect('/');
-    }
-  });
-
-  app.get('/:username/book', (req, res) => {
-    User.findOne({ 'local.username': req.params.username }, (err, user) => {
-        if (err) throw err;
-        //console.log(user.createMonthSchedule(year, month, curMonday));
-        res.render('client-booking', {
-          month: months[month],
-          days: user.createMonthSchedule(year, month, curMonday),
-          today: `${months[curMonth]} ${today}`,
-          username: req.params.username,
+  /* GET business schedule */
+  app.get('/schedule', isLoggedIn, (req, res) => {
+    holidays((data) => {
+      if (req.user.kind === 'Business') {
+        res.render('business-schedule', {
+          business: req.user,
+          allHolidays: data,
         });
-    }); 
-  });
-
-  app.get('/:username/businesss', (req, res) => {
-    User.findOne({ 'local.username': req.params.username }, (err, user) => {
-        if (err) throw err;
-        User.find({ 'isBusiness': true }, (err, businesss) => {
-          res.render('client-businesss', {
-            mybusinesss: user.businesss,
-            businesss: businesss,
-            username: req.params.username,
-          });
-        });
-    }); 
-  });
-
-  app.get('/:username/nextweek', (req, res) => {
-    if (month + 1 > 11) {
-      month = 0;
-      year++;
-    } else {
-      month++;
-    }
-    console.log(`${year} ${month} ${curMonth}`);
-  	res.redirect('/' + req.params.username + '/book');
-  });
-  app.get('/:username/prevweek', (req, res) => {
-    if (year > curYear) {
-      if (month - 1 < 0) {
-        month = 11;
-        year--;
-      } else {
-        month--;
       }
-    } else if (year == curYear && month - 1 >= curMonth) {
-      month--;
-    }
-    console.log(`${year} ${month} ${curMonth}`);
-  	res.redirect('/' + req.params.username + '/book');
+    });
   });
-  //---------------------------------------------------------
-  // app.post('/:username/newappointment', (req, res) => {
-  // 	let post = new Customer({
-  // 		user: req.params.username,
-  // 		name: req.body.name,
-  // 		phone: req.body.phone,
-  // 		email: req.body.email,
-  // 		reason: req.body.reason,
-  // 		ins: req.body.ins,
-  // 		time: req.body.time
-  // 	});
-  // 	post.save(function(err){
-  // 		if(err) return console.error(err);
-  // 		res.redirect('/' + req.params.username);
-  // 	});
-  // });
-  //---------------------------------------------------------
-  //saving customer data into user model
-  app.post('/:username/newappointment', (req, res) => {
-    User.findOne({ 'local.username': req.params.username }, (err, user) => {
+
+  /* POST business schedule */
+  app.post('/schedule', isLoggedIn, (req, res) => {
+    User.findById(req.user.id, (err, user) => { 
+      if (user.kind === 'Business') {
+        user.workdays = req.body.workdays;
+        user.workhours = req.body.workhours;
+        user.holidays = req.body.holidays; 
+        user.exceptionDates = req.body.exceptionDates;
+        user.save((err, update) => {
+          if (err) return handleError(err);
+          res.redirect('/schedule');
+        });
+      }
+    });
+    //res.send(req.body);
+  });
+
+   /* GET business/client profile page */
+  app.get('/profile', isLoggedIn, (req, res) => {
+    if (req.user.kind === 'Business') {
+      res.render('business-profile', {
+        business: req.user,
+      });
+    } else {
+      res.render('client-profile', {
+        user: req.user,
+      });
+    }
+  });
+
+  /* POST business/client profile*/
+  app.post('/profile', isLoggedIn, (req, res) => {
+    User.findById(req.user.id, (err, user) => {
       if (err) throw err;
-      console.log(user.local.username);
-      let post = {
-        name: req.body.name,
-        phone: req.body.phone,
-        email: req.body.email,
-        reason: req.body.reason,
-        ins: req.body.ins,
-        time: req.body.time
-      };
-      user.customers.push(post);
-      user.save(function(err, update){
+      user.firstname = req.body.firstname;
+      user.lastname = req.body.lastname;
+      user.save((err, update) => {
         if (err) return handleError(err);
-        res.redirect('/' + req.params.username);
+        res.redirect('/profile');
+      });
+    });
+    //res.send(req.body);
+  });
+
+   /* GET client contact search page*/
+  app.get('/search', isLoggedIn, (req, res) => {
+    res.render('client-search', {
+      user: req.user,
+      results: [],
+    });
+  });
+
+
+  /* POST client find request*/
+  app.post('/search', isLoggedIn, (req, res) => {
+    let pattern = new RegExp(req.body.username, "gi");
+    Business.find({ 'local.username': pattern }, (err, users) => {
+      if (err) throw err;
+      res.json({
+        results: users, 
+      });
+    });
+    //res.send(req.body);
+  });
+
+  /* GET client add contact page*/
+  app.get('/search/:id', isLoggedIn, (req, res) => {
+    Business.findById(req.params.id, (err, business) => {
+      let added = req.user.contacts.includes(req.params.id);
+      res.render('client-addcontact', {
+        user: req.user,
+        business: business,
+        added: added,
+      });
+    });
+  });
+
+  /* POST client add contact request*/
+  app.get('/search/:id/add', isLoggedIn, (req, res) => {
+    User.findById(req.user.id, (err, user) => {
+      if (err) throw err;
+      user.contacts.push(req.params.id);
+      user.save((err, update) => {
+        if (err) return handleError(err);
+        res.redirect(`/search/${req.params.id}`);
+      });
+    });
+    //res.send(req.body);
+  });
+
+  /* POST client remove contact request*/
+  app.get('/search/:id/remove', isLoggedIn, (req, res) => {
+    User.findById(req.user.id, (err, user) => {
+      if (err) throw err;
+      let i = user.contacts.indexOf(req.body.contact);
+      user.contacts.splice(i, 1);
+      user.save((err, update) => {
+        if (err) return handleError(err);
+        res.redirect(`/search/${req.params.id}`);
+      });
+    });
+    //res.send(req.body);
+  });
+
+  /* GET client book page */
+  app.get('/book/:id', isLoggedIn, (req, res) => {
+    Business.findById(req.params.id).populate('appointments').exec((err, business) => { 
+      if (err) throw err;
+      User.findById(req.user.id, 'contacts').populate('contacts').exec((err, contacts) => {
+        if (err) throw err;
+        DateObj = new Date();
+        DateObj.setSeconds(0);
+        DateObj.setMilliseconds(0);
+        res.render('client-booking', {
+          user: req.user,
+          contacts: contacts.contacts,
+          business: business,
+          days: business.createMonth(DateObj),
+          hours: business.createDay(DateObj),
+          DateObj: DateObj,
+        });
+      });
+    });
+  });
+
+
+  /* GET client book nextmonth request */
+  app.get('/book/:id/month/:month', isLoggedIn, (req, res) => {
+    Business.findById(req.params.id, (err, business) => {
+      let month = DateObj.getMonth();
+      let year = DateObj.getFullYear();
+      if (req.params.month == 'nextmonth') {
+        if (month + 1 > 11) {
+          month = 0;
+          year++;
+          } else {
+            month++;
+          }
+      }
+      if (req.params.month == 'prevmonth') {
+        if (year > new Date().getFullYear()) {
+          if (month - 1 < 0) {
+            month = 11;
+            year--;
+          } else {
+            month--;
+          }
+        } else if (year === new Date().getFullYear() && month - 1 >= new Date().getMonth()) {
+          month--;
+        }
+      }
+      DateObj.setFullYear(year);
+      DateObj.setMonth(month);
+      //res.redirect(`/book/${req.params.id}`);
+      res.json({ 
+        days: business.createMonth(DateObj),
+        DateObj: DateObj,
       });
     });
   });
 
   
+  /* GET client book another day request */
+  app.get('/book/:id/day/:day', isLoggedIn, (req, res) => {
+    Business.findById(req.params.id).populate('appointments').exec((err, business) => {
+      if (err) throw err;
+      console.log(typeof req.params.day);
+      DateObj.setDate(parseInt(req.params.day));
+      res.json({ 
+        hours: business.createDay(DateObj),
+        DateObj: DateObj,
+      });
+    });
+  });
+
+   /* POST client book request */
+  app.post('/book/:id/book', isLoggedIn, (req, res) => {
+    User.findById(req.user.id, (err, user) => {
+      if (err) throw err;
+      Business.findById(req.params.id, (err, business) => {
+        if (err) throw err;
+        let newAppnt = new Appointment();
+        newAppnt.user = user._id;
+        newAppnt.business = business._id;
+        newAppnt.date = req.body.date;
+        newAppnt.reason = req.body.reason;
+        newAppnt.save((err, appointment) => {
+          if (err) throw err;
+          user.appointments.push(appointment._id);
+          user.save((err, result) => {
+            if (err) throw err;
+            business.appointments.push(appointment._id);
+            business.save((err, result) => {
+              if (err) throw err;
+              res.send('Appoinment is made');
+            });
+          });
+        });
+      });
+    });
+    //res.send(req.body);    
+  });
+
+  /* GET client contacts page */
+  app.get('/contacts', isLoggedIn, (req, res) => {
+    User.findById(req.user._id, 'contacts').populate('contacts').exec((err, contacts) => { 
+      console.log(contacts);
+      res.render('client-contacts', {
+        user: req.user,
+        contacts: contacts.contacts,
+      });
+    });
+  })
+
+  /* GET Log Out */
+  app.get('/logout', function(req, res) {
+    req.logout();
+    res.redirect('/');
+  });
+  
+  function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated()) {
+      return next();
+    }
+    res.redirect('/');
+  }
 
 }

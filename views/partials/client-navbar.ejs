@@ -1,29 +1,9 @@
 <!-- views/partials/client-navbar.ejs -->
 
-<nav id="mySidenav" class="sidenav">
-
-  <div class="user">
-
-    <a href="/<%= username %>/profile"><i class="material-icons">account_circle</i><span><%= username %></span></a>
-
-  </div>
-
-  <div class="sidenav-items">
-
-    <a href="/<%= username %>"><i class="material-icons">account_circle</i><span>Upcoming appointments</span></a>
-    <a href="/<%= username %>/book"><i class="material-icons">account_circle</i><span>Book an appointment</span></a>
-    <a href="/<%= username %>/doctors"><i class="material-icons">account_circle</i><span>Doctors</span></a>
-    <a href="#"><i class="material-icons">account_circle</i><span>Reports [need to dev] </span></a>
-    <a href="#"><i class="material-icons">account_circle</i><span>Payments [need to dev]</span></a>
-
-  </div> 
-
-  <div class="footer">
-      
-    <a href=""><i class="material-icons">account_circle</i><span>Help</span></a>
-    <a class="terms" href="">Terms</a>
-    <a class="privacy" href="">Privacy</a>
-        
-  </div> 
-
+<nav id="navbar">
+  <a href="/home" class="demo-icon icon-01_home"></a>
+  <a href="/search" class="demo-icon icon-05_search"></a>
+  <a href="/book/<%= user.contacts[0] %>" class="demo-icon icon-73_plus"></a>
+  <a href="/contacts" class="demo-icon icon-26_list"></a>
+  <a href="/profile" class="demo-icon icon-04_profile"></a>
 </nav>

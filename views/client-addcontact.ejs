@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add</title>
+  <% include partials/head %>
+</head>
+<body>
+  <div class="grid-container">
+    <div class="header">
+      <a href="/search"><i class="demo-icon icon-71_chevron-"></i></a>
+    </div>
+    <div>
+      <h2 id="contact"><%= business.local.username %></h2>
+      <p>description</p>
+      <% if (added) { %>
+        <a href="/search/<%= business._id %>/remove">Remove</a>
+        <!-- <button id="addContactBtn" onclick="removeContact()">Remove</button> -->
+      <% } else { %>
+        <a href="/search/<%= business._id %>/add">Add</a>
+        <!-- <button id="addContactBtn" onclick="addContact()">Add</add> -->
+    <% } %>
+    </div>
+    <div id="serverMsgBox"></div>
+  </div> 
+  <script src="/public/script.js"></script>
+</body>
+</html>

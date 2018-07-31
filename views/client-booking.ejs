@@ -2,125 +2,111 @@
 <html>
 <head>
   <title>Book a visit</title>
-  <% include head %>
+  <% include partials/head %>
 </head>
 <body>
-
-  <% include client-navbar %>
-
-  <!------------------------>
-  <!-- Book an appintment -->
-  <!------------------------>
   <div class="grid-container">
-
-    <!-- top part -->
     <div class="header">
-
-      <% include header %>
-
+      <% include partials/client-navbar %>
     </div>
-
-    <!-- Page title -->
-    <div class="header">
-
+    <div class="title">
       <H2>Book an appointment</H2>
-
     </div>
-
-    <!-- Selecting a doctor -->
-    <div class="dropdown">
-
-      <span class="dropdown-item">Amanda Smith </br> <i>Dentist</i></span><!--
-   --><button id="dropdown-btnId" class="material-icons"  onclick="dropdown()">expand_more</button>
-
-      <div id="dropdown-contentId" class="dropdown-content">
-
-        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
-        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
-        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
-        <a href="#">Amanda Smith </br> <i>Dentist</i></a>
-
+    <div class="contacts">
+      <div class="contacts-bar">
+        <span><p><%= business.local.username %></p></span>
+        <button class="material-icons" onclick="showDropdown('contacts-content')">expand_more</button>
       </div>
-
+      <div id="contacts-content" class="contacts-content">
+        <% contacts.forEach((contact) => { %>
+          <% if (contact.local.username !== business.local.username) { %>
+            <a href="/book/<%= contact._id %>"><%= contact.local.username %></a>
+          <% } %>
+        <% }); %>
+      </div>
     </div>
-
-    <!-- Calendar -->
-    <div class="box">
-
-      <h3>Today, <%= today %></h3>
-
-      <div class="month"> 
-
-        <a href="/<%= username %>/prevweek" class="material-icons">keyboard_arrow_left</a>
-        <span><%= month %></span>
-        <a href="/<%= username %>/nextweek" class="material-icons">keyboard_arrow_right</a>
-
+    <div class="calendar">
+      <div class="title">
+        <h3>Today, <%= DateObj.toLocaleDateString() %> </h3>
+        <h3 id="year"><%= DateObj.getFullYear() %> </h3>
       </div>
-
+      <div class="month">
+        <% const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"] %>
+        <button type="button" onclick="setMonth('prevmonth')" class="material-icons">keyboard_arrow_left</button>
+        <span id="month"><%= monthNames[DateObj.getMonth()] %></span>
+        <button type="button" onclick="setMonth('nextmonth')" class="material-icons">keyboard_arrow_right</button>
+      </div>
       <ul class="days"> 
-        <% for (i = 0; i < days.length; i++) { %>
-        <li><%= days[i][0] %> %></li>
-        <% } %>
-        <!-- <li><span class="active"></span></li> -->
+        <li>Mo</li>
+        <li>Tu</li>
+        <li>We</li>
+        <li>Th</li>
+        <li>Fr</li>
+        <li>Sa</li>
+        <li>Su</li>
       </ul>
-
-    </div>
-
-    <!-- Time table before noon -->
-    <div class="box">
-
-      <h3>Before noon</h3>
-
-      <ul class="times">
-        <li>8:00</li>
-        <li>9:00</li>
-        <li>10:00</li>
-        <li>11:00</li>
-        <li>12:00</li>
-        <li>1:00</li>
-        <li>2:00</li>
-        <li>3:00</li>
-        <li>4:00</li>
+      <ul id="days" class="days">
+        <% let FirstAppDay = false; %>
+        <% (function() { %>
+          <% days.forEach((day) => { %>
+            <li>
+              <% if (day.app && !FirstAppDay) { %>
+                <% FirstAppDay = true; %>          
+                  <div id="checkedDay" class="appDays" onclick="setDay(this)"><%= day.num %></div> 
+              <% } else if (day.app) { %>
+                  <div class="appDays" onclick="setDay(this)"><%= day.num %></div> 
+              <% } else { %>
+                  <div><%= day.num %></div>
+              <% } %>
+            </li>
+          <% }); %>
+        <% })(); %>
       </ul>
-
     </div>
-
-    <!-- Time table before noon -->
-    <div class="box">
-
-      <h3>After noon</h3>
-
-      <ul class="times">
-        <li>8:00</li>
-        <li>9:00</li>
-        <li>10:00</li>
-        <li>11:00</li>
-        <li>12:00</li>
-        <li>1:00</li>
-        <li>2:00</li>
-        <li>3:00</li>
-        <li>4:00</li>
+    <div class="time">
+      <!-- <div class="title">
+        <h3>AM</h3>
+      </div>   -->  
+      <div class="title">
+        <h3>Time</h3>
+      </div>    
+      <ul id="amTime">
+        <% (function() { %>
+          <% let firstAppTime = false; %>
+          <% if (FirstAppDay) { %>
+            <% hours.forEach((hour) => { %>
+              <% if (firstAppTime) { %>
+                <% firstAppTime = true; %>
+                <li id="checkedTime"><%= hour %></li>
+              <% }else { %>
+                <li><%= hour %></li>
+              <% } %>
+            <% }); %>
+          <% } else { %>
+          <p><%= 'No time available this month' %></p>
+          <% } %>
+        <% })(); %>
       </ul>
-
+<!--       <div class="title">
+        <h3>PM</h3>
+      </div> -->
+  <!--     <ul id="pmTime">
+        
+      </ul> -->
     </div>
-
-    <!-- Reason for visit -->
-    <div class="box">
-
-      <p>Reason for visit</p>
-
-      <form action="/" method="post">
-        <textarea rows="4" name="reason"></textarea>
- 
-      </form>
-
+    <div class="reasonForVisit">
+      <div class="title">
+        <h3>Reason for visit</h3>
+      </div>
+      <div>
+        <textarea id="reason" rows="4" name="reason"></textarea>
+      </div>
     </div>
+    <div id="msg"></div>
+    <button class="submitBtn" type="button" onclick="book()">Book Now</button> 
 
-    <!-- Buttons-->
-    <button class="submitBtn" type="submit">Book Now</button>
     <button class="cancelBtn">Cancel</button>
-
   </div>
-  <script src="public/script.js"></script>
+  <script src="/public/script.js"></script>
 </body>
 </html>
