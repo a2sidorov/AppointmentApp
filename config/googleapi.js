@@ -33,7 +33,7 @@ module.exports = function (cb) {
 		  				console.log(events);
 		  				let holidaysListApi = events.map(function getHolidays (event) {
 								let start = event.start.dateTime || event.start.date;
-								let eventDate = { date: new Date(start).toDateString() , event: event.summary };
+								let eventDate = { date: start, name: event.summary };
 								return eventDate;  
 								});
 		  				console.log(holidaysListApi);

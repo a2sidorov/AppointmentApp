@@ -12,15 +12,19 @@
     </div>
     <div class="upcoming">
       <div class="title">
-        <H2>Upcoming appointments</H2>
+        <H2>Upcoming clients</H2>
       </div>
-      <div>
-        <% business.appointments.forEach((appointment) => { %>
-          <li><%= appointment.date %> <%= appointment.time %></li>
-        <% }); %>
-      </div>
+      <ul>
+        <% if (appointments.length > 0) { %>
+          <% appointments.forEach((appointment) => { %>
+            <li><%= new Date(appointment.date).toString().substring(0, 10) %> with <%= appointment.business.firstname %> <%= appointment.business.lastname %></li>
+          <% }); %>
+        <% } else { %>
+          <li>You don't have appointments.</li>
+        <% } %>
+      </ul>
     </div>
   </div>
-  <script src="public/script.js"></script>
+  <script src="/public/script.js"></script>
 </body>
 </html>

@@ -9,24 +9,21 @@
     <div class="header">
       <% include partials/client-navbar %>
     </div>
-    <div class="search">
-      <div class="title">
-        <H2>Find service</H2>
-      </div>
+    <main id="main">
+      <div class="search">
+        <div class="title">
+          <H2>Find service</H2>
+        </div>
       <div class="search-bar">
         <input id="searchBar" type="text" name="username" placeholder="Enter username">
-        <button type="submit" onclick="findUser()">Find</button> 
+        <button type="button" onclick="findUser()">Find</button> 
       </div>
-    </div>
-    <div>
-      <ul id="searchResult">
-        <% results.forEach((result) => { %>
-          <li><a href="<%= result._id %>"><%= result.local.username %></a></li>
-        <% }); %>
-      </ul>
-    </div>
-   
-  </div> 
+        <ul id="searchResults">  
+        </ul>
+      </div>
+    </main>
+  </div>   
   <script src="/public/script.js"></script>
+  <script src="/public/client-search.js"></script>
 </body>
 </html>

@@ -3,35 +3,23 @@
 const User = require('../models/user');
 const Business = require('../models/business');
 const Appointment = require('../models/appointment');
-const holidays = require('./googleapi');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
-const share = require('../public/share');
 
-let DateObj;
-// let Month = new Date().getMonth();
-// let Year = new Date().getFullYear();
 //logging user list
-Appointment.find({}, (err, user) => {
-  if (err) throw err;
-  console.log(user);
-});
+// Appointment.find({}, (err, user) => {
+//   if (err) throw err;
+//   console.log(user);
+// });
+// User.find({}, (err, user) => {
+//   if (err) throw err;
+//   console.log(JSON.stringify(user));
+// });
+//User.deleteMany({}, function (err) {});
 //Appointment.deleteMany({}, function (err) {});
 
 module.exports = function(app, passport) {
 	
-  //init data object
-  // let curDate = new Date(),
-  // year = curDate.getFullYear(),
-  // month = curDate.getMonth(),
-  // today = curDate.getDate(),
-  // weekDay = (curDate.getDay() === 0) ? 7 : curDate.getDay(),
-  // curMonth = month,
-  // curYear = year,
-  // curMonday = today - weekDay + 1;
-  // let timeArr = [];
-  // const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-
   /* GET login page. */
   app.get('/', (req, res) => {
   	res.render('login', {
@@ -46,12 +34,6 @@ module.exports = function(app, passport) {
       if (!user) return res.redirect('/');
       req.logIn(user, function(err) {
         if (err) return next(err);
-        // if (req.body.rememberme === 'on') {
-        //   req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000;
-        // } 
-        // if (req.body.rememberme !== 'on') {
-        //   req.session.cookie.maxAge = null;
-        // }
         return res.redirect('/home');
       });
    })(req, res, next);
@@ -205,47 +187,78 @@ module.exports = function(app, passport) {
 
   /* GET business/client home page */
   app.get('/home', isLoggedIn, (req, res) => {
-    if (req.user.kind === 'Business') {
-      res.render('business-home', {
-        business: req.user,
+   if (req.user.kind === 'Business') {
+      Appointment.find({ user: req.user.id }).populate({ path: 'user', select: 'firstname lastname' }).exec((err, appointments) => {
+        if (err) throw err;
+        res.render('business-home', {
+          appointments: appointments,
+        });
       });
     } else {
-      res.render('client-home', {
-        user: req.user,
+      Appointment.find({ user: req.user.id }).populate({ path: 'business', select: 'firstname lastname' }).exec((err, appointments) => {
+        if (err) throw err;
+        res.render('client-home', {
+          contacts: req.user.contacts,
+          appointments: appointments,
+        });
       });
     }
   });
 
-  /* GET business schedule */
-  app.get('/schedule', isLoggedIn, (req, res) => {
-    holidays((data) => {
-      if (req.user.kind === 'Business') {
-        res.render('business-schedule', {
-          business: req.user,
-          allHolidays: data,
-        });
-      }
+  /* GET business schedule page */
+  app.get('/schedule', isLoggedIn, isBusiness, (req, res) => {
+    res.render('business-schedule', {
+      workdays: req.user.workdays,
+      workhours: req.user.workhours,
+      holidays: req.user.holidays,
     });
   });
 
-  /* POST business schedule */
-  app.post('/schedule', isLoggedIn, (req, res) => {
-    User.findById(req.user.id, (err, user) => { 
-      if (user.kind === 'Business') {
-        user.workdays = req.body.workdays;
-        user.workhours = req.body.workhours;
-        user.holidays = req.body.holidays; 
-        user.exceptionDates = req.body.exceptionDates;
-        user.save((err, update) => {
+  /* GET(ajax) business schedule workdays */
+  app.post('/schedule/update', isLoggedIn, isBusiness, (req, res) => {
+    if (req.user.kind === 'Business') {
+      Business.findById(req.user.id, (err, business) => {
+        let updatedDays = JSON.parse(req.body.days);
+        let updatedTime = JSON.parse(req.body.time);
+        let updatedHolidays = JSON.parse(req.body.holidays);
+        if (updatedDays.length > 0) {
+          business.workdays.forEach((day) => {
+            updatedDays.forEach((updatedDay) => {
+              if (day.dayNum === updatedDay.dayNum) {
+                day.isAvailable = updatedDay.isAvailable;
+              }
+            });
+          });
+        }
+        if (updatedTime.length > 0) {
+          business.workhours.forEach((hour) => {
+            updatedTime.forEach((updatedTime) => {
+              if (hour.time === updatedTime.time) {
+                hour.isAvailable = updatedTime.isAvailable;
+              }
+            });
+          });
+        }
+        if (updatedHolidays.length > 0) {
+          business.holidays.forEach((holiday) => {
+            updatedHolidays.forEach((updatedHoliday) => {
+              if (holiday.date === updatedHoliday.date) {
+                holiday.isAvailable = updatedHoliday.isAvailable;
+              }
+            });
+          });
+        }
+        business.markModified('workdays');
+        business.save((err, update) => {
           if (err) return handleError(err);
-          res.redirect('/schedule');
+          res.send('Your schedule has been updated');
         });
-      }
-    });
-    //res.send(req.body);
+      });
+      //res.send(req.body);
+    }
   });
 
-   /* GET business/client profile page */
+  /* GET business/client profile page */
   app.get('/profile', isLoggedIn, (req, res) => {
     if (req.user.kind === 'Business') {
       res.render('business-profile', {
@@ -273,93 +286,80 @@ module.exports = function(app, passport) {
   });
 
    /* GET client contact search page*/
-  app.get('/search', isLoggedIn, (req, res) => {
+  app.get('/search', isLoggedIn, isClient, (req, res) => {
     res.render('client-search', {
-      user: req.user,
-      results: [],
+      contacts: req.user.contacts,
+      //results: [],
     });
   });
 
-
-  /* POST client find request*/
-  app.post('/search', isLoggedIn, (req, res) => {
-    let pattern = new RegExp(req.body.username, "gi");
-    Business.find({ 'local.username': pattern }, (err, users) => {
+  /* GET(ajax) client find request*/
+  app.get('/search/:pattern', isLoggedIn, isClient, (req, res) => {
+    let pattern = new RegExp(req.params.pattern, "gi");
+    Business.find({ 'local.username': pattern }, '_id local.username', (err, usernames) => {
       if (err) throw err;
       res.json({
-        results: users, 
+        results: usernames,
+        contacts: req.user.contacts,
       });
     });
     //res.send(req.body);
   });
 
-  /* GET client add contact page*/
-  app.get('/search/:id', isLoggedIn, (req, res) => {
-    Business.findById(req.params.id, (err, business) => {
-      let added = req.user.contacts.includes(req.params.id);
-      res.render('client-addcontact', {
-        user: req.user,
-        business: business,
-        added: added,
-      });
-    });
-  });
-
-  /* POST client add contact request*/
-  app.get('/search/:id/add', isLoggedIn, (req, res) => {
+  /* POST(ajax) client add contact page*/
+  app.post('/search/add', isLoggedIn, isClient, (req, res) => {
     User.findById(req.user.id, (err, user) => {
-      if (err) throw err;
-      user.contacts.push(req.params.id);
+      if (!user.contacts.includes(req.body.id)) {
+        user.contacts.push(req.body.id);
+      }
       user.save((err, update) => {
         if (err) return handleError(err);
-        res.redirect(`/search/${req.params.id}`);
+        res.send(update.contacts);
       });
     });
-    //res.send(req.body);
   });
 
-  /* POST client remove contact request*/
-  app.get('/search/:id/remove', isLoggedIn, (req, res) => {
+  /* POST(ajax) client remove contact request*/
+  app.post('/search/remove', isLoggedIn, isClient, (req, res) => {
     User.findById(req.user.id, (err, user) => {
       if (err) throw err;
-      let i = user.contacts.indexOf(req.body.contact);
+      let i = user.contacts.indexOf(req.body.id);
       user.contacts.splice(i, 1);
       user.save((err, update) => {
         if (err) return handleError(err);
-        res.redirect(`/search/${req.params.id}`);
+        res.send(update.contacts);
       });
     });
     //res.send(req.body);
   });
 
   /* GET client book page */
-  app.get('/book/:id', isLoggedIn, (req, res) => {
+  app.get('/book/:id', isLoggedIn, isClient, (req, res) => {
     Business.findById(req.params.id).populate('appointments').exec((err, business) => { 
       if (err) throw err;
       User.findById(req.user.id, 'contacts').populate('contacts').exec((err, contacts) => {
         if (err) throw err;
-        DateObj = new Date();
-        DateObj.setSeconds(0);
-        DateObj.setMilliseconds(0);
+        let date = new Date()
+        date.setSeconds(0);
+        date.setMilliseconds(0);
         res.render('client-booking', {
           user: req.user,
           contacts: contacts.contacts,
           business: business,
-          days: business.createMonth(DateObj),
-          hours: business.createDay(DateObj),
-          DateObj: DateObj,
+          days: business.createMonth(),
+          dateObj: date,
         });
       });
     });
   });
 
-
-  /* GET client book nextmonth request */
-  app.get('/book/:id/month/:month', isLoggedIn, (req, res) => {
+  /* POST(ajax) client book nextmonth request */
+  app.post('/book/:id/month', isLoggedIn, isClient, (req, res) => {
     Business.findById(req.params.id, (err, business) => {
-      let month = DateObj.getMonth();
-      let year = DateObj.getFullYear();
-      if (req.params.month == 'nextmonth') {
+      let date = new Date(req.body.dateISO);
+      let month = date.getMonth();
+      let year = date.getFullYear();
+      if (req.body.month == 'next') {
         if (month + 1 > 11) {
           month = 0;
           year++;
@@ -367,7 +367,7 @@ module.exports = function(app, passport) {
             month++;
           }
       }
-      if (req.params.month == 'prevmonth') {
+      if (req.body.month == 'prev') {
         if (year > new Date().getFullYear()) {
           if (month - 1 < 0) {
             month = 11;
@@ -379,32 +379,30 @@ module.exports = function(app, passport) {
           month--;
         }
       }
-      DateObj.setFullYear(year);
-      DateObj.setMonth(month);
-      //res.redirect(`/book/${req.params.id}`);
+      date.setFullYear(year);
+      date.setMonth(month);
       res.json({ 
-        days: business.createMonth(DateObj),
-        DateObj: DateObj,
+        days: business.createMonth(date),
+        dateISO: date.toISOString(),
       });
     });
   });
 
-  
-  /* GET client book another day request */
-  app.get('/book/:id/day/:day', isLoggedIn, (req, res) => {
+  /* POST(ajax) client book another day request */
+  app.post('/book/:id/day', isLoggedIn, isClient, (req, res) => {
     Business.findById(req.params.id).populate('appointments').exec((err, business) => {
       if (err) throw err;
-      console.log(typeof req.params.day);
-      DateObj.setDate(parseInt(req.params.day));
+      let date = new Date(req.body.dateISO);
+      date.setDate(parseInt(req.body.day));
       res.json({ 
-        hours: business.createDay(DateObj),
-        DateObj: DateObj,
+        hours: business.createDay(date),
+        dateISO: date.toISOString(),
       });
     });
   });
 
-   /* POST client book request */
-  app.post('/book/:id/book', isLoggedIn, (req, res) => {
+  /* POST(ajax) client book request */
+  app.post('/book/:id/book', isLoggedIn, isClient, (req, res) => {
     User.findById(req.user.id, (err, user) => {
       if (err) throw err;
       Business.findById(req.params.id, (err, business) => {
@@ -422,7 +420,8 @@ module.exports = function(app, passport) {
             business.appointments.push(appointment._id);
             business.save((err, result) => {
               if (err) throw err;
-              res.send('Appoinment is made');
+              res.send(`Your appointment is scheduled on ${new Date(appointment.date).toLocaleDateString()}
+               at ${new Date(appointment.date).toLocaleTimeString().substring(0,8)}`);
             });
           });
         });
@@ -432,11 +431,10 @@ module.exports = function(app, passport) {
   });
 
   /* GET client contacts page */
-  app.get('/contacts', isLoggedIn, (req, res) => {
-    User.findById(req.user._id, 'contacts').populate('contacts').exec((err, contacts) => { 
-      console.log(contacts);
+  app.get('/contacts', isLoggedIn, isClient, (req, res) => {
+    User.findById(req.user._id, 'contacts').populate('contacts').exec((err, contacts) => {
       res.render('client-contacts', {
-        user: req.user,
+        contacts: req.user.contacts,
         contacts: contacts.contacts,
       });
     });
@@ -450,6 +448,18 @@ module.exports = function(app, passport) {
   
   function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
+      return next();
+    }
+    res.redirect('/');
+  }
+  function isBusiness(req, res, next) {
+    if (req.user.kind === 'Business') {
+      return next();
+    }
+    res.redirect('/');
+  }
+  function isClient(req, res, next) {
+    if (req.user.kind !== 'Business') {
       return next();
     }
     res.redirect('/');

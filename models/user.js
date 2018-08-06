@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
 	},
   firstname: String,
   lastname: String,
-  contacts: Array,
+  contacts: [{type: mongoose.Schema.Types.ObjectId, ref: 'Business'}],
   appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
 }, options);
 

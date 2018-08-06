@@ -9,22 +9,24 @@
     <div class="header">
       <% include partials/client-navbar %>
     </div>
-    <div class="upcoming">
+    <div class="appointments">
       <div class="title">
         <H2>Upcoming appointments</H2>
       </div>
-      <div>
-        <% user.appointments.forEach((appointment) => { %>
-          <li><%= appointment.date %> <%= appointment.time %></li>
-        <% }); %>
-      </div>
-    </div>
-    <div class="previous">
-      <div class="title">
-        <H2>Previous appointments</H2>
-      </div>
+      <ul>
+        <% if (appointments.length > 0) { %>
+          <% appointments.forEach((appointment) => { %>
+            <div class="appointment-list">
+              <li><%= new Date(appointment.date).toString().substring(0, 10) %> with <%= appointment.business.firstname %> <%= appointment.business.lastname %></li>
+              <button type="button">Cancel</button>
+            </div>
+          <% }); %>
+        <% } else { %>
+          <li>You don't have appointments.</li>d
+        <% } %>
+      </ul>
     </div>
   </div>
-  <script src="public/script.js"></script>
+  <script src="/public/script.js"></script>
 </body>
 </html>
