@@ -10,15 +10,19 @@
     <div class="header">
       <% include partials/client-navbar %>
     </div>
-    <div class="contacts-list">
+    <div class="contacts">
       <H2>My contacts</H2>
       <ul>
         <% contacts.forEach((contact) => { %>
-          <li><a href="/search/<%= contact._id %>"><%= contact.local.username %></a></li>
+          <div class="contacts-list">
+            <li><%= contact.local.username %></li>
+            <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
+          </div>
         <% }); %>
       </ul>
     </div>
   </div> 
   <script src="/public/script.js"></script>
+  <script src="/public/client-search.js"></script>
 </body>
 </html>

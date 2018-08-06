@@ -5,67 +5,120 @@ const User = require('./user');
 const options = require('./user');
 const Appointment = require('../models/appointment');
 
+let FirstAppDay;
 
 const businessSchema = new mongoose.Schema({
-	//isBusiness: Boolean,
-  workhours: Array,
-  workdays: Array,
-  holidays: Array,
-  exceptionDates: Array,
-  clients: Array,
+  workdays: [mongoose.Schema.Types.Mixed],
+  workhours: [mongoose.Schema.Types.Mixed],
+  holidays: [mongoose.Schema.Types.Mixed],
+  clients: [{type: mongoose.Schema.Types.ObjectId, ref: 'Business'}],
+  appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
 }, options);
 
+
+
 businessSchema.methods.createMonth = function(dateObj) {
-  const week = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
-  let i;
-  let day = {}; 
-  let days = [];
-  let date;
-  let weekDayNum;
-  let year = dateObj.getFullYear();
-  let month = dateObj.getMonth();
-  let lastDay = new Date(year, month + 1, 0).getDate();
-  let firstMonday = new Date(year, month, 1).getDay();
-  firstMonday = (firstMonday === 0) ? 7 : firstMonday;
-    for (i = 1 - firstMonday + 1; i <= lastDay; i++) {
-      day = {};
-      if (i > 0) {
-        date = new Date(year, month, i);
-        weekDayNum =  date.getDay();
-        if (date.getTime() > new Date().getTime() && this.workdays.includes(week[weekDayNum])) {
-          day.num = i;
-          day.app = true;
-        } else {
-          day.num = i;
-          day.app = false;
-        }
-      } else {
-        day.num = '';
-        day.app = false;
+  if (dateObj == undefined) {
+    dateObj = new Date();
+  }
+
+ let workdaysArr = [];
+    this.workdays.forEach((day) => {
+      if (day.isAvailable) {
+        workdaysArr.push(day.dayNum);
       }
-      days.push(day);
-    }
-  return days;
+    });
+    let holidaysArr = [];
+    this.holidays.forEach((holiday) => {
+      if (!holiday.isAvailable) {
+        holidaysArr.push(holiday.date);
+      }
+    });
+
+    let today = new Date();
+    today.setHours(0);
+    today.setMinutes(0);
+    today.setSeconds(0);
+    today.setMilliseconds(0);
+    let i;
+    let day = {}; 
+    let days = [];
+    let date;
+    let weekDayNum;
+    let year = dateObj.getFullYear();
+    let month = dateObj.getMonth();
+    let lastDay = new Date(year, month + 1, 0).getDate();
+    let firstMonday = new Date(year, month, 1).getDay();
+    firstMonday = (firstMonday === 0) ? 7 : firstMonday;
+      for (i = 1 - firstMonday + 1; i <= lastDay; i++) {
+        day = {};
+        if (i > 0) {
+          //date = new Date(year, month, i);
+          dateObj.setDate(i);
+          console.log(dateObj.toISOString().substring(0, 10));
+          if (dateObj.getTime() >= today.getTime() 
+            && workdaysArr.includes(dateObj.getDay().toString())
+            && !holidaysArr.includes(dateObj.toISOString().substring(0, 10))
+            ) {
+            day.num = i;
+            day.isAvailable = true;
+          } else {
+            day.num = i;
+            day.isAvailable = false;
+          }
+        } else {
+          day.num = '';
+          day.isAvailable = false;
+        }
+          days.push(day);
+      }
+    dateObj.setDate(1);
+    return days;
 }
-
-
-
 
 businessSchema.methods.createDay = function(dateObj) {
-  let appArr = this.appointments.map((item) => { 
-    return item.date.toISOString();
+  let availableWorkhours = this.workhours.filter((hour) => {
+    return hour.isAvailable;
   });
-  console.log('appArr ' + appArr);
-  function availableTime(time) {
-    let hh = parseInt(time.substring(0, 2));
-    let mm = parseInt(time.substring(3));
-    dateObj.setHours(hh);
-    dateObj.setMinutes(mm);
-    console.log('dateObj ' + dateObj);
-    return !appArr.includes(dateObj.toISOString());
-  }
-  return this.workhours.filter(availableTime);
+  let timeArr = [];
+  let appArr = this.appointments.map((item) => { 
+    return item.date;
+  });
+  console.log('appArr' + appArr);
+  availableWorkhours.forEach((hour) => {
+    let h = parseInt(hour.time.substring(0, 2));
+    let m = parseInt(hour.time.substring(3, 5));
+    dateObj.setHours(h);
+    dateObj.setMinutes(m);
+    console.log('dateObj.toISOString()' + dateObj.toISOString());
+    if (appArr.includes(dateObj.toISOString())) {
+      hour.isBooked = true;
+    }
+  });
+  console.log('availableWorkhours' + availableWorkhours);
+  return availableWorkhours;
 }
+
+// businessSchema.methods.createDay = function(dateObj) {
+//   let result = [];
+//   if (!dateObj) dateObj = FirstAppDay;
+//   console.log('createDay ' + dateObj);
+//   let appArr = this.appointments.map((item) => { 
+//     return item.date.toISOString();
+//   });
+//   //console.log('appArr ' + appArr);
+//   function availableTime(time) {
+//     let hh = parseInt(time.substring(0, 2));
+//     let mm = parseInt(time.substring(3));
+//     dateObj.setHours(hh);
+//     dateObj.setMinutes(mm);
+//     //console.log('dateObj ' + dateObj);
+//     return !appArr.includes(dateObj.toISOString());
+//   }
+//   result
+
+//   return this.workhours.filter(availableTime);
+// }
 
 
 

@@ -1,6 +1,6 @@
 :root {
   --main-color: #4CAF90;
-  --main-active-color: #4CAF90;
+  --main-active-color: #4CAF50;
   --main-inactive-color: #808080;
 }
 * {
@@ -16,8 +16,9 @@ button {
     background-color: #fff;
     border: none;
 }
-h2 {
-  margin-bottom: 5px;
+
+.title {
+  padding-bottom: 4px;
 }
 
 
@@ -83,122 +84,6 @@ h2 {
     margin-bottom: 10px;
   }
 
-  /*---------------------------*/
-  /*   Schedule page            */
-  /*---------------------------*/
-  .schedule .workdays ul {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
-  .schedule .workdays ul li {
-    padding-top: 4px;
-    color: var(--main-inactive-color);
-    text-align: center;
-    width: 30px;
-    height: 30px;
-    border: 1px solid var(--main-inactive-color);
-    border-radius: 50%;
-  }
-  .schedule .workdays ul input {
-    display: none;
-  }
-  .schedule .workdays .checked {
-    color: #fff;
-    background-color: #4CAF50;
-  }
-  .schedule .workhours {
-    margin-top: 10px;
-    position: relative;
-    width: 100%;
-    height: 340px;
-  }
-  .schedule .workhours .clock {
-    position: absolute;
-    border: 3px solid #fff;
-    top: 50%;
-    left: 47%;
-    width: 5px;
-    height: 5px;
-  }
-  .schedule .workhours .clock li {
-    padding-top: 4px;
-    font-size: 12px;
-    background-color: #fff;
-    color: var(--main-inactive-color);
-    border: 1px solid var(--main-inactive-color);
-    border-radius: 50%;
-    width: 24px;
-    height: 24px;
-    text-align: center;
-    z-index: 19;
-  }
-  .schedule .workhours .clock .checked {
-    color: #fff;
-    background-color: #4CAF50;
-  }
-  .schedule .workhours .clock input {
-    display: none;
-  }
-  #exceptionDay ul li {
-    display: none;
-  }
-  #exceptionDay .show {
-    display: block;
-  }
-  #holidays label:first-child {
-    display: block;
-    padding-bottom: 10px;
-  }
-  #holidays span {
-    display: inline-block;
-  }
-  .exceptionDates label:first-child {
-    display: block;
-    padding-bottom: 10px;
-  }
-  .exceptionDates .addBtn {
-    display: block;
-    font-size: 12px;
-    background-color: #4CAF50;
-    border: 1px solid #d1d5da;
-    border-radius: 50%;
-    color: #fff;
-    width: 25px;
-    height: 25px;
-  }
-  #saveBtn {
-    display: none;
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px;
-    margin: auto;
-    border: none;
-    width: 100%;
-  }
-
- 
-  /*
-  .profile-form .workhours li:first-child {
-    position: absolute;
-    top: 16.66%;
-    left: 66.66%;
-    border: 3px solid #73AD21;
-  }
-  .profile-form .workhours li:nth-child(2) {
-    position: absolute;
-    top: 33.33%;
-    left: 83.33%;
-    border: 3px solid #73AD21;
-  }
-  .profile-form .workhours li:nth-child(3) {
-    position: absolute;
-    top: 50%;
-    left: 100%;
-    border: 3px solid #73AD21;
-  }
-  */
-
   /*------------------*/
   /* Home page        */
   /*------------------*/
@@ -207,14 +92,6 @@ h2 {
     grid-row-gap: 15px;
     width: 90%;
     margin: auto;
-  }
-  .addBtn {
-    text-align: center;
-    font-size: 30px;
-  }
-  
-  .sidenav .footer a:first-child {
-    text-align: left;
   }
   .header * {
     display: inline-block;
@@ -233,12 +110,96 @@ h2 {
   .header div:first-child button{
     text-align: left;
   }
-
-  .dropdown-item span {
-    display: block;
-    padding: 5px 0px 5px 20px;
-    text-decoration: none;
+  .appointments .appointment-list {
+    display: flex;
+    border: 1px solid var(--main-inactive-color);
+    margin-top: 10px;
   }
+  .appointments .appointment-list li {
+    width: 80%;
+  }
+  .appointments .appointment-list button {
+    border-left: none;
+    background-color: var(--main-color);
+    color: #fff;
+    width: 20%;
+  }
+
+  /*---------------------------*/
+  /*   Schedule page            */
+  /*---------------------------*/
+  .schedule .workdays ul {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+  }
+  .schedule .workdays ul li {
+    padding-top: 4px;
+    color: var(--main-inactive-color);
+    text-align: center;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--main-inactive-color);
+    border-radius: 50%;
+  }
+  .schedule .workdays .checked {
+    color: #fff;
+    background-color: var(--main-active-color);
+  }
+  .schedule .workhours {
+    margin-top: 10px;
+    position: relative;
+    width: 100%;
+    height: 340px;
+  }
+  .schedule .workhours ul {
+    position: absolute;
+    border: 3px solid #fff;
+    top: 50%;
+    left: 47%;
+    width: 5px;
+    height: 5px;
+  }
+  .schedule .workhours ul li {
+    padding-top: 4px;
+    font-size: 12px;
+    background-color: #fff;
+    color: var(--main-inactive-color);
+    border: 1px solid var(--main-inactive-color);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+  }
+  .schedule .workhours .checked {
+    color: #fff;
+    background-color: var(--main-active-color);
+  }
+  .schedule .workhours .checked {
+    color: #fff;
+    background-color: var(--main-active-color);
+  }
+  .schedule .holidays ul li {
+    border: 1px solid var(--main-inactive-color);
+    margin-bottom: 5px;
+    height: 25px;
+    text-align: center;
+    padding-top: 2px;
+  }
+  .schedule .holidays .checked {
+    color: #fff;
+    background-color: var(--main-active-color);
+  }
+  .schedule .saveBtn {
+    display: none;
+    background-color: var(--main-active-color);
+    color: #fff;
+    padding: 10px;
+    margin: auto;
+    border: none;
+    width: 100%;
+  }
+
 
   /*------------------*/
   /* Search page      */
@@ -252,7 +213,22 @@ h2 {
   .search .search-bar button {
     border: 1px solid var(--main-inactive-color);
     border-left: none;
-    background-color: var(--main-active-color);
+    background-color: var(--main-color);
+    color: #fff;
+    width: 20%;
+  }
+  .search .search-result {
+    display: flex;
+    border: 1px solid var(--main-inactive-color);
+    margin-top: 10px;
+  }
+  .search .search-result li {
+    width: 80%;
+  }
+  .search .search-result button {
+    border: 1px solid var(--main-inactive-color);
+    border-left: none;
+    background-color: var(--main-color);
     color: #fff;
     width: 20%;
   }
@@ -339,50 +315,33 @@ h2 {
     height: 23px;
   }
 
-  /*.calendar .days li .active {
-    padding: 5px;
-    background: #1abc9c;
-    color: white !important
-  }*/
-
-  .calendar .days .appDays {
+  .calendar .days .availableDays {
     background: var(--main-color);
     color: #fff;
   }
   #checkedDay {
-    background: #4CAF50;
+    background: var(--main-active-color);
     color: #fff;
     border-radius: 0%;
   }
-  .calendar .days li div input {
-    display: none;
-  }
+  
   .time {
     clear: both;
   }
+  #timetable li {
+    float: left;
+    width: 20%;
+    text-align: center;
+    margin: 5px;
+  }
+  .availableTime {
+    background: var(--main-color);
+    color: #fff;
+  }
   #checkedTime {
-    background: #4CAF50;
+    background: var(--main-active-color);
     color: #fff;
     border-radius: 5%;
-  }
-  #checkedTime input {
-    display: none;
-  }
-  #amTime li {
-    float: left;
-    width: 20%;
-    text-align: center;
-    margin-bottom: 5px;
-  }
-  .time .title {
-    clear: both;
-  }
-  #pmTime li {
-
-    float: left;
-    width: 20%;
-    text-align: center;
-    margin-bottom: 5px;
   }
   .reasonForVisit {
     clear: both;
@@ -409,8 +368,23 @@ h2 {
     width: 100%;
   }
   /*----------------------*/
-  /* Client services page */
+  /* Client contacts       */
   /*----------------------*/
+  .contacts .contacts-list {
+    display: flex;
+    border: 1px solid var(--main-inactive-color);
+    margin-top: 10px;
+  }
+  .contacts .contacts-list li {
+    width: 80%;
+  }
+  .contacts .contacts-list button {
+    border: 1px solid var(--main-inactive-color);
+    border-left: none;
+    background-color: var(--main-color);
+    color: #fff;
+    width: 20%;
+  }
   
 
 }

@@ -4,7 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
 const Business = require('../models/business');
-const holidays = require('./googleapi');
+const getHolidays = require('./googleapi');
 
 module.exports = function (passport) {
 
@@ -33,7 +33,7 @@ module.exports = function (passport) {
               if (err) return done(err);
               if (email) return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
               else {
-                holidays((data) => {
+                getHolidays((events) => {
                 if (req.body.isBusiness === 'on') {
                   let newUser = new Business();
                   newUser.local.username = username;
@@ -41,10 +41,31 @@ module.exports = function (passport) {
                   newUser.local.password = newUser.generateHash(password);
                   newUser.firstname = req.body.firstname;
                   newUser.lastname = req.body.lastname;
-                  newUser.workdays = ['Mo', 'Tu', 'We', 'Th', 'Fr'];
-                  newUser.workhours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-                  newUser.holidays = data.map(event => {return event.date}); 
-                  newUser.exceptionDates = [`${new Date().getFullYear()}-05-04`];
+
+                  for (let d = 0; d <= 6; d++) {
+                    if (d >= 1 && d <= 5) {
+                      newUser.workdays.push({dayNum: d.toString(), isAvailable: true});
+                    } else {
+                      newUser.workdays.push({dayNum: d.toString(), isAvailable: false});
+                    }     
+                  }
+
+                  for (let h = 0; h <= 24; h++) {
+                    if (h >= 8 && h <= 17) {
+                      newUser.workhours.push({time:`${h}:00`, isAvailable: true});
+                      newUser.workhours.push({time:`${h}:30`, isAvailable: false});
+                    } else {
+                      if (h !== 0) {
+                        newUser.workhours.push({time:`${h}:00`, isAvailable: false});
+                      }
+                      if (h === 24) break;
+                      newUser.workhours.push({time:`${h}:30`, isAvailable: false});
+                    }     
+                  } 
+                  events.forEach((event) => {
+                    event.isAvailable = false;
+                  });
+                  newUser.holidays = events;
                   newUser.save(function(err) {
                     if (err) throw err;
                     return done(null, newUser);

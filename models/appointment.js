@@ -11,7 +11,7 @@ const appointmentSchema = new mongoose.Schema({
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Business',
 	},
-	date: Date,
+	date: String,
 	reason: String,
 });
 
