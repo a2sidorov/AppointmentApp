@@ -13,6 +13,8 @@ const appointmentSchema = new mongoose.Schema({
 	},
 	date: String,
 	reason: String,
+	canceled: Boolean,
+	timeMMM: Number,
 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

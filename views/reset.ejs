@@ -5,36 +5,23 @@
   <% include head %>
 </head>
 <body>
-
   <div class="grid-container">
-
-    <div class="login">
-
-      <div class="header">
-
-        <H2>Password recovery</H2>
-
-      </div> 
-
+    <header class="page-title">
+      <H2>Password recovery</H2>
+    </header>
+    <main class="reset">
       <form action="/reset/<%= //token %>" method="post">
-
         <label>New password</label>
         <input type="password" name="password" placeholder="New password">
-
         <label>Confirm password</label>
         <input type="password" name="confirmPassword" placeholder="Confirm password">
-
         <button type="submit">Update Password</button>
-
       </form>
-
       <button type="button" class="cancelbtn">Cancel</button>
-
       <% if (message) { %>
       <div class="flash"><%= message %></div>
       <% } %>
-
+    </main>
   </div>
-  
 </body>
 </html>

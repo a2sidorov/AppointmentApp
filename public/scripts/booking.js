@@ -1,19 +1,26 @@
+'use strict';
+
+/* Client booking */
 const appointment = {
   date: undefined,
-  setMonth: function(monthBtn) {
-    let list, div, txt, responseObj;
+  isDayChosen: false,
+  isTimeChosen: false,
+  getDays: function(dateISO, month) {
+    if (this.date === undefined) {
+      this.date = new Date(dateISO);
+    }
     const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul','Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    let days = document.getElementById('days');
+    const days = document.getElementById('days');
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        responseObj = JSON.parse(this.responseText);
+        const responseObj = JSON.parse(this.responseText);
         //console.log('responseObj.DateObj ' + responseObj.DateObj);
-        appointment.date = new Date(responseObj.DateObj);
+        appointment.date = new Date(responseObj.dateISO);
         //console.log('DateObj ' + DateObj);
-        document.getElementById('year').innerHTML = appointment.date.getFullYear();
         document.getElementById('month').innerHTML = monthNames[appointment.date.getMonth()];
         removeChildren(days);
+        let list, div, txt;
         responseObj.days.forEach((day) => {
           txt = document.createTextNode(day.num);
           div = document.createElement('DIV');
@@ -21,92 +28,102 @@ const appointment = {
           div.appendChild(txt);
           if (day.isAvailable) {
             div.classList.add('availableDays');
-            div.onclick = function() {appointment.setDay(this)};
+            div.onclick = function() {appointment.setDay(responseObj.dateISO, this)};
           }
           list.appendChild(div);
           days.appendChild(list);
         });
       }
     };
-    xhttp.open("GET", `${window.location}/month/${monthBtn}`, true);
+    xhttp.open('POST', `${window.location}/month`, true);
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhttp.send();
+    xhttp.send(`dateISO=${this.date.toISOString()}&month=${month}`);
   },
-  setDay: function(el) {
-    let dayNum, txt, p, list, responseObj;
-    let timetable = document.getElementById('timetable');
-    let checkedDay = document.getElementById('checkedDay');
+  setDay: function(dateISO, el) {
+    if (this.date === undefined) {
+      this.date = new Date(dateISO);
+    }
+    const dayNum = el.innerHTML;
+    this.checkDay(el);
+    this.getTimetable(dayNum);
+    this.isDayChosen = true;
+  },
+  checkDay(el) {
+    const checkedDay = document.getElementById('checkedDay');
     if (checkedDay && checkedDay !== el) {
       checkedDay.removeAttribute('id'); 
     }
     el.id = 'checkedDay';
-    dayNum = el.innerHTML;
+  },
+  getTimetable(dayNum) {
+    const timetable = document.getElementById('timetable');
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        responseObj = JSON.parse(this.responseText);
-        appointment.date = new Date(responseObj.DateObj);
+        const responseObj = JSON.parse(this.responseText);
+        appointment.date = new Date(responseObj.dateISO);
         removeChildren(timetable);
+        let txt, list;
         responseObj.hours.forEach((hour) => {
-          txt = document.createTextNode(hour);
           list = document.createElement('LI');
-          list.appendChild(txt);
-          
-          if (!hour.isBooked) {
+          txt = document.createTextNode(hour.time);
+          if (!hour.isUnavailable) {
             list.classList.add('availableTime');
             list.onclick = function() {appointment.setTime(this)};
           }
+          list.appendChild(txt);
           timetable.appendChild(list);
-        });
-        console.log(appointment.date);       
+        });     
       }
     };
-    xhttp.open("GET", `${window.location}/day/${dayNum}`, true);
+    xhttp.open("POST", `${window.location}/day`, true);
     xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    xhttp.send();
+    xhttp.send(`dateISO=${appointment.date.toISOString()}&day=${dayNum}`);
   },
   setTime: function(el) {
-    console.log(el);
-    let checkedTime = document.getElementById('checkedTime');
-    let hh, mm;
+    this.checkTime(el);
+    const hour = (el.innerHTML).substring(0, 2);
+    const minute = (el.innerHTML).substring(3);
+    appointment.date.setHours(parseInt(hour));
+    appointment.date.setMinutes(parseInt(minute));
+    this.isTimeChosen = true;
+  },
+  checkTime: function(el) {
+    const checkedTime = document.getElementById('checkedTime');
     if (checkedTime && checkedTime !== el) {
       checkedTime.removeAttribute('id'); 
     }
     el.id = 'checkedTime';
-    hh = (el.innerHTML).substring(0, 2);
-    mm = (el.innerHTML).substring(3);
-    appointment.date.setHours(parseInt(hh));
-    appointment.date.setMinutes(parseInt(mm));
-    console.log(this.date);
   },
   book: function() {
-    console.log(this.date);
-    let div, txt, a;
-    let main = document.getElementById('main');
-    let msg = document.getElementById('msg');
-    if (!this.date) {
-      msg.innerHTML = 'You have to choose date and time.';
-    } else {
-      let reason = document.getElementById('reason').innerHTML;
+    if (this.isDayChosen && this.isTimeChosen) {
+      const main = document.getElementById('main');
+      const reason = document.getElementById('reason').innerHTML;
       const xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
           console.log(this.responseText);
-          txt = document.createTextNode('back');
-          a = document.createElement('a')
-          a.href = window.location;
-          a.appendChild(txt);
-          msg = document.createTextNode(this.responseText);
-          div = document.createElement('div');
-          div.appendChild(msg);
+          let txt = document.createTextNode(this.responseText);
+          let div = document.createElement('div');
+          div.appendChild(txt);
           removeChildren(main);
-          main.appendChild(a);
           main.appendChild(div);
         }
       }
       xhttp.open("POST", `${window.location}/book`, true);
       xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       xhttp.send(`date=${appointment.date.toISOString()}&reason=${reason}`);
+    } else {
+      document.getElementById('msg').innerHTML = 'You have to choose day and time.';
     }
   },
 };
+
+function showDropdown() {
+  document.getElementById('content').classList.toggle("show");
+}
+
+
+
+
+

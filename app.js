@@ -10,13 +10,14 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const favicon = require('serve-favicon');
 const path = require('path');
+const scheduler = require('./config/scheduler');
 
+scheduler.removeOldAppointments(0, 0, 0, 0); //parameters h, m, s, ms
 
 //mongoose.connect('mongodb://localhost/mydb');
 mongoose.connect('mongodb+srv://test1:noldor1986@cluster0-fwxgm.mongodb.net/test?retryWrites=true/mydb');
 
 require('./config/passport')(passport);
-
 
 app.set('view engine', 'ejs');
 //app.set('views', __dirname + '/views');
@@ -24,7 +25,7 @@ app.set('/views', path.join(__dirname, 'views'));
 
 app.use('/public', express.static(path.join(__dirname, '/public')))
 app.use('/:username/public', express.static(path.join(__dirname, '/public')))
-app.use(favicon(path.join(__dirname, '/public/favicon.ico')));
+app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());

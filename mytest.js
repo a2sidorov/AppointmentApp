@@ -1,32 +1,20 @@
-let date = new Date();
-// date.setMonth(0);
-// date.setDate(0);
-//date.setHours(0);
-date.setMinutes(0);
-date.setSeconds(0);
-date.setMilliseconds(0);
-time = '01:30';
+//const Appointment = require('../models/appointment');
 
-let h = parseInt(time.substring(0, 2));
-let m = parseInt(time.substring(3, 5));
+// function deleteOldAppoinments() {
+//   Appointment.find({date: { $gt: 17, $lt: 66 },})
+// }
 
-console.log(h);
-console.log(m);
 
-let workhours = [{time:"0:30", isAvailable: false}, {time: "1:00", isAvailable: true}];
+console.log(new Date() < new Date(2025,1,1));
+//setInterval(intervalFunc, 24 * 60 * 60);
 
-console.log(workhours);
+let app1 = 1533603600000/(24*60*60*1000);
+let app2 = 1533607200000/(24*60*60*1000);
 
-function checkAvailable(hour) {
-	return hour.isAvailable
-}
+let cur = 1533611121200/(24*60*60*1000);
 
-availableWorkhours = workhours.filter((hour) => {
-	return hour.isAvailable
-});
-console.log(availableWorkhours);
+console.log(cur + ' ' + app1);
+console.log(cur + ' ' + app2);
 
-// console.log(new Date());
-// console.log(date);
-// console.log(date.toISOString());
-
+console.log(cur - app1);
+console.log(cur - app2);

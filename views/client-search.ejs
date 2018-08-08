@@ -6,24 +6,21 @@
 </head>
 <body>
   <div class="grid-container">
-    <div class="header">
+    <header class="header">
       <% include partials/client-navbar %>
-    </div>
-    <main id="main">
-      <div class="search">
-        <div class="title">
-          <H2>Find service</H2>
-        </div>
+    </header>
+    <main id="main" class="search">
+      <div class="title">
+        <H2>Find service</H2>
+      </div>
       <div class="search-bar">
         <input id="searchBar" type="text" name="username" placeholder="Enter username">
         <button type="button" onclick="findUser()">Find</button> 
       </div>
-        <ul id="searchResults">  
-        </ul>
-      </div>
+      <ul id="searchResults"></ul>
     </main>
   </div>   
-  <script src="/public/script.js"></script>
-  <script src="/public/client-search.js"></script>
+  <script src="/public/scripts/navbar.js"></script>
+  <script src="/public/scripts/search.js"></script>
 </body>
 </html>

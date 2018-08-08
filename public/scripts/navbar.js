@@ -4,6 +4,7 @@
 (function() {
   const path = window.location.pathname;
   const endpoint = (path.match(/^\/\w+/g));
+  const navbar = document.getElementById('navbar');
   if (navbar.children.length === 3) {
     if (endpoint[0] === '/schedule') {
       navbar.children[1].className += " active";
@@ -27,6 +28,8 @@
   }
 })();
 
+
+
 /*Shared functions*/
 function removeChildren(e) {
   if (e) {
@@ -36,16 +39,8 @@ function removeChildren(e) {
   }
 }
 
-/* Client booking */
-function showDropdown(content) {
-  document.getElementById(content).classList.toggle('show');
-}
 
 
-/* Profile */
-function showBtn() {
-  document.getElementById("saveBtn").style.display = 'block';
-}
 
 
 

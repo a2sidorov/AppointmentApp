@@ -5,54 +5,34 @@
 	<% include partials/head %>
 </head>
 <body>
-
   <div class="grid-container">
-
-    <div class="login">
-
-      <div class="header">
-
-        <H2>Medapp</H2>
-
-      </div>
-
-    <form action="/signup" method="post">
-
-  		<label>Username</label>
-  		<input type="text" name="username" required value="client1">
-
-  		<label>Email</label>
-  		<input type="text" name="email" required value="client1@gmail.com">
-
-      <label>First Name</label>
-      <input type="text" name="firstname" required value="Cli1">
-
-      <label>Last Name</label>
-      <input type="text" name="lastname" required value="Ent1">
-
-  		<label>Password</label>
-  		<input type="password" name="password" required value="noldor">
-
-      <label>Confirm Password</label>
-      <input type="password" name="confirm" required value="noldor">
-
-      <input type="checkbox" name="isBusiness"> I am a business owner
-
-      <button type="submit">Signup</button>
-
-    </form>
-
-    </div>
-
-    <div class="recovery">
-      <p>Already have an account? <a href="/">Login</a></p>
-    </div>
-    
-    <% if (message) { %>
-		  <div class="flash"><%= message %></div>
-		<% } %>
-
+    <header class="main-title">
+        <H2>AppointmentApp</H2>
+    </header>
+    <main class="login">
+      <form action="/signup" method="post">
+        <label>Username</label>
+        <input type="text" name="username" required value="client1">
+        <label>Email</label>
+        <input type="text" name="email" required value="client1@gmail.com">
+        <label>First Name</label>
+        <input type="text" name="firstname" required value="Cli1">
+        <label>Last Name</label>
+        <input type="text" name="lastname" required value="Ent1">
+        <label>Password</label>
+        <input type="password" name="password" required value="noldor">
+        <label>Confirm Password</label>
+        <input type="password" name="confirm" required value="noldor">
+        <input type="checkbox" name="isBusiness"> I am a business owner
+        <button type="submit">Signup</button>
+      </form>
+      <div class="recovery">
+        <p>Already have an account? <a href="/">Login</a></p>
+      </div>  
+      <% if (message) { %>
+        <div class="flash"><%= message %></div>
+      <% } %> 
+    </main>
   </div>
-  
 </body>
 </html>
