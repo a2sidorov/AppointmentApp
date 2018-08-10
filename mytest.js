@@ -1,20 +1,23 @@
-//const Appointment = require('../models/appointment');
 
-// function deleteOldAppoinments() {
-//   Appointment.find({date: { $gt: 17, $lt: 66 },})
-// }
+const mongoose = require('mongoose');
+const Business = require('./models/business');
 
 
-console.log(new Date() < new Date(2025,1,1));
-//setInterval(intervalFunc, 24 * 60 * 60);
 
-let app1 = 1533603600000/(24*60*60*1000);
-let app2 = 1533607200000/(24*60*60*1000);
 
-let cur = 1533611121200/(24*60*60*1000);
 
-console.log(cur + ' ' + app1);
-console.log(cur + ' ' + app2);
+mongoose.connect('mongodb+srv://test1:noldor1986@cluster0-fwxgm.mongodb.net/test?retryWrites=true/mydb');
 
-console.log(cur - app1);
-console.log(cur - app2);
+
+const newBusiness = new Business();
+  newBusiness.local.username = 'test';
+  newBusiness.local.email = 'test@test.com';
+  newBusiness.local.password = newBusiness.generateHash('test');
+  newBusiness.save((err, business) => {
+  if (err) throw err;
+  });
+
+
+
+
+

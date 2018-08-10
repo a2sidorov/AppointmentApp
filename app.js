@@ -1,3 +1,4 @@
+
 const express = require('express');
 const app = express();
 let port = process.env.PORT || 3000;
@@ -10,14 +11,20 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const favicon = require('serve-favicon');
 const path = require('path');
-const scheduler = require('./config/scheduler');
+const schedule = require('node-schedule');
+const holidays = require('./config/holidays');
 
-scheduler.removeOldAppointments(0, 0, 0, 0); //parameters h, m, s, ms
+require('dotenv').config();
+
+console.log(JSON.stringify(process.env.PORT));
+
 
 //mongoose.connect('mongodb://localhost/mydb');
-mongoose.connect('mongodb+srv://test1:noldor1986@cluster0-fwxgm.mongodb.net/test?retryWrites=true/mydb');
+mongoose.connect('mongodb+srv://test1:noldor1986@cluster0-fwxgm.mongodb.net/test?retryWrites=true/mydb', { useNewUrlParser: true });
 
 require('./config/passport')(passport);
+require('./config/scheduler');
+
 
 app.set('view engine', 'ejs');
 //app.set('views', __dirname + '/views');
@@ -31,7 +38,7 @@ app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({ 
-	secret: 'secret',
+	secret: process.env.SECRET_KEY,
 	resave: true,
 	saveUninitialized: true,
 }));

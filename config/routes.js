@@ -7,16 +7,26 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 //logging user list
-Appointment.find({}, (err, user) => {
-  if (err) throw err;
-  console.log(user);
-});
-// User.find({}, (err, user) => {
+// Appointment.find({}, (err, user) => {
 //   if (err) throw err;
-//   console.log(JSON.stringify(user));
+//   console.log(user);
+// });
+// User.find({}, (err, users) => {
+//   if (err) throw err;
+//   users.forEach((user) => {
+//     console.log(user.local.username);
+//   });
 // });
 //User.deleteMany({}, function (err) {});
 //Appointment.deleteMany({}, function (err) {});
+// Business.deleteOne({ 'local.username': 'test' }, (err) => {});
+// Business.deleteOne({ 'local.username': 'test1' }, (err) => {});
+// User.find({}, (err, users) => {
+//   if (err) throw err;
+//   users.forEach((user) => {
+//     console.log(user.local.username);
+//   });
+// });
 
 module.exports = function(app, passport) {
 	
@@ -67,12 +77,12 @@ module.exports = function(app, passport) {
             const transporter = nodemailer.createTransport({
               service: 'gmail',
               auth: {
-                user: 'a2mail4dev@gmail.com',
-                pass: ''
+                user: process.env.EMAIL,
+                pass: process.env.EMAIL_PASS,
               }
             });
             const mailOptions = {
-            from: 'passwordreset@demo.com',
+            from: process.env.EMAIL,
             to: user.local.email,
             subject: 'Appointment App Password Reset',
             text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
@@ -140,12 +150,12 @@ module.exports = function(app, passport) {
           const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-              user: 'a2mail4dev@gmail.com',
-              pass: ''
+              user: process.env.EMAIL,
+              pass: process.env.EMAIL_PASS,
             }
           });
           const mailOptions = {
-            from: 'passwordreset@demo.com',
+            from: process.env.EMAIL,
             to: user.local.email,
             subject: 'Your password has been changed',
             text: 'Hello,\n\n' +

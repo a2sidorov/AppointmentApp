@@ -8,14 +8,45 @@ const Appointment = require('../models/appointment');
 let FirstAppDay;
 
 const businessSchema = new mongoose.Schema({
-  workdays: [mongoose.Schema.Types.Mixed],
-  workhours: [mongoose.Schema.Types.Mixed],
-  holidays: [mongoose.Schema.Types.Mixed],
+  workdays: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkdays() },
+  workhours: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkhours() },
+  holidays: { type: [mongoose.Schema.Types.Mixed], default: defaultHolidays() },
   clients: [{type: mongoose.Schema.Types.ObjectId, ref: 'Business'}],
   appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
 }, options);
 
+function defaultWorkdays() {
+  for (let d = 0; d <= 6; d++) {
+    if (d >= 1 && d <= 5) {
+      newUser.workdays.push({dayNum: d.toString(), isAvailable: true});
+    } else {
+      newUser.workdays.push({dayNum: d.toString(), isAvailable: false});
+    }     
+  }
+}
 
+function defaultWorkhours() {
+  for (let h = 0; h <= 24; h++) {
+    if (h >= 8 && h <= 17) {
+      newUser.workhours.push({time:`${h}:00`, isAvailable: true});
+      newUser.workhours.push({time:`${h}:30`, isAvailable: false});
+    } else {
+      if (h !== 0) {
+        newUser.workhours.push({time:`${h}:00`, isAvailable: false});
+      }
+      if (h === 24) break;
+      newUser.workhours.push({time:`${h}:30`, isAvailable: false});
+    }     
+  } 
+}
+
+function defaultHolidays() {
+  holidays.get((events) => {
+    events.forEach((event) => {
+      event.isAvailable = false;
+    });
+  });
+}
 
 businessSchema.methods.createMonth = function(dateObj) {
   if (!dateObj) {
