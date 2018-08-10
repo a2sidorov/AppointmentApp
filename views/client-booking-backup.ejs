@@ -15,16 +15,14 @@
       </div>
       <div class="contacts">
         <div class="bar">
-          <span><p><%= chosenContact %></p></span>
-          <button class="material-icons" onclick="showDropdown()">expand_more</button>
+          <li>Choose contact</li>
+          <button class="material-icons" onclick="showContent()">expand_more</button>
         </div>
-        <div id="content" class="content">
+        <ul id="content" class="content">
           <% contacts.forEach((contact) => { %>
-            <% if (contact.local.username !== chosenContact) { %>
-              <a href="/book/<%= contact._id %>"><%= contact.local.username %></a>
-            <% } %>
+              <li><%= contact.local.username %></li>
           <% }); %>
-        </div>
+        </ul>
       </div>
       <div class="calendar">
         <div class="title">
@@ -32,9 +30,9 @@
         </div>
         <div class="month">
           <% const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"] %>
-          <button type="button" onclick="appointment.getDays('<%= dateObj.toISOString() %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
+          <button type="button" onclick="appointment.setMonth('<%= dateObj.toISOString() %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
           <span id="month"><%= monthNames[dateObj.getMonth()] %></span>
-          <button type="button" onclick="appointment.getDays('<%= dateObj.toISOString() %>', 'next')" class="material-icons">keyboard_arrow_right</button>
+          <button type="button" onclick="appointment.setMonth('<%= dateObj.toISOString() %>', 'next')" class="material-icons">keyboard_arrow_right</button>
         </div>
         <ul class="days"> 
           <li>Mo</li>
@@ -64,13 +62,7 @@
           <h3>Time</h3>
         </div>    
         <ul id="timetable">
-          <% (function() { %>
-              <% workhours.forEach((hour) => { %>
-                  <% if (hour.isAvailable) { %>
-                    <li><%= hour.time %></li>
-                  <% } %>
-              <% }); %>
-          <% })(); %>
+          <li></li>
         </ul>
       <div class="reasonForVisit">
         <div class="title">
@@ -84,7 +76,7 @@
       <button class="submitBtn" type="button" onclick="appointment.book()">Book Now</button> 
     </main>   
   </div>   
-  <script src="/public/scripts/navbar.js"></script>
-  <script src="/public/scripts/booking.js"></script>
+  <script src="/public/script.js"></script>
+  <script src="/public/client-booking.js"></script>
 </body>
 </html>

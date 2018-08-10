@@ -6,27 +6,33 @@
 </head>
 <body>
   <div class="grid-container">
-    <div class="header">
+    <header class="header">
       <% include partials/client-navbar %>
-    </div>
-    <div class="appointments">
+    </header>
+    <main id="main" class="appointments">
       <div class="title">
         <H2>Upcoming appointments</H2>
       </div>
       <ul>
         <% if (appointments.length > 0) { %>
           <% appointments.forEach((appointment) => { %>
-            <div class="appointment-list">
-              <li><%= new Date(appointment.date).toString().substring(0, 10) %> with <%= appointment.business.firstname %> <%= appointment.business.lastname %></li>
-              <button type="button">Cancel</button>
-            </div>
+          <div class="appointment-list">
+            <% let date = new Date(appointment.date);%>
+            <li><%= date.toString().substring(0, 10) %> at <%= date.toString().substring(16, 21) %> with <%= appointment.business.firstname %> <%= appointment.business.lastname %></li>
+              <% if (appointment.canceled === false) { %>
+                <button class="active" type="button" onclick="cancel(this, '<%= appointment._id %>')">Cancel</button>
+              <% } else { %>
+                <button class="canceled" type="button">Canceled</button>
+              <% } %>
+          </div>
           <% }); %>
         <% } else { %>
-          <li>You don't have appointments.</li>d
+          <li>You don't have appointments.</li>
         <% } %>
       </ul>
-    </div>
+    </main>
   </div>
-  <script src="/public/script.js"></script>
+  <script src="/public/scripts/navbar.js"></script>
+  <script src="/public/scripts/home.js"></script>
 </body>
 </html>

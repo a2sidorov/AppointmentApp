@@ -2,36 +2,28 @@
 <html>
 <head>
   <title></title>
-  <% include head %>
+  <% include partials/head %>
 </head>
 <body>
-
   <div class="grid-container">
-
-    <div class="login">
-
-    <div class="header">
-
+    <header class="main-title">
+        <H2>AppointmentApp</H2>
+    </header> 
+    <main class="login">
+      <div class="title">
         <H2>Password recovery</H2>
-
-    </div> 
-
-    <form action="/forgot" method="post">
-
-      <label>Email</label>
-      <input type="email" name="email" placeholder="Enter your email">
-
-      <button type="submit">Reset password</button>
-
-    </form>
-
-    <button type="button" class="cancelBtn">Cancel</button>
-
-    <% if (message) { %>
-      <div class="flash"><%= message %></div>
-    <% } %>
-  
+      </div>
+      <form action="/forgot" method="post">
+        <input type="email" name="email" placeholder="Enter your email">
+        <button type="submit">Reset password</button>
+      </form>
+      <div class="recovery">
+        <a href="/">Cancel</a>
+      </div>
+      <% if (message) { %>
+        <div class="flash"><%= message %></div>
+      <% } %>
+    </main>
   </div>
-
 </body>
 </html>

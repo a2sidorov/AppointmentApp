@@ -7,10 +7,9 @@ const schedule = {
   updateDays: function(el, dayNum, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    let index = this.days.findIndex((day) => {
+    const index = this.days.findIndex((day) => {
       return day.dayNum === dayNum;
     });
-    console.log('index ' + index);
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
       this.days.push({dayNum: dayNum, isAvailable: isAvailable});
@@ -22,7 +21,7 @@ const schedule = {
   updateTime: function(el, time, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    let index = this.time.findIndex((hour) => {
+    const index = this.time.findIndex((hour) => {
       return hour.time === time;
     });
     console.log('index ' + index);
@@ -32,15 +31,13 @@ const schedule = {
     } else {
       this.time[index].isAvailable = this.time[index].isAvailable ? false : true;
     }
-    console.log(this.time);
   },
   updateHolidays: function(el, holidayDate, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    let index = this.holidays.findIndex((event) => {
+    const index = this.holidays.findIndex((event) => {
       return event.date === holidayDate;
     });
-    console.log('index ' + index);
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
       this.holidays.push({date: holidayDate, isAvailable: isAvailable});
@@ -53,7 +50,7 @@ const schedule = {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        console.log('The schedule has been updated');
+        console.log(this.responseText);
         saveBtn.style.display = 'none';
       }
     };

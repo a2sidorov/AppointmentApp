@@ -5,24 +5,27 @@
   <% include partials/head %>
 </head>
 <body>
-  
   <div class="grid-container">
-    <div class="header">
+    <header class="header">
       <% include partials/client-navbar %>
-    </div>
-    <div class="contacts">
-      <H2>My contacts</H2>
-      <ul>
-        <% contacts.forEach((contact) => { %>
-          <div class="contacts-list">
-            <li><%= contact.local.username %></li>
-            <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
-          </div>
-        <% }); %>
-      </ul>
-    </div>
+    </header>
+    <main id="main" class="contacts">
+      <div class="contacts">
+        <div class="title">
+          <H2>My contacts</H2>
+        </div>
+        <ul>
+          <% contacts.forEach((contact) => { %>
+            <div class="contacts-list">
+              <li><%= contact.local.username %></li>
+              <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
+            </div>
+          <% }); %>
+        </ul>
+      </div> 
+    </main>
   </div> 
-  <script src="/public/script.js"></script>
-  <script src="/public/client-search.js"></script>
+  <script src="/public/scripts/navbar.js"></script>
+  <script src="/public/scripts/search.js"></script>
 </body>
 </html>

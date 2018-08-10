@@ -7,11 +7,11 @@
 </head>
 <body>
   <div class="grid-container">
-    <div class="header">
+    <header class="header">
       <% include partials/business-navbar %>
-    </div>
-    <div class="schedule">
-      <div class="title">
+    </header>
+    <main id="main" class="schedule">
+      <div class="page-title">
         <h4>Schedule</h4>
       </div>
       <div class=workdays>
@@ -76,9 +76,9 @@
         </ul>    
       </div>
       <button id="saveBtn" class="saveBtn" type="button" onclick="schedule.save()">Save</button>
-    </div>
+    </main>
   </div>
-  <script src="/public/script.js"></script>
-  <script src="/public/business-schedule.js"></script>
+  <script src="/public/scripts/navbar.js"></script>
+  <script src="/public/scripts/schedule.js"></script>
 </body>
 </html>

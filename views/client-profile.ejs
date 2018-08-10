@@ -7,19 +7,23 @@
 </head>
 <body>
   <div class="grid-container">
-    <div class="header">
+    <header class="header">
       <% include partials/client-navbar %>
-    </div>
-    <div class="profile-form">
-      <H2>Profile</H2>
-      <form action="/<%= user.local.username %>/profile" method="post" id="profile-form">
+    </header>
+    <main id="main">
+      <div class="title">
+        <H2>Profile</H2>
+      </div>
+      <div class="profile-form">
         <label for="firstname">First Name</label>
-        <input type="text" name="firstname" value="<%= user.firstname %>" oninput="showBtn()">  
+        <input id="firstname" type="text" name="firstname" value="<%= firstname %>" oninput="showSaveBtn()">  
         <label for="lastname">Last Name</label>
-        <input type="text" name="lastname" value="<%= user.lastname %>" oninput="showBtn()">
-    </form>
+        <input id="lastname" type="text" name="lastname" value="<%= lastname %>" oninput="showSaveBtn()">  
+        <button id="saveBtn" type="button" onclick="updateProfile()">Save</button>
+      </div>
+    </main>
   </div>
-  <button id="saveBtn" type="submit" form="profile-form">Save</button>
-  <script src="/public/script.js"></script>
+  <script src="/public/scripts/navbar.js"></script>
+  <script src="/public/scripts/profile.js"></script>
 </body>
 </html>

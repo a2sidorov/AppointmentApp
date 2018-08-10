@@ -4,7 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const User = require('../models/user');
 const Business = require('../models/business');
-const getHolidays = require('./googleapi');
+const holidays = require('./holidays');
 
 module.exports = function (passport) {
 
@@ -33,7 +33,7 @@ module.exports = function (passport) {
               if (err) return done(err);
               if (email) return done(null, false, req.flash('signupMessage', 'That email is already taken.'));
               else {
-                getHolidays((events) => {
+                holidays.get((events) => {
                 if (req.body.isBusiness === 'on') {
                   let newUser = new Business();
                   newUser.local.username = username;

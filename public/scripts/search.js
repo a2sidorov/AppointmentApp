@@ -1,14 +1,14 @@
 /* Client search */
 function findUser() {
-  let div, list, listTxt, btn, btnTxt;
-  let data = searchBar.value;
-  let searchResults = document.getElementById('searchResults');
+  const data = searchBar.value;
+  const searchResults = document.getElementById('searchResults');
   removeChildren(searchResults); //shared functions
   const xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
       const obj = JSON.parse(this.responseText);
       console.log(obj);
+      let div, list, listTxt, btn, btnTxt;
       obj.results.forEach((result) => {
         div = document.createElement('div');
         div.classList.add('search-result');
