@@ -14,7 +14,7 @@ const appointmentSchema = new mongoose.Schema({
 	date: String,
 	reason: String,
 	canceled: Boolean,
-	timeMMM: Number,
+	timeMs: Number,
 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

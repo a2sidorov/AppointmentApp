@@ -1,7 +1,0 @@
-testing logtesting logtesting log
-testing log 
-testing log 
-testing log 
-Old appointments were deleted on ${new Date()} 
-Old appointments were deleted on Wed Aug 08 2018 15:04:57 GMT+0700 (+07) 
-Old appointments were deleted on 2018-08-08T08:06:16.083Z 
