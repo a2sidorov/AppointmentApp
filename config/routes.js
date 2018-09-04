@@ -5,16 +5,16 @@ const Business = require('../models/business');
 const Appointment = require('../models/appointment');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const validator = require('validator');
+const passwordRecovery = require('./passwordRecovery');
 
 //logging user list
 // Appointment.find({}, (err, user) => {
 //   if (err) throw err;
-//   console.log(user);
 // });
 // User.find({}, (err, users) => {
 //   if (err) throw err;
 //   users.forEach((user) => {
-//     console.log(user.local.username);
 //   });
 // });
 //User.deleteMany({}, function (err) {});
@@ -24,107 +24,98 @@ const nodemailer = require('nodemailer');
 // User.find({}, (err, users) => {
 //   if (err) throw err;
 //   users.forEach((user) => {
-//     console.log(user.local.username);
 //   });
 // });
 
-module.exports = function(app, passport) {
-	
+module.exports = (app, passport) => {
+
   /* GET login page. */
   app.get('/', (req, res) => {
-  	res.render('login', {
-  		message: req.flash('loginMessage')
-  	});
+    res.render('login');
   });
 
   /* POST login */
-  app.post('/login', function(req, res, next) {
-    passport.authenticate('local-login', function(err, user, info) {
-      if (err) return next(err);
-      if (!user) return res.redirect('/');
-      req.logIn(user, function(err) {
+  app.post('/login', (req, res, next) => {
+    passport.authenticate('local-login', (err, user, info) => {
+      if (err) return next(err); 
+      if (!user) return res.json({ success: false, message: info });
+      req.logIn(user, (err) => {
         if (err) return next(err);
-        return res.redirect('/home');
+        return res.json({ success: true });
       });
-   })(req, res, next);
+    })(req, res, next);
+  });
+
+  /* GET sign up page */
+  app.get('/signup', (req, res) => {
+    res.render('signup');
+  });
+
+  /* POST(ajax) sign up */
+  app.post('/signup', isEmailValid, isPasswordValid, (req, res, next) => {
+    passport.authenticate('local-signup', (err, user, info) => {
+      if (err) return next(err);
+      if (!user) return res.json({ success: false, message: info });
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        return res.json({ success: true });
+      });
+    })(req, res, next);
   });
 
   /* GET password recovery page */
   app.get('/forgot', (req, res) => {
     res.render('forgot', {
-      message: req.flash('info')
+      message: req.flash('info') 
     });
   });
 
   /* POST password recovery */
-  app.post('/forgot', (req, res) => {
-    User.findOne({ 'local.email': req.body.email }, (err, user) => {
-      if (err) throw err;
-      if (!user) {
-        req.flash('info', 'No account with that email address exists.');
-        res.render('forgot', {
-          message: req.flash('info')
-        });
-      } else {
-        crypto.randomBytes(20, (err, buf) => {
-          if (err) throw err;
-          const token = buf.toString('hex')
-          user.local.resetPasswordToken = token;
-          user.local.resetPasswordExpires = Date.now() + 3600000;
-
-          user.save((err, update) => {
-            if (err) throw err;
-            const transporter = nodemailer.createTransport({
-              service: 'gmail',
-              auth: {
-                user: process.env.EMAIL,
-                pass: process.env.EMAIL_PASS,
-              }
-            });
-            const mailOptions = {
-            from: process.env.EMAIL,
-            to: user.local.email,
-            subject: 'Appointment App Password Reset',
-            text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-              'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-              'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-              'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-            };
-
-            transporter.sendMail(mailOptions, (error, info) => {
-              if (err) console.log(err); 
-              else {
-                req.flash('info', 'Recovery email has been sent');
-                res.render('forgot', {
-                message: req.flash('info')
-              });
-            }
-          });
-          });
-        });
-      } 
-    });
+  app.post('/forgot', isEmailValid, async (req, res, next) => {
+    try {
+      const result = await passwordRecovery(req);
+      res.json(result);
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* GET password reset page */
-  app.get('/reset/:token', (req, res) => {
-    User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
+  app.get('/reset/:token', async (req, res, next) => {
+    try {
+      throw new Error('Test error');
+      const user = await User.findOne({ 'local.resetPasswordToken': req.params.token });
       if (!user) {
         req.flash('info', 'Password reset token is invalid.');
         res.redirect('/forgot');
       } else if (user.local.resetPasswordExpires < Date.now()) {
-        req.flash('info', 'Password reset token is expired.')
+        req.flash('info', 'Password reset token is expired.');
         res.redirect('/forgot');
-      } else {
-        res.render('reset', {
-          user: req.user,
-          token: req.params.token,
-          message: req.flash('info')
-        });
+      } else { 
+        res.render('reset');
       }
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
+//  app.get('/reset/:token', (req, res) => {
+//    User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
+//      if (!user) {
+//        req.flash('info', 'Password reset token is invalid.');
+//        res.redirect('/forgot');
+//      } else if (user.local.resetPasswordExpires < Date.now()) {
+//        req.flash('info', 'Password reset token is expired.')
+//        res.redirect('/forgot');
+//      } else {
+//        res.render('reset', {
+//          user: req.user,
+//          token: req.params.token,
+//          message: req.flash('info')
+//        });
+//      }
+//    });
+//  });
   /* POST Password reset */
   app.post('/reset/:token', (req, res) => {
     User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
@@ -159,8 +150,8 @@ module.exports = function(app, passport) {
             to: user.local.email,
             subject: 'Your password has been changed',
             text: 'Hello,\n\n' +
-              'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-            };
+            'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
+          };
 
           transporter.sendMail(mailOptions, (error, info) => {
             if (err) console.log(err); 
@@ -176,47 +167,28 @@ module.exports = function(app, passport) {
     });
   });
 
-  /* GET registration Page */
-  app.get('/signup',(req, res) => {
-  	res.render('signup', {
-  		message: req.flash('signupMessage')
-  	});
-  });
-
-  /* POST sign up */
-  app.post('/signup', function(req, res, next) {
-    passport.authenticate('local-signup', function(err, user, info) {
-      if (err) return next(err);
-      if (!user) return res.redirect('/signup');
-      req.logIn(user, function(err) {
-        if (err) return next(err);
-        return res.redirect('/home');
-      });
-   })(req, res, next);
-  });
 
   /* GET business/client home page */
   app.get('/home', isLoggedIn, (req, res) => {
-     if (req.user.kind === 'Business') {
-        Appointment.find({ business: req.user.id }).populate({ path: 'user', select: 'firstname lastname' }).exec((err, appointments) => {
+    if (req.user.kind === 'Business') {
+      Appointment.find({ business: req.user.id }).populate({ path: 'user', select: 'firstname lastname' }).exec((err, appointments) => {
+        if (err) throw err;
+        res.render('business-home', {
+          appointments: appointments,
+        });
+      });
+    } else {
+      User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec((err, user) => {
+        Appointment.find({ user: req.user.id }).populate({ path: 'business', select: 'firstname lastname' }).exec((err, appointments) => {
           if (err) throw err;
-          res.render('business-home', {
+          res.render('client-home', {
+            contacts: req.user.contacts,
             appointments: appointments,
+            contacts: user.contacts,
           });
         });
-      } else {
-        User.findById(req.user.id).populate({ path: 'contacts', select: 'local.username' }).exec((err, user) => {
-          console.log('contacts ' + user.contacts);
-          Appointment.find({ user: req.user.id }).populate({ path: 'business', select: 'firstname lastname' }).exec((err, appointments) => {
-            if (err) throw err;
-            res.render('client-home', {
-              contacts: req.user.contacts,
-              appointments: appointments,
-              contacts: user.contacts,
-            });
-          });
-        });
-      }
+      });
+    }
   });
 
   /* POST business/client home page */
@@ -225,9 +197,9 @@ module.exports = function(app, passport) {
       if (err) throw err;
       appointment.canceled = true;
       appointment.save((err, update) => {
-          if (err) return handleError(err);
-          res.send('This appointment has been calceled');
-        });
+        if (err) return handleError(err);
+        res.send('This appointment has been calceled');
+      });
 
     });
   });
@@ -317,7 +289,7 @@ module.exports = function(app, passport) {
     //res.send(req.body);
   });
 
-   /* GET client contact search page*/
+  /* GET client contact search page*/
   app.get('/search', isLoggedIn, isClient, (req, res) => {
     res.render('client-search', {
       contacts: req.user.contacts,
@@ -329,7 +301,6 @@ module.exports = function(app, passport) {
     const pattern = new RegExp(req.params.pattern, "gi");
     Business.find({ 'local.username': pattern }, '_id local.username', (err, usernames) => {
       if (err) throw err;
-      console.log('/search/:pattern' + usernames)
       res.json({
         results: usernames,
         contacts: req.user.contacts,
@@ -367,8 +338,8 @@ module.exports = function(app, passport) {
   /* GET client book page (no contacts) */
   app.get('/book/nocontacts', isLoggedIn, isClient, (req, res) => {
     res.render('client-booking-nocontacts', {
-        contacts: req.user.contacts,
-        message: 'You don\'t have contacts to make an appointment.',
+      contacts: req.user.contacts,
+      message: 'You don\'t have contacts to make an appointment.',
     });
   });
 
@@ -402,9 +373,9 @@ module.exports = function(app, passport) {
         if (month + 1 > 11) {
           month = 0;
           year++;
-          } else {
-            month++;
-          }
+        } else {
+          month++;
+        }
       }
       if (req.body.month == 'prev') {
         if (year > new Date().getFullYear()) {
@@ -462,7 +433,7 @@ module.exports = function(app, passport) {
             business.save((err, result) => {
               if (err) throw err;
               res.send(`Your appointment is scheduled on ${new Date(appointment.date).toLocaleDateString()}
-               at ${new Date(appointment.date).toLocaleTimeString().substring(0,8)}`);
+                at ${new Date(appointment.date).toLocaleTimeString().substring(0,8)}`);
             });
           });
         });
@@ -474,33 +445,38 @@ module.exports = function(app, passport) {
   /* GET client contacts page */
   app.get('/contacts', isLoggedIn, isClient, (req, res) => {
     User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.username' }).exec((err, user) => {
-      console.log('/contacts ' + user.contacts);
       res.render('client-contacts', {
         contacts: user.contacts,
       });
     });
   })
 
+  /* POST delete account*/
+  app.get('/delete', isLoggedIn, (req, res) => {
+    User.findByIdAndRemove(req.user._id, (err) => { 
+      if (err) throw err;
+      res.redirect('/');
+    });
+  });
+
   /* GET Log Out */
-  app.get('/logout', isLoggedIn, function(req, res) {
+  app.get('/logout', isLoggedIn, (req, res) => {
     req.logout();
     res.redirect('/');
   });
 
-  /* 404 page */
-  app.get('*', isLoggedIn, function(req, res) {
-    if (req.user.kind === 'Business') {
-      res.render('business-404', {
-        message:`The requested URL ${req.url} not found on this server`,
+  /* Error page */
+  app.get('/error/:code', (req, res) => {
+      res.render('error', {
+        code: req.params.code, 
       });
-    } else {
-      res.render('client-404', {
-        contacts: req.user.contacts,
-        message:`The requested URL ${req.url} not found on this server`,
-      });
-    }
   });
-  
+  /* 404 page */
+  app.get('*', function(req, res) {
+    res.statusCode = 404;
+    res.render('404');
+  });
+
   function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
       return next();
@@ -519,5 +495,38 @@ module.exports = function(app, passport) {
     }
     res.redirect('/');
   }
-
+  function isEmailValid(req, res, next) {
+    if (typeof req.body.email === 'string' && validator.isEmail(req.body.email)) {
+      return next();
+    }
+    res.json({ 
+      success: false,
+      message: 'The entered email is not valid'
+    });
+  }
+  function isPasswordValid(req, res, next) {
+    if (req.body.password !== req.body.confirm) {
+      res.json({ 
+        success: false,
+        message: 'The entered passwords do not match.'
+      });
+    } else if (!(/^[a-zA-Z0-9@#$]+$/).test(req.body.password)) {
+      res.json({ 
+        success: false,
+        message: 'The entered password must contain only a-zA-Z0-9@#$ characters'
+      });
+    } else if (req.body.password.length < 6) {
+      res.json({ 
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    } else if (req.body.password.length > 20) {
+      res.json({ 
+        success: false,
+        message: 'Password must be less than 20 characters long'
+      });
+    } else {
+      return next();
+    }
+  }
 }

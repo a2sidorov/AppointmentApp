@@ -1,0 +1,50 @@
+'use strict';
+
+const app = require ('./app');
+const assert = require('chai').assert;
+const request = require('supertest');
+
+describe('Route test', function() {
+  describe('GET /', () => {
+    it('should have status 200', (done) => {
+      request(app) .get('/') .end((err, res) => {
+        assert.equal(res.statusCode, 200);
+        done();
+      });
+    });
+    it('should have html type', (done) => {
+      request(app) .get('/') .end((err, res) => {
+        assert.equal(res.type, 'text/html');
+        done();
+      });
+    });
+  });
+  describe('GET /signup', () => {
+    it('should have status 200', (done) => {
+      request(app) .get('/signup') .end((err, res) => {
+        assert.equal(res.statusCode, 200);
+        done();
+      });
+    });
+    it('should have html type', (done) => {
+      request(app) .get('/signup') .end((err, res) => {
+        assert.equal(res.type, 'text/html');
+        done();
+      });
+    });
+  });
+  describe('POST /signup', () => {
+    const inputData = {
+      email: 'test1@test1.com',
+      password: 'password',
+    };
+    it('should have status 200', (done) => {
+      request(app) .post('/signup') .send(inputData) .end((err, res) => {
+        if (err) done(err);
+        console.log(res);
+        assert.equal(res.statusCode, 200);
+        done();
+      });
+    });
+  });
+});

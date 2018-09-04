@@ -9,22 +9,21 @@
       <header class="main-title">
         <H2>AppointmentApp</H2>
       </header>
-      <main class="login">
-        <form action="/login" method="post">
-          <label for="username"><b>Username</b></label>
-          <input type="text" name="username" placeholder="Enter username or email" required value="client1">
-          <label for="password"><b>Password</b></label>
-          <input type="password" name="password" placeholder="Enter password" requred value="noldor">
-          <button type="submit">Login</button>
-        </form>
+      <main id="main">
+        <div class="login-form">
+          <label>Email</label>
+          <input id="email" type="text" placeholder="Enter your email" required value="client1@gmail.com">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Enter password" requred value="noldor">
+          <button id="loginBtn" type="button" onclick="login()">Login</button>
+        </div>
         <div class="recovery">
           <a href="/forgot">Forgot password?</a><!--
           --><p>Need an account? <a href="/signup">Signup</a></p>
         </div>
-        <% if (message) { %>
-          <div class="flash"><%= message %></div>
-        <% } %>
+          <div id="message"></div>
       </main>
   </div>
+  <script src="/public/scripts/login.js"></script>
 </body>
 </html>

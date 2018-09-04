@@ -4,46 +4,49 @@ const mongoose = require('mongoose');
 const User = require('./user');
 const options = require('./user');
 const Appointment = require('../models/appointment');
-
-let FirstAppDay;
+const holidays = require('../config/holidays');
 
 const businessSchema = new mongoose.Schema({
   workdays: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkdays() },
   workhours: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkhours() },
-  holidays: { type: [mongoose.Schema.Types.Mixed], default: defaultHolidays() },
-  clients: [{type: mongoose.Schema.Types.ObjectId, ref: 'Business'}],
+  holidays: [mongoose.Schema.Types.Mixed],
   appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
 }, options);
 
 function defaultWorkdays() {
+  const workdays = [];
   for (let d = 0; d <= 6; d++) {
     if (d >= 1 && d <= 5) {
-      newUser.workdays.push({dayNum: d.toString(), isAvailable: true});
+      workdays.push({dayNum: d.toString(), isAvailable: true});
     } else {
-      newUser.workdays.push({dayNum: d.toString(), isAvailable: false});
+      workdays.push({dayNum: d.toString(), isAvailable: false});
     }     
   }
+  return workdays;
 }
 
 function defaultWorkhours() {
+  const workhours = [];
   for (let h = 0; h <= 24; h++) {
     if (h >= 8 && h <= 17) {
-      newUser.workhours.push({time:`${h}:00`, isAvailable: true});
-      newUser.workhours.push({time:`${h}:30`, isAvailable: false});
+      workhours.push({time:`${h}:00`, isAvailable: true});
+      workhours.push({time:`${h}:30`, isAvailable: false});
     } else {
       if (h !== 0) {
-        newUser.workhours.push({time:`${h}:00`, isAvailable: false});
-      }
-      if (h === 24) break;
-      newUser.workhours.push({time:`${h}:30`, isAvailable: false});
+      workhours.push({time:`${h}:00`, isAvailable: false});
+    }
+    if (h === 24) break;
+    workhours.push({time:`${h}:30`, isAvailable: false});
     }     
   } 
+  return workhours;
 }
 
-function defaultHolidays() {
-  holidays.get((events) => {
+businessSchema.methods.setHolidays = function() {
+  holidays.readFromFile().then((events) => {
     events.forEach((event) => {
       event.isAvailable = false;
+      this.holidays.push(event);
     });
   });
 }
@@ -69,10 +72,9 @@ businessSchema.methods.createMonth = function(dateObj) {
       day = {};
       if (i > 0) {
         dateObj.setDate(i);
-        //console.log(dateObj.toISOString().substring(0, 10));
         if (dateObj.getTime() >= todayDate.getTime() 
-          && isWorkday(dateObj, this.workdays) 
-          && !isHoliday(dateObj, this.holidays)) {
+          && this.isWorkday(dateObj) 
+          && !this.isHoliday(dateObj)) {
           day.num = i;
           day.isAvailable = true;
         } else {
@@ -98,7 +100,7 @@ businessSchema.methods.createDay = function(dateObj) {
     let m = parseInt(hour.time.substring(3, 5));
     dateObj.setHours(h);
     dateObj.setMinutes(m);
-    if (isBooked(dateObj, this.appointments) || isLate(dateObj)) {
+    if (this.isBooked(dateObj) || this.isLate(dateObj)) {
       hour.isUnavailable = true;
     }
   });
@@ -106,9 +108,9 @@ businessSchema.methods.createDay = function(dateObj) {
 }
 
 /*  Auxiliary functions */
-function isWorkday (dateObj, workdays) {
+businessSchema.methods.isWorkday = function(dateObj) {
   const workdaysArr = [];
-  workdays.forEach((day) => {
+  this.workdays.forEach((day) => {
     if (day.isAvailable) {
       workdaysArr.push(day.dayNum);
     }
@@ -116,9 +118,9 @@ function isWorkday (dateObj, workdays) {
   return workdaysArr.includes(dateObj.getDay().toString());
 }
 
-function isHoliday (dateObj, holidays) {
+businessSchema.methods.isHoliday = function(dateObj) {
   const holidaysArr = [];
-  holidays.forEach((holiday) => {
+  this.holidays.forEach((holiday) => {
     if (!holiday.isAvailable) {
       holidaysArr.push(holiday.date);
     }
@@ -126,8 +128,8 @@ function isHoliday (dateObj, holidays) {
   return holidaysArr.includes(dateObj.toISOString().substring(0, 10));
 }
 
-function isBooked(dateObj, appointments) {
-  const activeAppointments = appointments.map((appointment) => {
+businessSchema.methods.isBooked = function(dateObj) {
+  const activeAppointments = this.appointments.map((appointment) => {
     if (!appointment.canceled) {
        return appointment.date;
     }
@@ -135,7 +137,7 @@ function isBooked(dateObj, appointments) {
   return activeAppointments.includes(dateObj.toISOString());
 }
 
-function isLate(dateObj) { 
+businessSchema.methods.isLate = function(dateObj) { 
   return (dateObj.getTime() - new Date().getTime()) < (30 * 60 * 1000); //checking if an appointment starts in less than 30 minutes;
 }
 

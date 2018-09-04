@@ -21,7 +21,6 @@
   /*----------------------------------------*/
   /*    Global                              */
   /*----------------------------------------*/
-
   .grid-container {
     display: grid;
     grid-row-gap: 15px;
@@ -33,9 +32,8 @@
   } 
 
   /*----------------------------------------*/
-  /*    Login/signup/recovery/reset page    */
+  /*    Login/recovery/reset page    */
   /*----------------------------------------*/
-
   .main-title h2 {
     padding: 10px 0px;
     text-align: center;
@@ -55,6 +53,9 @@
     margin: 8px 0;
     border: none;
   }
+  #message {
+    color: #ff0000;
+  } 
   .recovery {
     width: 90%;
     margin: auto;
@@ -63,6 +64,59 @@
     padding-top: 10px;
   }
 
+  /*---------------------------*/
+  /*   Login                   */
+  /*---------------------------*/
+  .login-form input[type=email], input[type=password], input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+  }
+  .login-form button {
+    width: 100%;
+    background-color: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: none;
+  }
+  
+  /*---------------------------*/
+  /*   Signup                  */
+  /*---------------------------*/
+  .signup-form input[type=email], input[type=password], input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+  }
+  .signup-form button {
+    width: 100%;
+    background-color: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: none;
+  }
+
+  /*---------------------------*/
+  /*   Password recovery       */
+  /*---------------------------*/
+  .recovery-form input[type=email], input[type=password], input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+  }
+  .recovery-form button {
+    width: 100%;
+    background-color: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: none;
+  }
   /*---------------------------*/
   /*   Navbar                  */
   /*---------------------------*/

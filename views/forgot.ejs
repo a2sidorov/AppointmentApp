@@ -9,21 +9,20 @@
     <header class="main-title">
         <H2>AppointmentApp</H2>
     </header> 
-    <main class="login">
+    <main id="main">
       <div class="title">
         <H2>Password recovery</H2>
       </div>
-      <form action="/forgot" method="post">
-        <input type="email" name="email" placeholder="Enter your email">
-        <button type="submit">Reset password</button>
-      </form>
+      <div class="recovery-form">
+        <input id="email" type="email" name="email" placeholder="Enter your email">
+        <button id="sendBtn" type="button" onclick="recover()">Send</button>
+      </div>
       <div class="recovery">
         <a href="/">Cancel</a>
       </div>
-      <% if (message) { %>
-        <div class="flash"><%= message %></div>
-      <% } %>
+        <div id="message"><%= message %></div>
     </main>
   </div>
+  <script src="/public/scripts/forgot.js"></script>
 </body>
 </html>

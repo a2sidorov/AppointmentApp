@@ -1,0 +1,36 @@
+//authentication to remote repository
+git config --global user.name "Juri Strumpflohner"
+git config --global user.email "myemail@gmail.com"
+
+//adding your remote respository
+git remote add origin https://github.com/a2sidorov/hello-world.git
+
+//removing a folder from tracking
+git rm -r --cached modules
+
+//check current remote origin url
+git remote -v
+
+//change your remote's URL from HTTPS to SSH with the git remote set-url command.
+git remote set-url origin git@github.com:USERNAME/REPOSITORY.git
+
+
+
+//workflow
+git status //checking what branch are you on
+git add . //adding all files to be tracked
+git commit -m 'comments' //submitting files to the local repository with a comment
+git push -u origin <your branch name> //synching the local repo with remote one
+
+
+
+//Manual for working with a project
+1) mkdir hello-world
+2) cd hello-world
+3) git init 
+4) git remote add origin https://github.com/a2sidorov/hello-world.git //connect to a remote repo
+5) git pull origin master //to pull a project
+6) git checkout -b <your branch name> //to create and switch on a new branch
+7) git branch //to list all branches
+
+
