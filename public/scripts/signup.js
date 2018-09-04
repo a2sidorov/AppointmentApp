@@ -19,6 +19,6 @@ function signup() {
     }
   };
   xhttp.open('POST', '/signup', true);
-  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.setRequestHeader('Content-type', 'application/json');
   xhttp.send(`email=${email}&password=${password}&confirm=${confirm}`);
 }

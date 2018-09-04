@@ -5,18 +5,17 @@ const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 
 module.exports = async (req) => {
+  //throw new Error('Test error');
   const user = await User.findOne({ 'local.email': req.body.email });
-  console.log(1);
   if (!user) {
-    return { success: false, masseage: 'No account with that email address exists.' };
+    return { success: false, massage: 'No account with that email address exists.' };
   } else {
     const buf = await crypto.randomBytes(20);
-    console.log(2);
     const token =  buf.toString('hex')
+    process.env.TEST_TOKEN = token; //for testing
     user.local.resetPasswordToken = token;
     user.local.resetPasswordExpires = Date.now() + 3600000;
     await user.save();
-    console.log(3);
     const transporter = await nodemailer.createTransport({
       service: 'gmail',
       auth: {
@@ -24,7 +23,6 @@ module.exports = async (req) => {
         pass: process.env.EMAIL_PASS,
       }
     });
-    console.log(3.1);
     const mailOptions = {
       from: process.env.EMAIL,
       to: user.local.email,
@@ -34,12 +32,11 @@ module.exports = async (req) => {
       'http://' + req.headers.host + '/reset/' + token + '\n\n' +
       'If you did not request this, please ignore this email and your password will remain unchanged.\n'
     };
-    console.log(3.2);
     await transporter.sendMail(mailOptions);
-    console.log(4);
     return { success: true, message: 'Recovery email has been sent' };
   }
 }
+
       //        crypto.randomBytes(20, (err, buf) => {
       //          if (err) throw err;
       //          const token = buf.toString('hex')

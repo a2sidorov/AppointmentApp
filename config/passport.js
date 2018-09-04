@@ -54,7 +54,7 @@ module.exports = function(passport) {
   },
     async function(req, username, password, done) {
       try {
-        //throw new Error('Test error');
+        throw new Error('Test error');
         const user = await User.findOne({ 'local.email': username });
         if (user) return done(null, false, 'This email is alredy signed up');
         if (req.body.isBusiness === 'on') {

@@ -46,88 +46,76 @@ module.exports = (app, passport) => {
     })(req, res, next);
   });
 
+  /* GET sign up page */
+  app.get('/signup', (req, res) => {
+    res.render('signup');
+  });
+
+  /* POST(ajax) sign up */
+  app.post('/signup', isEmailValid, isPasswordValid, (req, res, next) => {
+    passport.authenticate('local-signup', (err, user, info) => {
+      if (err) return next(err);
+      if (!user) return res.json({ success: false, message: info });
+      req.logIn(user, (err) => {
+        if (err) return next(err);
+        return res.json({ success: true });
+      });
+    })(req, res, next);
+  });
+
   /* GET password recovery page */
   app.get('/forgot', (req, res) => {
-    res.render('forgot');
+    res.render('forgot', {
+      message: req.flash('info') 
+    });
   });
 
   /* POST password recovery */
-  app.post('/forgot', async (req, res) => {
+  app.post('/forgot', isEmailValid, async (req, res, next) => {
     try {
-      let result; 
-      result = await passwordRecovery(req);
-      res.json(result); } catch(err) {
-      return res.status(500).send(err);
+      const result = await passwordRecovery(req);
+      res.json(result);
+    } catch(err) {
+      next(err);
     }
   });
-//  app.post('/forgot', (req, res) => {
-//    User.findOne({ 'local.email': req.body.email }, (err, user) => {
-//      if (err) throw err;
-//      if (!user) {
-//        req.flash('info', 'No account with that email address exists.');
-//        res.render('forgot', {
-//          message: req.flash('info')
-//        });
-//      } else {
-//        crypto.randomBytes(20, (err, buf) => {
-//          if (err) throw err;
-//          const token = buf.toString('hex')
-//          user.local.resetPasswordToken = token;
-//          user.local.resetPasswordExpires = Date.now() + 3600000;
-//
-//          user.save((err, update) => {
-//            if (err) throw err;
-//            const transporter = nodemailer.createTransport({
-//              service: 'gmail',
-//              auth: {
-//                user: process.env.EMAIL,
-//                pass: process.env.EMAIL_PASS,
-//              }
-//            });
-//            const mailOptions = {
-//              from: process.env.EMAIL,
-//              to: user.local.email,
-//              subject: 'Appointment App Password Reset',
-//              text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
-//              'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
-//              'http://' + req.headers.host + '/reset/' + token + '\n\n' +
-//              'If you did not request this, please ignore this email and your password will remain unchanged.\n'
-//            };
-//
-//            transporter.sendMail(mailOptions, (error, info) => {
-//              if (err) console.log(err); 
-//              else {
-//                req.flash('info', 'Recovery email has been sent');
-//                res.render('forgot', {
-//                  message: req.flash('info')
-//                });
-//              }
-//            });
-//          });
-//        });
-//      } 
-//    });
-//  });
 
   /* GET password reset page */
-  app.get('/reset/:token', (req, res) => {
-    User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
+  app.get('/reset/:token', async (req, res, next) => {
+    try {
+      throw new Error('Test error');
+      const user = await User.findOne({ 'local.resetPasswordToken': req.params.token });
       if (!user) {
         req.flash('info', 'Password reset token is invalid.');
         res.redirect('/forgot');
       } else if (user.local.resetPasswordExpires < Date.now()) {
-        req.flash('info', 'Password reset token is expired.')
+        req.flash('info', 'Password reset token is expired.');
         res.redirect('/forgot');
-      } else {
-        res.render('reset', {
-          user: req.user,
-          token: req.params.token,
-          message: req.flash('info')
-        });
+      } else { 
+        res.render('reset');
       }
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
+//  app.get('/reset/:token', (req, res) => {
+//    User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
+//      if (!user) {
+//        req.flash('info', 'Password reset token is invalid.');
+//        res.redirect('/forgot');
+//      } else if (user.local.resetPasswordExpires < Date.now()) {
+//        req.flash('info', 'Password reset token is expired.')
+//        res.redirect('/forgot');
+//      } else {
+//        res.render('reset', {
+//          user: req.user,
+//          token: req.params.token,
+//          message: req.flash('info')
+//        });
+//      }
+//    });
+//  });
   /* POST Password reset */
   app.post('/reset/:token', (req, res) => {
     User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
@@ -179,22 +167,6 @@ module.exports = (app, passport) => {
     });
   });
 
-  /* GET registration page */
-  app.get('/signup', (req, res) => {
-    res.render('signup');
-  });
-
-  /* POST(ajax) sign up */
-  app.post('/signup', isEmailValid, isPasswordValid, (req, res, next) => {
-    passport.authenticate('local-signup', (err, user, info) => {
-      if (err) return next(err);
-      if (!user) return res.json({ success: false, message: info});
-      req.logIn(user, (err) => {
-        if (err) return next(err);
-        return res.json({ success: true });
-      });
-    })(req, res, next);
-  });
 
   /* GET business/client home page */
   app.get('/home', isLoggedIn, (req, res) => {

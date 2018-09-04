@@ -70,7 +70,7 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
     });
   });
-  describe.only('POST /signup', () => {
+  describe('POST /signup', () => {
     before(async () => {
       const newUser = new User();
       newUser.local.email = 'test@test.com';
@@ -176,6 +176,7 @@ describe('Testing routes', () => {
       const res = await request(app)
         .post('/signup')
         .send({ email: 'business@test.com', password: 'password', confirm: 'password', isBusiness: 'on' });
+      //      return console.log(res.body);
       assert.isTrue(res.body.success);
     });
     after(async () => {
@@ -184,74 +185,126 @@ describe('Testing routes', () => {
       await User.findOneAndRemove({ 'local.email': 'business@test.com' });
     });
   });
-  describe('Testing routes with authentication', () => {
-    let authenticatedSession;
-    const testSession = session(app);
-    it('should create a new user', (done) => {
-      request(app).post('/signup').send({ email: 'test@test.com', password: 'password', confirm: 'password' }).end((err, res) => {
-        if (err) done(err);
-        assert.isTrue(res.body.success);
-        done();
-      });
-    });
-    it('should log in', (done) => {
-      testSession.post('/login').send({ email: 'test@test.com', password: 'password' }).end((err, res) => {
-        if (err) done(err);
-        assert.isTrue(res.body.success);
-        authenticatedSession = testSession;
-        done();
-      });
-    });
-    it('should get home page', (done) => {
-      authenticatedSession.get('/home').end((err, res) => {
-        if (err) done(err);
-        assert.equal(res.statusCode, 200);
-        done();
-      });
-    });
-    it('should return false if no user found', (done) => {
-      authenticatedSession.post('/forgot').send({ email: 'test1@test.com' }).end((err, res) => {
-        if (err) done(err);
-        assert.isFalse(res.body.success);
-        done();
-      });
-    });
-
-    it('should delete user account', (done) => {
-      authenticatedSession.get('/delete').end((err, res) => {
-        if (err) done(err);
-        assert.equal(res.headers.location, '/');
-        done();
-      });
+  describe('GET /forgot', () => {
+    it('should have status 200', async () => {
+      const res = await request(app)
+        .get('/forgot');
+      assert.equal(res.statusCode, 200);
     });
   });
-  describe('Testing password recovery', () => {
+  describe('POST /forgot', () => {
     let authenticatedSession;
     const testSession = session(app);
-    before( async () => {
-      await request(app).post('/signup')
-        .send({ email: process.env.TEST_EMAIL, password: process.env.TEST_EMAIL_PASS, confirm: process.env.TEST_EMAIL_PASS });
+    before(async () => {
+      await request(app)
+        .post('/signup')
+        .send({
+          email: process.env.TEST_EMAIL,
+          password: process.env.TEST_EMAIL_PASS,
+          confirm: process.env.TEST_EMAIL_PASS
+        });
       await testSession.post('/login')
-        .send({ email: process.env.TEST_EMAIL, password: process.env.TEST_EMAIL_PASS });
+        .send({
+          email: process.env.TEST_EMAIL,
+          password: process.env.TEST_EMAIL_PASS
+        });
       authenticatedSession = testSession;
     });
+    it('should return false if email is invalid', async () => {
+      const res = await request(app)
+        .post('/forgot')
+        .send({ email: 'test#test.com' });
+      assert.isFalse(res.body.success);
+    });
     it('should return false if no user found', async () => {
-      const res = await request(app).post('/forgot')
-        .send({ email: 'someEmail@test.dev' });
+      const res = await request(app)
+        .post('/forgot')
+        .send({ email: 'test@test.com' });
       assert.isFalse(res.body.success);
     });
     it('should return true if email found', async () => {
-      const res = await request(app).post('/forgot')
+      const res = await request(app)
+        .post('/forgot')
         .send({ email: process.env.TEST_EMAIL });
       assert.isTrue(res.body.success);
     });
-    it('should delete user account', (done) => {
-      authenticatedSession.get('/delete').end((err, res) => {
-        if (err) done(err);
-        assert.equal(res.headers.location, '/');
-        done();
-      });
+    after(async () => {
+      await User.findOneAndRemove({ 'local.email': process.env.TEST_EMAIL });
+    });
+  });
+  describe.only('GET /reset/:token', () => {
+    before(async () => {
+      await request(app)
+        .post('/signup')
+        .send({
+          email: process.env.TEST_EMAIL,
+          password: process.env.TEST_EMAIL_PASS,
+          confirm: process.env.TEST_EMAIL_PASS
+        });
+    });
+    before(async () => {
+      await request(app)
+        .post('/forgot')
+        .send({
+          email: process.env.TEST_EMAIL
+        });
+    });
+    it('should redirect to /forgot if token is invalid', async () => {
+      const res = await request(app)
+        .get('/reset/incorrecttoken');
+      assert.equal(res.header.location, '/forgot');
+    });
+    it('should have status 200', async () => {
+      const res = await request(app)
+        .get(`/reset/${process.env.TEST_TOKEN}`);
+      assert.equal(res.statusCode, 200);
+    });
+    after(async () => {
+      await User.findOneAndRemove({ 'local.email': process.env.TEST_EMAIL });
     });
   });
 
-});
+
+          describe('GET /home', () => {
+            let authenticatedSession;
+            const testSession = session(app);
+            it('should create a new user', (done) => {
+              request(app).post('/signup').send({ email: 'test@test.com', password: 'password', confirm: 'password' }).end((err, res) => {
+                if (err) done(err);
+                assert.isTrue(res.body.success);
+                done();
+              });
+            });
+            it('should log in', (done) => {
+              testSession.post('/login').send({ email: 'test@test.com', password: 'password' }).end((err, res) => {
+                if (err) done(err);
+                assert.isTrue(res.body.success);
+                authenticatedSession = testSession;
+                done();
+              });
+            });
+            it('should get home page', (done) => {
+              authenticatedSession.get('/home').end((err, res) => {
+                if (err) done(err);
+                assert.equal(res.statusCode, 200);
+                done();
+              });
+            });
+            it('should return false if no user found', (done) => {
+              authenticatedSession.post('/forgot').send({ email: 'test1@test.com' }).end((err, res) => {
+                if (err) done(err);
+                assert.isFalse(res.body.success);
+                done();
+              });
+            });
+
+            it('should delete user account', (done) => {
+              authenticatedSession.get('/delete').end((err, res) => {
+                if (err) done(err);
+                assert.equal(res.headers.location, '/');
+                done();
+              });
+            });
+          });
+
+    });

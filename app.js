@@ -53,6 +53,7 @@ require('./config/routes.js')(app, passport);
 //  res.status(err.statusCode).send('Something broke!');
 //});.
 app.use(function(err, req, res, next) {
+  console.log(req.headers['content-type'] === 'application/json');
   winston.error(err.message);
 //  winston.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 //  res.status(err.status || 500);
