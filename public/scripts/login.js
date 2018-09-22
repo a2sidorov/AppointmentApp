@@ -20,6 +20,6 @@ function login() {
     }
   };
   xhttp.open('POST', '/login', true);
-  xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  xhttp.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
   xhttp.send(`email=${email}&password=${password}`);
 }
