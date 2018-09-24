@@ -92,6 +92,21 @@ businessSchema.methods.createMonth = function(dateObj) {
 };
 
 businessSchema.methods.createDay = function(dateObj) {
+  const availableWorkhours = this.workhours.filter(hour => hour.isAvailable);
+  availableWorkhours.forEach((hour) => {
+    let h = parseInt(hour.time.substring(0, 2));
+    let m = parseInt(hour.time.substring(3, 5));
+    dateObj.setHours(h);
+    dateObj.setMinutes(m);
+    if (this.isBooked(dateObj) || this.isLate(dateObj)) {
+      hour.isAvailable = false;
+    }
+  });
+  return availableWorkhours;
+}
+
+/*
+businessSchema.methods.createDay = function(dateObj) {
   const availableWorkhours = this.workhours.filter((hour) => {
     return hour.isAvailable;
   });
@@ -106,7 +121,7 @@ businessSchema.methods.createDay = function(dateObj) {
   });
   return availableWorkhours;
 }
-
+*/
 /*  Auxiliary functions */
 businessSchema.methods.isWorkday = function(dateObj) {
   const workdaysArr = [];
