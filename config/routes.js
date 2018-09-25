@@ -222,6 +222,7 @@ module.exports = (app, passport) => {
       const business = await Business.findById(req.user.id, 'suspended');
       business.suspended = req.body.suspended;
       await business.save();
+      
       const msg = req.body.suspended ? 'Your schedule has been suspended' : 'Your schedule has been activated';
       res.json({
         success: true,
@@ -281,6 +282,13 @@ module.exports = (app, passport) => {
           success: false,
           message: 'Wrong password'
         })
+      }
+      if (req.user.kind  === 'Business') {
+        const appointments = await Appointment.find({ 'business': req.user.id });
+        appointments.forEach(async appointment => {
+          appointment.canceled = true;
+          await appointment.save();
+        });
       }
       await User.findByIdAndRemove(req.user._id);
       req.logout();
