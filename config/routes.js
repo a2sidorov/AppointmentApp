@@ -8,25 +8,6 @@ const nodemailer = require('nodemailer');
 const validator = require('validator');
 const passwordReset = require('./passwordReset');
 
-//logging user list
-// Appointment.find({}, (err, user) => {
-//   if (err) throw err;
-// });
-// User.find({}, (err, users) => {
-//   if (err) throw err;
-//   users.forEach((user) => {
-//   });
-// });
-//User.deleteMany({}, function (err) {});
-//Appointment.deleteMany({}, function (err) {});
-// Business.deleteOne({ 'local.username': 'test' }, (err) => {});
-// Business.deleteOne({ 'local.username': 'test1' }, (err) => {});
-// User.find({}, (err, users) => {
-//   if (err) throw err;
-//   users.forEach((user) => {
-//   });
-// });
-
 module.exports = (app, passport) => {
 
   /* GET login page. */
@@ -98,12 +79,12 @@ module.exports = (app, passport) => {
     try {
       const user = await User.findOne({ 'local.resetPasswordToken': req.params.token });
       if (!user) {
-  req.flash('info', 'Password reset token is invalid.');
-  return res.redirect('/forgot');
+        req.flash('info', 'Password reset token is invalid.');
+        return res.redirect('/forgot');
       }
       if (user.local.resetPasswordExpires < Date.now()) {
-  req.flash('info', 'Password reset token is expired.');
-  return res.redirect('/forgot');
+        req.flash('info', 'Password reset token is expired.');
+        return res.redirect('/forgot');
       }
       return res.render('reset');
     } catch(err) {
@@ -228,55 +209,29 @@ module.exports = (app, passport) => {
       next(err);
     }
   });
-  /*
-  app.post('/schedule/update', isLoggedIn, isBusiness, (req, res) => {
-    if (req.user.kind === 'Business') {
-      Business.findById(req.user.id, 'workdays workhours holidays', (err, business) => {
-  const updatedDays = JSON.parse(req.body.days);
-  const updatedTime = JSON.parse(req.body.time);
-  const updatedHolidays = JSON.parse(req.body.holidays);
-  if (updatedDays.length > 0) {
-    business.workdays.forEach((day) => {
-      updatedDays.forEach((updatedDay) => {
-        if (day.dayNum === updatedDay.dayNum) {
-    day.isAvailable = updatedDay.isAvailable;
-        }
+
+  /* GET suspend service */
+  app.post('/schedule/suspend', isLoggedIn, isBusiness, async (req, res, next) => {
+    try {
+      if (typeof req.body.suspended !== 'boolean') {
+        return res.json({
+          success: false,
+          message: 'Invalid data'
+        });
+      }
+      const business = await Business.findById(req.user.id, 'suspended');
+      business.suspended = req.body.suspended;
+      await business.save();
+      const msg = req.body.suspended ? 'Your schedule has been suspended' : 'Your schedule has been activated';
+      res.json({
+        success: true,
+        message: msg
       });
-    });
-    business.markModified('workdays');
-  }
-  if (updatedTime.length > 0) {
-    business.workhours.forEach((hour) => {
-      updatedTime.forEach((updatedTime) => {
-        if (hour.time === updatedTime.time) {
-    hour.isAvailable = updatedTime.isAvailable;
-        }
-      });
-    });
-    business.markModified('workhours');
-  }
-  if (updatedHolidays.length > 0) {
-    business.holidays.forEach((holiday) => {
-      updatedHolidays.forEach((updatedHoliday) => {
-        if (holiday.date === updatedHoliday.date) {
-    holiday.isAvailable = updatedHoliday.isAvailable;
-        }
-      });
-    });
-    business.markModified('holidays');
-  }
-  business.save((err, update) => {
-    if (err) return handleError(err);
-    res.json({
-      success: true,
-      message: 'Your schedule has been updated'
-    });
-  });
-      });
-//res.send(req.body);
+
+    } catch(err) {
+      next(err);
     }
   });
-  */
 
   /* GET business/client profile page */
   app.get('/profile', isLoggedIn, (req, res) => {
@@ -311,6 +266,27 @@ module.exports = (app, passport) => {
       res.json({
         success: true,
         message: 'Your profile has been updated'
+      });
+    } catch(err) {
+      next(err);
+    }
+  });
+
+  /* POST delete account*/
+  app.post('/profile/delete', isLoggedIn, isPasswordValid, async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user.validPassword(req.body.password)) {
+        return res.json({
+          success: false,
+          message: 'Wrong password'
+        })
+      }
+      await User.findByIdAndRemove(req.user._id);
+      req.logout();
+      res.json({
+        success: true,
+        message: 'Your account has benn successfully deleted'
       });
     } catch(err) {
       next(err);
@@ -522,38 +498,6 @@ module.exports = (app, passport) => {
     }
   });
 
-  /*
-  app.post('/book/:id/book', isLoggedIn, isClient, (req, res) => {
-    User.findById(req.user.id, 'appointments', (err, user) => {
-      if (err) throw err;
-      Business.findById(req.params.id, '_id appointments', (err, business) => {
-        if (err) throw err;
-        let newAppnt = new Appointment();
-        newAppnt.user = req.user.id;
-        newAppnt.business = business._id;
-        newAppnt.date = req.body.date;
-        newAppnt.reason = req.body.reason;
-        newAppnt.canceled = false;
-        newAppnt.timeMMM = new Date(req.body.date).getTime();
-        newAppnt.save((err, appointment) => {
-    if (err) throw err;
-    user.appointments.push(appointment._id);
-    user.save((err, result) => {
-      if (err) throw err;
-      business.appointments.push(appointment._id);
-      business.save((err, result) => {
-        if (err) throw err;
-        res.send(`Your appointment is scheduled on ${new Date(appointment.date).toLocaleDateString()}
-          at ${new Date(appointment.date).toLocaleTimeString().substring(0,8)}`);
-      });
-    });
-        });
-      });
-    });
-    //res.send(req.body);    
-  });
-  */
-
   /* POST cancel appointment */
   app.post('/home/cancel', isLoggedIn, async (req, res, next) => { 
     try {
@@ -568,7 +512,7 @@ module.exports = (app, passport) => {
       if (appointment.canceled) {
         return res.json({
           success: false,
-          message: 'appointment is already canceled'
+          message: 'This appointment is already canceled'
         });
       }
       appointment.canceled = true;
@@ -582,45 +526,26 @@ module.exports = (app, passport) => {
     }
   });
 
-/*
-app.post('/home/cancel', isLoggedIn, (req, res) => { 
-  Appointment.findById(req.body.appointmentId, 'canceled', (err, appointment) => {
-    if (err) throw err;
-    appointment.canceled = true;
-    appointment.save((err, update) => {
-      if (err) return handleError(err);
-      res.send('This appointment has been calceled');
-    });
-  });
-});
-*/
-/* POST delete account*/
-app.get('/delete', isLoggedIn, (req, res) => {
-  User.findByIdAndRemove(req.user._id, (err) => { 
-    if (err) throw err;
+  /* GET Log Out */
+  app.get('/logout', isLoggedIn, (req, res) => {
+    req.logout();
     res.redirect('/');
   });
-});
 
-/* GET Log Out */
-app.get('/logout', isLoggedIn, (req, res) => {
-  req.logout();
-  res.redirect('/');
-});
+  /* Error page */
+  app.get('/error/:code', (req, res) => {
+    res.render('error', {
+      code: req.params.code, 
+    });
+  });
 
-/* Error page */
-app.get('/error/:code', (req, res) => {
-  res.render('error', {
-    code: req.params.code, 
+  /* Error 404 page */
+  app.get('*', (req, res) => {
+    res.statusCode = 404;
+    res.render('error', {
+      code: 404, 
+    });
   });
-});
-/* Error 404 page */
-app.get('*', (req, res) => {
-  res.statusCode = 404;
-  res.render('error', {
-    code: 404, 
-  });
-});
 
   function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
@@ -628,8 +553,8 @@ app.get('*', (req, res) => {
     }
     if (req.headers['content-type'] === 'application/json') {
       return res.json({
-  success: false,
-  message: 'You are not logged in'
+        success: false,
+        message: 'You are not logged in'
       });
     }
     res.redirect('/');
@@ -711,26 +636,26 @@ app.get('*', (req, res) => {
   function isPasswordValid(req, res, next) {
     if (!req.body.password) {
       return res.json({ 
-  success: false,
-  message: 'No password is sent'
+        success: false,
+        message: 'No password is sent'
       });
     }
     if (!(/^[a-zA-Z0-9@#]+$/).test(req.body.password)) {
       return res.json({ 
-  success: false,
-  message: 'Password must contain only a-zA-Z0-9@# characters'
+        success: false,
+        message: 'Password must contain only a-zA-Z0-9@# characters'
       });
     }
     if (req.body.password.length < 6) {
       return res.json({ 
-  success: false,
-  message: 'Password must be at least 6 characters long'
+        success: false,
+        message: 'Password must be at least 6 characters long'
       });
     }
     if (req.body.password.length > 20) {
       return res.json({ 
-  success: false,
-  message: 'Password must be less than 20 characters long'
+        success: false,
+        message: 'Password must be less than 20 characters long'
       });
     } 
     return next();
@@ -739,32 +664,32 @@ app.get('*', (req, res) => {
   function isConfirmPasswordValid(req, res, next) {
     if (!req.body.confirm) {
       return res.json({ 
-  success: false,
-  message: 'No confirmation password is sent'
+        success: false,
+        message: 'No confirmation password is sent'
       });
     }
     if (!(/^[a-zA-Z0-9@#]+$/).test(req.body.confirm)) {
       return res.json({ 
-  success: false,
-  message: 'Confirmation password must contain only a-zA-Z0-9@# characters'
+        success: false,
+        message: 'Confirmation password must contain only a-zA-Z0-9@# characters'
       });
     }
     if (req.body.password !== req.body.confirm) {
       return res.json({ 
-  success: false,
-  message: 'The entered passwords do not match.'
+        success: false,
+        message: 'The entered passwords do not match.'
       });
     }
     if (req.body.password.length < 6) {
       return res.json({ 
-  success: false,
-  message: 'Password must be at least 6 characters long'
+        success: false,
+        message: 'Password must be at least 6 characters long'
       });
     }
     if (req.body.password.length > 20) {
       return res.json({ 
-  success: false,
-  message: 'Password must be less than 20 characters long'
+        success: false,
+        message: 'Password must be less than 20 characters long'
       });
     } 
     return next();

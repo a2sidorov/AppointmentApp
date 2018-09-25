@@ -20,7 +20,7 @@ describe('Testing routes', () => {
       const res = await request(app)
 				.get('/incorrectpath');
       assert.equal(res.statusCode, 404);
-    });
+		});
   });
   
   describe('GET /', () => {
@@ -652,7 +652,7 @@ describe('Testing routes', () => {
     });
   });
 
-  describe('GET /schedule for businesses', () => {
+  describe('GET /schedule', () => {
     let businessSession;
     let clientSession;
     const testSession1 = session(app);
@@ -715,7 +715,7 @@ describe('Testing routes', () => {
     });
   });
     
-  describe('POST /schedule/update for businesses', () => {
+  describe('POST /schedule/update', () => {
     let businessSession;
     let clientSession;
     const testSession1 = session(app);
@@ -827,6 +827,130 @@ describe('Testing routes', () => {
 				});
       assert.isTrue(res.body.success);
     });
+    after(async () => {
+      await User.findOneAndRemove({ 'local.email': 'client@test.com' });
+      await User.findOneAndRemove({ 'local.email': 'business@test.com' });
+    });
+	});
+	
+	describe('POST /schedule/suspend', () => {
+    let businessSession;
+    let clientSession;
+    const testSession1 = session(app);
+    const testSession2 = session(app);
+    before(async () => {
+      await request(app)
+				.post('/signup')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'business@test.com',
+					password: 'password',
+					confirm: 'password',
+					isBusiness: 'on'
+				});
+      await request(app)
+				.post('/signup')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'client@test.com',
+					password: 'password',
+					confirm: 'password',
+				});
+    });
+    before(async () => {
+      await testSession1
+				.post('/login')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'business@test.com',
+					password: 'password'
+				});
+      businessSession = testSession1;
+      await testSession2
+				.post('/login')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'client@test.com',
+					password: 'password'
+				});
+      clientSession = testSession2;
+    });
+    it('should fail if user is not logged in', async () => {
+      const res = await request(app)
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: true
+				});
+				assert.isFalse(res.body.success);
+		});
+    it('should fail if user is not business', async () => {
+      const res = await clientSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: true
+				});
+      assert.isFalse(res.body.success);
+		});
+    it('should fail if no data sent', async () => {
+      const res = await businessSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+				});
+      assert.isFalse(res.body.success);
+		});
+		it('should fail if sent data is not boolean type', async () => {
+      const res = await businessSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: 0
+				});
+      assert.isFalse(res.body.success);
+		});
+    it('should send an error as json if an error in Business.findById()', async () => {
+      const findById = sinon.stub(Business, 'findById');
+      findById.throws(new Error('test error'));
+      const res = await businessSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: true
+				});
+      findById.restore();
+      assert.isTrue(res.body.error);
+		});
+    it('should suspend business schedule', async () => {
+      const res = await businessSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: true
+				});
+      const business = await Business.findOne({ 'local.email': 'business@test.com' });
+      assert.isTrue(business.suspended);
+		});
+		it('should suspend business schedule', async () => {
+      const res = await businessSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: false
+				});
+			const business = await Business.findOne({ 'local.email': 'business@test.com' });
+      assert.isFalse(business.suspended);
+		});
+    it('should send success notification', async () => {
+      const res = await businessSession
+				.post('/schedule/suspend')
+				.set('Content-type', 'application/json')
+				.send({
+					suspended: true
+				});
+      assert.isTrue(res.body.success);
+		});
     after(async () => {
       await User.findOneAndRemove({ 'local.email': 'client@test.com' });
       await User.findOneAndRemove({ 'local.email': 'business@test.com' });
@@ -1010,8 +1134,118 @@ describe('Testing routes', () => {
       await User.findOneAndRemove({ 'local.email': 'client@test.com' });
       await User.findOneAndRemove({ 'local.email': 'business@test.com' });
     });
-  });
+	});
 
+	describe('POST /profile/delete', () => {
+    let businessSession;
+    let clientSession;
+    const testSession1 = session(app);
+    const testSession2 = session(app);
+    before(async () => {
+      await request(app)
+				.post('/signup')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'business@test.com',
+					password: 'password',
+					confirm: 'password',
+					isBusiness: 'on'
+				});
+      await request(app)
+				.post('/signup')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'client@test.com',
+					password: 'password',
+					confirm: 'password',
+				});
+    });
+    before(async () => {
+      await testSession1
+				.post('/login')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'business@test.com',
+					password: 'password'
+				})
+      businessSession = testSession1;
+      await testSession2
+				.post('/login')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'client@test.com',
+					password: 'password'
+				})
+      clientSession = testSession2;
+    });
+    it('should fail if user is not logged in', async () => {
+      const res = await request(app)
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'password',
+				});
+      assert.isFalse(res.body.success);
+		});
+    it('should fail if no password sent', async () => {
+      const res = await clientSession
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+				});
+      assert.isFalse(res.body.success);
+		});
+		it('should fail if password is incorrent', async () => {
+      const res = await clientSession
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'incorrectPassword'
+				});
+      assert.isFalse(res.body.success);
+		});
+    it('should send an error as json if an error in User.findById()', async () => {
+      const findById = sinon.stub(User, 'findById');
+      findById.throws(new Error('test error'));
+      const res = await clientSession
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'password'
+				});
+      findById.restore();
+      assert.isTrue(res.body.error);
+		});
+    it('should delete client account', async () => {
+      const res = await clientSession
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'password'
+				});
+			const user = await User.findOne({ 'local.email': 'client@test.com' });
+      assert.isNull(user);
+		});
+		it('should fail to get home page for clients', async () => {
+			const res = await clientSession
+				.get('/home');
+      assert.notEqual(res.statusCode, 200);
+		});
+    it('should send success notification', async () => {
+      const res = await businessSession
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'password'
+				});
+      assert.isTrue(res.body.success);
+		});
+    after(async () => {
+      await User.findOneAndRemove({ 'local.email': 'client@test.com' });
+      await User.findOneAndRemove({ 'local.email': 'business@test.com' });
+    });
+	});
+	
   describe('GET /search', () => {
     let clientSession;
     let businessSession;
@@ -1190,7 +1424,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString().toString();
       await request(app)
 				.post('/signup')
 				.set('Content-type', 'application/json')
@@ -1201,7 +1435,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business1 = await Business.findOne({ 'local.email': 'business1@test.com' }, '_id');
-      businessId1 = business1._id;
+      businessId1 = business1._id.toString();
     });
     before(async () => {
       await testSession1
@@ -1331,7 +1565,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString();
       await request(app)
 				.post('/signup')
 				.set('Content-type', 'application/json')
@@ -1342,7 +1576,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business1 = await Business.findOne({ 'local.email': 'business1@test.com' }, '_id');
-      businessId1 = business1._id;
+      businessId1 = business1._id.toString();
     });
     before(async () => {
       await testSession1
@@ -1613,7 +1847,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString();
     });
     before(async () => {
       await testSession1
@@ -1702,7 +1936,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString();
     });
     before(async () => {
       await testSession1
@@ -1901,7 +2135,7 @@ describe('Testing routes', () => {
 					isBusiness: 'on'
 				});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString();
     });
     before(async () => {
       await testSession1
@@ -2039,7 +2273,7 @@ describe('Testing routes', () => {
 	  isBusiness: 'on'
 	});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString().toString();
     });
     before(async () => {
       await testSession1
@@ -2141,15 +2375,14 @@ describe('Testing routes', () => {
 					date: date.toISOString(),
 					reason: 'reason'
 				});
-			assert.isTrue(res.body.success);
-			const appointments = await Appointment.find({});
-			assert.equal(appointments[0].reason, 'reason');
-			assert.isFalse(appointments[0].canceled);
-      assert.property(appointments[0], 'user');
-			assert.property(appointments[0], 'business');
-			assert.property(appointments[0], 'date');
-			assert.property(appointments[0], 'reason');
-			assert.property(appointments[0], 'canceled');
+			const appointment = await Appointment.findOne({ 'business': businessId });
+			assert.equal(appointment.reason, 'reason');
+			assert.isFalse(appointment.canceled);
+      assert.property(appointment, 'user');
+			assert.property(appointment, 'business');
+			assert.property(appointment, 'date');
+			assert.property(appointment, 'reason');
+			assert.property(appointment, 'canceled');
 		});
 		it('should fail if time already booked', async () => {
       const res = await clientSession
@@ -2207,7 +2440,7 @@ describe('Testing routes', () => {
     });
 	});
 
-	describe.only('POST /home/cancel', () => {
+	describe('POST /home/cancel', () => {
     let clientSession;
     let businessSession;
 		let businessId;
@@ -2234,7 +2467,7 @@ describe('Testing routes', () => {
 	  isBusiness: 'on'
 	});
       const business = await Business.findOne({ 'local.email': 'business@test.com' }, '_id');
-      businessId = business._id;
+      businessId = business._id.toString();
     });
     before(async () => {
       await testSession1
@@ -2378,6 +2611,74 @@ describe('Testing routes', () => {
 			await Appointment.deleteMany({});
     });
 	});
+
+	describe('GET /logout', () => {
+    let clientSession;
+    let businessSession;
+    const testSession1 = session(app);
+    const testSession2 = session(app);
+    before(async () => {
+      await request(app)
+				.post('/signup')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'client@test.com',
+					password: 'password',
+					confirm: 'password'
+				});
+      await request(app)
+				.post('/signup')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'business@test.com',
+					password: 'password',
+					confirm: 'password',
+					isBusiness: 'on'
+				});
+    });
+    before(async () => {
+      await testSession1
+				.post('/login')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'client@test.com',
+					password: 'password'
+				});
+			clientSession = testSession1;
+      await testSession2
+				.post('/login')
+				.set('Content-type', 'application/json')
+				.send({
+					email: 'business@test.com',
+					password: 'password',
+					isBusiness: 'on'
+				});
+			businessSession = testSession2;
+    });
+    it('should redirect to / if user in not logged in', async () => {
+      const res = await request(app)
+				.get('/logout');
+      assert.equal(res.headers.location, '/');
+		});
+    it('should log out from session for clients', async () => {
+      const res = await clientSession
+				.get('/logout');
+			const res1 = await clientSession
+				.get('/home');
+      assert.equal(res1.headers.location, '/');
+		});
+		it('should log out from session for businesses', async () => {
+      const res = await businessSession
+				.get('/logout');
+			const res1 = await businessSession
+				.get('/home');
+      assert.equal(res1.headers.location, '/');
+		});
+    after(async () => {
+      await User.findOneAndRemove({ 'local.email': 'client@test.com' });
+      await User.findOneAndRemove({ 'local.email': 'business@test.com' });
+    });
+  });
 	
 	
 
