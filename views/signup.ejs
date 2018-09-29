@@ -14,12 +14,13 @@
     <main id="main">
       <div class="signup-form">
         <label>Email</label>
-        <input id="email" type="text" name="email" required value="client1@gmail.com">
+        <input id="email" type="text" name="email" required value="business@gmail.com">
         <label>Password</label>
         <input id="password" type="password" name="password" required value="noldor">
         <label>Confirm Password</label>
         <input id="confirm" type="password" name="confirm" required value="noldor">
-        <input id="isBusiness" type="checkbox" name="isBusiness"> I am a business owner
+        <input id="isClient" type="radio" name="type" value="on"> Client<br>
+        <input id="isBusiness" type="radio" name="type" value="on" checked> Business<br>
         <button id="signupBtn" type="button" onclick="signup()">Signup</button>
       </div>
       <div class="recovery">

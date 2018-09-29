@@ -27,7 +27,8 @@ module.exports = function(passport) {
           const newBusiness = new Business();
           newBusiness.local.email = username;
           newBusiness.local.password = newBusiness.generateHash(password);
-          newBusiness.holidays = await holidays.readFromFile();
+          //newBusiness.holidays = await holidays.readFromFile();
+          await newBusiness.setHolidays();
           await newBusiness.save();
           return done(null, newBusiness);
         } else {

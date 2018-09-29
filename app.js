@@ -59,7 +59,7 @@ app.use(function(err, req, res, next) {
   if (req.headers['content-type'] === 'application/json') {
     return res.json({
       error: true,
-      message: `Server error ${err.status || 500} `  
+      message: `Server error ${err.status || 500}`  
     });
   }
 //  } else if (req.headers['content-type'] === 'text/html') {

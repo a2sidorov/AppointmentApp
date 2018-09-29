@@ -117,11 +117,31 @@
     margin: 8px 0;
     border: none;
   }
+
+  /*---------------------------*/
+  /*   Password reset       */
+  /*---------------------------*/
+  .reset-form input[type=email], input[type=password], input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+  }
+  .reset-form button {
+    width: 100%;
+    background-color: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: none;
+  }
+
   /*---------------------------*/
   /*   Navbar                  */
   /*---------------------------*/
 
   nav {
+    padding-top: 10px;
     display: flex;
     justify-content: space-around;
   }

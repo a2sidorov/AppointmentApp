@@ -32,14 +32,14 @@ module.exports = (app, passport) => {
     res.render('signup');
   });
 
-  /* POST(ajax) sign up */
+  /* POST sign up */
   app.post('/signup', isEmailValid, isPasswordValid, isConfirmPasswordValid, (req, res, next) => {
     passport.authenticate('local-signup', (err, user, info) => {
       if (err) return next(err);
       if (!user) return res.json({ success: false, message: info });
       req.logIn(user, (err) => {
-  if (err) return next(err);
-  return res.json({ success: true });
+        if (err) return next(err);
+        return res.json({ success: true });
       });
     })(req, res, next);
   });
@@ -56,9 +56,9 @@ module.exports = (app, passport) => {
     try {
       const user = await User.findOne({ 'local.email': req.body.email });
       if (!user) {
-  return res.json({
-    success: false, massage: 'No account with that email address exists.'
-  });
+        return res.json({
+          success: false, message: 'No account with that email address found.'
+        });
       }
       const buf = await crypto.randomBytes(20);
       const token =  buf.toString('hex')
@@ -67,7 +67,7 @@ module.exports = (app, passport) => {
       await user.save();
       passwordReset.sendToken(req, user.local.email, token);
       return res.json({
-  success: true, message: 'Recovery email has been sent'
+        success: true, message: 'Recovery email has been sent.'
       });
     } catch(err) {
       next(err);
@@ -93,27 +93,27 @@ module.exports = (app, passport) => {
   });
 
   /* POST Password reset */
-  app.post('/reset/:token', isPasswordValid, async (req, res, next) => {
+  app.post('/reset/:token', isPasswordValid, isConfirmPasswordValid, async (req, res, next) => {
     try {
       const user = await User.findOne({ 'local.resetPasswordToken': req.params.token });
       if (!user) {
-  return res.json({
-    success: false, massage: 'Password reset token is invalid.'
-  });
+        return res.json({
+          success: false, massage: 'Password reset token is invalid.'
+        });
       }
       if (user.local.resetPasswordExpires < Date.now()) {
-  return res.json({
-    success: false, massage: 'Password reset token is expired.'
-  });
+        return res.json({
+          success: false, massage: 'Password reset token is expired.'
+        });
       }
       user.local.password = user.generateHash(req.body.password);
       user.resetPasswordToken = undefined;
       user.resetPasswordExpires = undefined;
       await user.save();
       passwordReset.sendConfirmation(user.local.email);
-      return res.json({
-  success: true,
-  massage: 'Success! Your password has been changed.'
+      res.json({
+        success: true,
+        message: 'Success! Your password has been changed.'
       });
     } catch(err) {
       next(err);
@@ -124,26 +124,26 @@ module.exports = (app, passport) => {
   app.get('/home', isLoggedIn, async (req, res, next) => {
     try {
       if (req.user.kind === 'Business') {
-  const appointments = Appointment
-    .find({ business: req.user.id })
-    .populate({ path: 'user', select: 'firstname lastname' })
-    .exec();
-  res.setHeader('view', 'business-home');
-  return res.render('business-home', {
-    appointments: appointments,
-  });
+        const appointments = Appointment
+          .find({ business: req.user.id })
+          .populate({ path: 'user', select: 'firstname lastname' })
+          .exec();
+        res.setHeader('view', 'business-home');
+        return res.render('business-home', {
+          appointments: appointments,
+        });
       }
       const user = User.findById(req.user.id)
-  .populate({ path: 'contacts', select: 'local.email' })
-  .exec();
+        .populate({ path: 'contacts', select: 'local.email' })
+        .exec();
       const appointments = Appointment.find({ user: req.user.id })
-  .populate({ path: 'business', select: 'firstname lastname' })
-  .exec();
+        .populate({ path: 'business', select: 'firstname lastname' })
+        .exec();
       res.setHeader('view', 'client-home');
       return res.render('client-home', {
-  contacts: req.user.contacts,
-  appointments: appointments,
-  //contacts: user.contacts,
+        contacts: req.user.contacts,
+        appointments: appointments,
+        //contacts: user.contacts,
       });
     } catch(err) {
       next(err);
@@ -166,7 +166,7 @@ module.exports = (app, passport) => {
       if (req.body.days.length === 0 && req.body.time.length === 0 && req.body.holidays.length === 0) {
         return res.json({
           success: false,
-          messsage: 'No changes are sent'
+          message: 'No changes are sent'
         });
       }
       if (req.body.days.length > 0) {
@@ -190,9 +190,8 @@ module.exports = (app, passport) => {
         business.markModified('workhours');
       }
       if (req.body.holidays.length > 0) {
-        req.body.holidays.holidays.forEach((holiday) => {
-          //	  updatedHolidays.forEach((updatedHoliday) => {
-          updatedHolidays.forEach((updatedHoliday) => {
+        business.holidays.forEach((holiday) => {
+          req.body.holidays.forEach((updatedHoliday) => {
             if (holiday.date === updatedHoliday.date) {
               holiday.isAvailable = updatedHoliday.isAvailable;
             }
@@ -541,9 +540,9 @@ module.exports = (app, passport) => {
   });
 
   /* Error page */
-  app.get('/error/:code', (req, res) => {
+  app.get('/error/:status', (req, res) => {
     res.render('error', {
-      code: req.params.code, 
+      status: req.params.code, 
     });
   });
 
@@ -682,6 +681,7 @@ module.exports = (app, passport) => {
         message: 'Confirmation password must contain only a-zA-Z0-9@# characters'
       });
     }
+    
     if (req.body.password !== req.body.confirm) {
       return res.json({ 
         success: false,
