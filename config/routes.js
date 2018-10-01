@@ -467,12 +467,9 @@ module.exports = (app, passport) => {
   /* POST(ajax) client book request */
   app.post('/book/:id/book', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
-      const results = await Promise.all([
-        User.findById(req.user.id, 'appointments'),
-        Business.findById(req.params.id).populate('appointments').exec()
-      ]);
-      const user = results[0];
-      const business = results[1];
+      const user = await User.findById(req.user.id, 'appointments');
+      const business = await Business.findById(req.params.id).populate('appointments').exec();
+      
       const date = new Date(req.body.date);
       if ( !business.isWorkday(date) 
         || business.isHoliday(date)
@@ -491,10 +488,13 @@ module.exports = (app, passport) => {
       newAppnt.canceled = false;
       newAppnt.timeMMM = new Date(req.body.date).getTime();
       const appointment = await newAppnt.save();
+
       user.appointments.push(appointment._id);
       await user.save();
+
       business.appointments.push(appointment._id);
-      business.save();
+      await business.save();
+
       res.json({
         success: true,
         message: `Your appointment is scheduled on ${new Date(appointment.date).toLocaleDateString()}

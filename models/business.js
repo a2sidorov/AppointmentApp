@@ -99,6 +99,7 @@ businessSchema.methods.createDay = function(dateObj) {
     let m = parseInt(hour.time.substring(3, 5));
     dateObj.setHours(h);
     dateObj.setMinutes(m);
+    
     if (this.isBooked(dateObj) || this.isLate(dateObj)) {
       hour.isAvailable = false;
     }
@@ -123,6 +124,7 @@ businessSchema.methods.createDay = function(dateObj) {
   return availableWorkhours;
 }
 */
+
 /*  Auxiliary functions */
 businessSchema.methods.isWorkday = function(dateObj) {
   const workdaysArr = [];
@@ -150,6 +152,7 @@ businessSchema.methods.isBooked = function(dateObj) {
        return appointment.date;
     }
   });
+  
   return activeAppointments.includes(dateObj.toISOString());
 }
 
