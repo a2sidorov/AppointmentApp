@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Book a visit</title>
+  <title>Booking</title>
   <% include partials/head %>
 </head>
 <body>
@@ -10,7 +10,7 @@
       <% include partials/client-navbar %>
     </header>
     <main id="main" class="booking">
-      <div class="title">
+      <div class="page-title">
         <H2>Book an appointment</H2>
       </div>
       <div class="contacts">
@@ -20,8 +20,8 @@
         </div>
         <div id="content" class="content">
           <% contacts.forEach((contact) => { %>
-            <% if (contact.local.username !== chosenContact) { %>
-              <a href="/book/<%= contact._id %>"><%= contact.local.username %></a>
+            <% if (contact.local.email !== chosenContact) { %>
+              <a href="/book/<%= contact._id %>"><%= contact.local.email %></a>
             <% } %>
           <% }); %>
         </div>
@@ -32,9 +32,9 @@
         </div>
         <div class="month">
           <% const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"] %>
-          <button type="button" onclick="appointment.getDays('<%= dateObj.toISOString() %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
+          <button type="button" onclick="getDays('<%= dateObj.toISOString() %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
           <span id="month"><%= monthNames[dateObj.getMonth()] %></span>
-          <button type="button" onclick="appointment.getDays('<%= dateObj.toISOString() %>', 'next')" class="material-icons">keyboard_arrow_right</button>
+          <button type="button" onclick="getDays('<%= dateObj.toISOString() %>', 'next')" class="material-icons">keyboard_arrow_right</button>
         </div>
         <ul class="days"> 
           <li>Mo</li>
@@ -50,7 +50,7 @@
             <% days.forEach((day) => { %>
               <li>
                 <% if (day.isAvailable) { %> 
-                    <div class="availableDays" onclick="appointment.setDay('<%= dateObj.toISOString() %>', this)"><%= day.num %></div> 
+                    <div class="availableDays" onclick="setDay('<%= dateObj.toISOString() %>', this)"><%= day.num %></div> 
                 <% } else { %>
                     <div><%= day.num %></div>
                 <% } %>
@@ -80,11 +80,12 @@
           <textarea id="reason" rows="4" name="reason"></textarea>
         </div>
       </div>
-      <div id="msg"></div>
-      <button class="submitBtn" type="button" onclick="appointment.book()">Book Now</button> 
+      <button class="submitBtn" type="button" onclick="book()">Book Now</button>
+      <div id="message"></div>
     </main>   
   </div>   
   <script src="/public/scripts/navbar.js"></script>
   <script src="/public/scripts/booking.js"></script>
+  <script src="/public/scripts/shared.js"></script>
 </body>
 </html>

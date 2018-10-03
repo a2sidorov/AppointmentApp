@@ -1,2 +1,0 @@
-/* Indent a whole document */
-gg=G

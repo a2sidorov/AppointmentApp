@@ -29,10 +29,10 @@ app.set('view engine', 'ejs');
 app.set('/views', path.join(__dirname, 'views')); 
 
 app.use('/public', express.static(path.join(__dirname, '/public')))
-app.use('/:username/public', express.static(path.join(__dirname, '/public')))
+//app.use('/:username/public', express.static(path.join(__dirname, '/public')))
 app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
-//app.use(morgan('dev'));
-app.use(morgan('combined', { stream: winston.stream }));
+app.use(morgan('dev'));
+//app.use(morgan('combined', { stream: winston.stream }));
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -44,7 +44,6 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-
 require('./config/routes.js')(app, passport);
 
 //app.use((err, req, res, next) => {
@@ -53,20 +52,40 @@ require('./config/routes.js')(app, passport);
 //  res.status(err.statusCode).send('Something broke!');
 //});.
 app.use(function(err, req, res, next) {
-  console.log(req.headers['content-type'] === 'application/json');
-  winston.error(err.message);
+//  console.log(req.headers['content-type'] === 'application/json');
+  //winston.error(err);
+  console.error(err);
+//  console.log(req.headers);
+  if (req.headers['content-type'] === 'application/json') {
+    return res.json({
+      error: true,
+      message: `Server error ${err.status || 500}`  
+    });
+  }
+//  } else if (req.headers['content-type'] === 'text/html') {
+//    res.json({
+//      error: true,
+//      message: `works`  
+//    });
+//    
+  res.redirect(`/error/${err.status || 500}`);
+
 //  winston.error(`${err.status || 500} - ${err.message} - ${req.originalUrl} - ${req.method} - ${req.ip}`);
 //  res.status(err.status || 500);
-  res.json({
-    error: true,
-    message: `Server error ${err.status || 500} `  
-  });
 //});.
 });
 
+app.on('listening',function(){
+  console.log('ok, server is running');
+});
+
+app.listen(3000);
+
+/*
 app.listen(port, () => {
 	console.info(`listening on port ${port}`);
 });
+*/
 
-module.exports = app;
+module.exports = app; // for testing
 

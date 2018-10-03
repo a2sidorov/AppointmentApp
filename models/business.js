@@ -10,7 +10,9 @@ const businessSchema = new mongoose.Schema({
   workdays: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkdays() },
   workhours: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkhours() },
   holidays: [mongoose.Schema.Types.Mixed],
+  //holidays: { type: [mongoose.Schema.Types.Mixed], default: defaultHolidays() },
   appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
+  suspended: { type: Boolean, default: false },
 }, options);
 
 function defaultWorkdays() {
@@ -42,14 +44,13 @@ function defaultWorkhours() {
   return workhours;
 }
 
-businessSchema.methods.setHolidays = function() {
-  holidays.readFromFile().then((events) => {
-    events.forEach((event) => {
-      event.isAvailable = false;
-      this.holidays.push(event);
-    });
+businessSchema.methods.setHolidays = async function() {
+  const events = await holidays.readFromFile();
+  events.forEach((event) => {
+    event.isAvailable = false;
+    this.holidays.push(event);
   });
-}
+};
 
 businessSchema.methods.createMonth = function(dateObj) {
   if (!dateObj) {
@@ -92,6 +93,22 @@ businessSchema.methods.createMonth = function(dateObj) {
 };
 
 businessSchema.methods.createDay = function(dateObj) {
+  const availableWorkhours = this.workhours.filter(hour => hour.isAvailable);
+  availableWorkhours.forEach((hour) => {
+    let h = parseInt(hour.time.substring(0, 2));
+    let m = parseInt(hour.time.substring(3, 5));
+    dateObj.setHours(h);
+    dateObj.setMinutes(m);
+    
+    if (this.isBooked(dateObj) || this.isLate(dateObj)) {
+      hour.isAvailable = false;
+    }
+  });
+  return availableWorkhours;
+}
+
+/*
+businessSchema.methods.createDay = function(dateObj) {
   const availableWorkhours = this.workhours.filter((hour) => {
     return hour.isAvailable;
   });
@@ -106,6 +123,7 @@ businessSchema.methods.createDay = function(dateObj) {
   });
   return availableWorkhours;
 }
+*/
 
 /*  Auxiliary functions */
 businessSchema.methods.isWorkday = function(dateObj) {
@@ -134,11 +152,12 @@ businessSchema.methods.isBooked = function(dateObj) {
        return appointment.date;
     }
   });
+  
   return activeAppointments.includes(dateObj.toISOString());
 }
 
 businessSchema.methods.isLate = function(dateObj) { 
-  return (dateObj.getTime() - new Date().getTime()) < (30 * 60 * 1000); //checking if an appointment starts in less than 30 minutes;
+  return ((dateObj.getTime() - new Date().getTime()) < (30 * 60 * 1000)); //checking if an appointment starts in less than 30 minutes;
 }
 
 module.exports = User.discriminator('Business', businessSchema);

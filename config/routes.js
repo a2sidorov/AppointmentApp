@@ -6,26 +6,7 @@ const Appointment = require('../models/appointment');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const validator = require('validator');
-const passwordRecovery = require('./passwordRecovery');
-
-//logging user list
-// Appointment.find({}, (err, user) => {
-//   if (err) throw err;
-// });
-// User.find({}, (err, users) => {
-//   if (err) throw err;
-//   users.forEach((user) => {
-//   });
-// });
-//User.deleteMany({}, function (err) {});
-//Appointment.deleteMany({}, function (err) {});
-// Business.deleteOne({ 'local.username': 'test' }, (err) => {});
-// Business.deleteOne({ 'local.username': 'test1' }, (err) => {});
-// User.find({}, (err, users) => {
-//   if (err) throw err;
-//   users.forEach((user) => {
-//   });
-// });
+const passwordReset = require('./passwordReset');
 
 module.exports = (app, passport) => {
 
@@ -34,14 +15,14 @@ module.exports = (app, passport) => {
     res.render('login');
   });
 
-  /* POST login */
-  app.post('/login', (req, res, next) => {
+  /* POST(ajax) login */
+  app.post('/login', isEmailValid, isPasswordValid, (req, res, next) => {
     passport.authenticate('local-login', (err, user, info) => {
       if (err) return next(err); 
       if (!user) return res.json({ success: false, message: info });
       req.logIn(user, (err) => {
-        if (err) return next(err);
-        return res.json({ success: true });
+  if (err) return next(err);
+  return res.json({ success: true });
       });
     })(req, res, next);
   });
@@ -51,8 +32,8 @@ module.exports = (app, passport) => {
     res.render('signup');
   });
 
-  /* POST(ajax) sign up */
-  app.post('/signup', isEmailValid, isPasswordValid, (req, res, next) => {
+  /* POST sign up */
+  app.post('/signup', isEmailValid, isPasswordValid, isConfirmPasswordValid, (req, res, next) => {
     passport.authenticate('local-signup', (err, user, info) => {
       if (err) return next(err);
       if (!user) return res.json({ success: false, message: info });
@@ -73,8 +54,21 @@ module.exports = (app, passport) => {
   /* POST password recovery */
   app.post('/forgot', isEmailValid, async (req, res, next) => {
     try {
-      const result = await passwordRecovery(req);
-      res.json(result);
+      const user = await User.findOne({ 'local.email': req.body.email });
+      if (!user) {
+        return res.json({
+          success: false, message: 'No account with that email address found.'
+        });
+      }
+      const buf = await crypto.randomBytes(20);
+      const token =  buf.toString('hex')
+      user.local.resetPasswordToken = token;
+      user.local.resetPasswordExpires = Date.now() + (60 * 60 * 1000);
+      await user.save();
+      passwordReset.sendToken(req, user.local.email, token);
+      return res.json({
+        success: true, message: 'Recovery email has been sent.'
+      });
     } catch(err) {
       next(err);
     }
@@ -83,125 +77,81 @@ module.exports = (app, passport) => {
   /* GET password reset page */
   app.get('/reset/:token', async (req, res, next) => {
     try {
-      throw new Error('Test error');
       const user = await User.findOne({ 'local.resetPasswordToken': req.params.token });
       if (!user) {
         req.flash('info', 'Password reset token is invalid.');
-        res.redirect('/forgot');
-      } else if (user.local.resetPasswordExpires < Date.now()) {
-        req.flash('info', 'Password reset token is expired.');
-        res.redirect('/forgot');
-      } else { 
-        res.render('reset');
+        return res.redirect('/forgot');
       }
+      if (user.local.resetPasswordExpires < Date.now()) {
+        req.flash('info', 'Password reset token is expired.');
+        return res.redirect('/forgot');
+      }
+      return res.render('reset');
     } catch(err) {
       next(err);
     }
   });
 
-//  app.get('/reset/:token', (req, res) => {
-//    User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
-//      if (!user) {
-//        req.flash('info', 'Password reset token is invalid.');
-//        res.redirect('/forgot');
-//      } else if (user.local.resetPasswordExpires < Date.now()) {
-//        req.flash('info', 'Password reset token is expired.')
-//        res.redirect('/forgot');
-//      } else {
-//        res.render('reset', {
-//          user: req.user,
-//          token: req.params.token,
-//          message: req.flash('info')
-//        });
-//      }
-//    });
-//  });
   /* POST Password reset */
-  app.post('/reset/:token', (req, res) => {
-    User.findOne({ 'local.resetPasswordToken': req.params.token }, (err, user) => {
-      if (err) throw err;
+  app.post('/reset/:token', isPasswordValid, isConfirmPasswordValid, async (req, res, next) => {
+    try {
+      const user = await User.findOne({ 'local.resetPasswordToken': req.params.token });
       if (!user) {
-        req.flash('info', 'Password reset token is invalid.');
-        res.render('reset', {
-          user: req.user,
-          message: req.flash('info')
-        });
-      } else if (user.local.resetPasswordExpires < Date.now()) {
-        req.flash('info', 'Password reset token is expired.')
-        res.render('reset', {
-          user: req.user,
-          message: req.flash('info')
-        });
-      } else {
-        user.local.password = user.generateHash(req.body.password);
-        user.resetPasswordToken = undefined;
-        user.resetPasswordExpires = undefined;
-        user.save((err, update) => {
-          if (err) throw err;
-          const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: process.env.EMAIL,
-              pass: process.env.EMAIL_PASS,
-            }
-          });
-          const mailOptions = {
-            from: process.env.EMAIL,
-            to: user.local.email,
-            subject: 'Your password has been changed',
-            text: 'Hello,\n\n' +
-            'This is a confirmation that the password for your account ' + user.email + ' has just been changed.\n'
-          };
-
-          transporter.sendMail(mailOptions, (error, info) => {
-            if (err) console.log(err); 
-            else {
-              req.flash('info', 'Success! Your password has been changed.');
-              res.render('login', {
-                message: req.flash('info')
-              });
-            }
-          });
+        return res.json({
+          success: false, massage: 'Password reset token is invalid.'
         });
       }
-    });
-  });
-
-
-  /* GET business/client home page */
-  app.get('/home', isLoggedIn, (req, res) => {
-    if (req.user.kind === 'Business') {
-      Appointment.find({ business: req.user.id }).populate({ path: 'user', select: 'firstname lastname' }).exec((err, appointments) => {
-        if (err) throw err;
-        res.render('business-home', {
-          appointments: appointments,
+      if (user.local.resetPasswordExpires < Date.now()) {
+        return res.json({
+          success: false, massage: 'Password reset token is expired.'
         });
+      }
+      user.local.password = user.generateHash(req.body.password);
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+      await user.save();
+      passwordReset.sendConfirmation(user.local.email);
+      res.json({
+        success: true,
+        message: 'Success! Your password has been changed.'
       });
-    } else {
-      User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec((err, user) => {
-        Appointment.find({ user: req.user.id }).populate({ path: 'business', select: 'firstname lastname' }).exec((err, appointments) => {
-          if (err) throw err;
-          res.render('client-home', {
-            contacts: req.user.contacts,
-            appointments: appointments,
-            contacts: user.contacts,
-          });
-        });
-      });
+    } catch(err) {
+      next(err);
     }
   });
 
-  /* POST business/client home page */
-  app.post('/home/cancel', isLoggedIn, (req, res) => { 
-    Appointment.findById(req.body.appointmentId, 'canceled', (err, appointment) => {
-      if (err) throw err;
-      appointment.canceled = true;
-      appointment.save((err, update) => {
-        if (err) return handleError(err);
-        res.send('This appointment has been calceled');
+  /* GET home page */
+  app.get('/home', isLoggedIn, async (req, res, next) => {
+    try {
+      if (req.user.kind === 'Business') {
+        const appointments = await Appointment
+          .find({ business: req.user.id })
+          .populate({ path: 'user', select: 'local.email' })
+          .exec();
+        res.setHeader('view', 'business-home');
+        return res.render('business-home', {
+          appointments: appointments,
+          message: "",
+        });
+      }
+      /*
+      const user = User.findById(req.user.id)
+        .populate({ path: 'contacts', select: 'local.email' })
+        .exec();
+      */
+      const appointments = await Appointment.find({ user: req.user.id })
+        .populate({ path: 'business', select: 'local.email' })
+        .exec();
+      res.setHeader('view', 'client-home');
+      return res.render('client-home', {
+        contacts: req.user.contacts,
+        appointments: appointments,
+        message: "",
+        //contacts: user.contacts,
       });
-
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* GET business schedule page */
@@ -213,80 +163,145 @@ module.exports = (app, passport) => {
     });
   });
 
-  /* GET(ajax) business schedule workdays */
-  app.post('/schedule/update', isLoggedIn, isBusiness, (req, res) => {
-    if (req.user.kind === 'Business') {
-      Business.findById(req.user.id, 'workdays workhours holidays', (err, business) => {
-        const updatedDays = JSON.parse(req.body.days);
-        const updatedTime = JSON.parse(req.body.time);
-        const updatedHolidays = JSON.parse(req.body.holidays);
-        if (updatedDays.length > 0) {
-          business.workdays.forEach((day) => {
-            updatedDays.forEach((updatedDay) => {
-              if (day.dayNum === updatedDay.dayNum) {
-                day.isAvailable = updatedDay.isAvailable;
-              }
-            });
-          });
-        }
-        if (updatedTime.length > 0) {
-          business.workhours.forEach((hour) => {
-            updatedTime.forEach((updatedTime) => {
-              if (hour.time === updatedTime.time) {
-                hour.isAvailable = updatedTime.isAvailable;
-              }
-            });
-          });
-        }
-        if (updatedHolidays.length > 0) {
-          business.holidays.forEach((holiday) => {
-            updatedHolidays.forEach((updatedHoliday) => {
-              if (holiday.date === updatedHoliday.date) {
-                holiday.isAvailable = updatedHoliday.isAvailable;
-              }
-            });
-          });
-        }
-        business.markModified('workdays');
-        business.markModified('workhours');
-        business.markModified('holidays');
-        business.save((err, update) => {
-          if (err) return handleError(err);
-          res.send('Your schedule has been updated');
+  /* POST(ajax) business schedule workdays */
+  app.post('/schedule/update', isLoggedIn, isBusiness, async (req, res, next) => {
+    try {
+      const business = await Business.findById(req.user.id, 'workdays workhours holidays');
+      if (req.body.days.length === 0 && req.body.time.length === 0 && req.body.holidays.length === 0) {
+        return res.json({
+          success: false,
+          message: 'No changes are sent'
         });
+      }
+      if (req.body.days.length > 0) {
+        business.workdays.forEach((day) => {
+          req.body.days.forEach((updatedDay) => {
+            if (day.dayNum === updatedDay.dayNum) {
+              day.isAvailable = updatedDay.isAvailable;
+            }
+          });
+        });
+        business.markModified('workdays');
+      }
+      if (req.body.time.length > 0) {
+        business.workhours.forEach((hour) => {
+          req.body.time.forEach((updatedTime) => {
+            if (hour.time === updatedTime.time) {
+              hour.isAvailable = updatedTime.isAvailable;
+            }
+          });
+        });
+        business.markModified('workhours');
+      }
+      if (req.body.holidays.length > 0) {
+        business.holidays.forEach((holiday) => {
+          req.body.holidays.forEach((updatedHoliday) => {
+            if (holiday.date === updatedHoliday.date) {
+              holiday.isAvailable = updatedHoliday.isAvailable;
+            }
+          });
+        });
+        business.markModified('holidays');
+      }
+      await business.save();
+      res.json({
+  success: true,
+  message: 'Your schedule has been updated'
       });
-      //res.send(req.body);
+    } catch(err) {
+      next(err);
+    }
+  });
+
+  /* GET suspend service */
+  app.post('/schedule/suspend', isLoggedIn, isBusiness, async (req, res, next) => {
+    try {
+      if (typeof req.body.suspended !== 'boolean') {
+        return res.json({
+          success: false,
+          message: 'Invalid data'
+        });
+      }
+      const business = await Business.findById(req.user.id, 'suspended');
+      business.suspended = req.body.suspended;
+      await business.save();
+      
+      const msg = req.body.suspended ? 'Your schedule has been suspended' : 'Your schedule has been activated';
+      res.json({
+        success: true,
+        message: msg
+      });
+
+    } catch(err) {
+      next(err);
     }
   });
 
   /* GET business/client profile page */
   app.get('/profile', isLoggedIn, (req, res) => {
     if (req.user.kind === 'Business') {
-      res.render('business-profile', {
+      res.setHeader('view', 'business-profile');
+      return res.render('business-profile', {
         firstname: req.user.firstname,
         lastname: req.user.lastname,
-      });
-    } else {
-      res.render('client-profile', {
-        firstname: req.user.firstname,
-        lastname: req.user.lastname,
-        contacts: req.user.contacts,
       });
     }
+    res.setHeader('view', 'client-profile');
+    res.render('client-profile', {
+      firstname: req.user.firstname,
+      lastname: req.user.lastname,
+      contacts: req.user.contacts,
+    });
   });
 
   /* POST(ajax) business/client profile*/
-  app.post('/profile/update', isLoggedIn, (req, res) => {
-    User.findById(req.user.id, 'firstname lastname', (err, user) => {
-      if (err) throw err;
+  app.post('/profile/update', isLoggedIn, async (req, res, next) => {
+    try {
+      if (!req.body.firstname && !req.body.lastname) {
+        return res.json({
+          success: false,
+          message: 'No data is sent'
+        });
+      }
+      const user = await User.findById(req.user.id, 'firstname lastname');
       user.firstname = req.body.firstname;
       user.lastname = req.body.lastname;
-      user.save((err, update) => {
-        if (err) return handleError(err);
-        res.send('Profile has been updated');
+      await user.save();
+      res.json({
+        success: true,
+        message: 'Your profile has been updated'
       });
-    });
-    //res.send(req.body);
+    } catch(err) {
+      next(err);
+    }
+  });
+
+  /* POST delete account*/
+  app.post('/profile/delete', isLoggedIn, isPasswordValid, async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id);
+      if (!user.validPassword(req.body.password)) {
+        return res.json({
+          success: false,
+          message: 'Wrong password'
+        })
+      }
+      if (req.user.kind  === 'Business') {
+        const appointments = await Appointment.find({ 'business': req.user.id });
+        appointments.forEach(async appointment => {
+          appointment.canceled = true;
+          await appointment.save();
+        });
+      }
+      await User.findByIdAndRemove(req.user._id);
+      req.logout();
+      res.json({
+        success: true,
+        message: 'Your account has benn successfully deleted'
+      });
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* GET client contact search page*/
@@ -296,45 +311,84 @@ module.exports = (app, passport) => {
     });
   });
 
-  /* GET(ajax) client find request*/
-  app.get('/search/:pattern', isLoggedIn, isClient, (req, res) => {
-    const pattern = new RegExp(req.params.pattern, "gi");
-    Business.find({ 'local.username': pattern }, '_id local.username', (err, usernames) => {
-      if (err) throw err;
+  /* POST(ajax) client find request*/
+  app.post('/search', isLoggedIn, isClient, async (req, res, next) => {
+    try {
+      const pattern = new RegExp(req.body.pattern, "gi");
+      const businesses = await Business.find({ 'local.email': pattern }, '_id local.email');
+      if (businesses.length === 0) {
+        return res.json({
+          success: false,
+          message: 'No match found.'
+        });
+      }
       res.json({
-        results: usernames,
+        success: true,
+        results: businesses,
         contacts: req.user.contacts,
       });
-    });
-    //res.send(req.body);
+    } catch(err) {
+      next(err);
+    }
   });
 
-  /* POST(ajax) client add contact page*/
-  app.post('/search/add', isLoggedIn, isClient, (req, res) => {
-    User.findById(req.user.id, 'contacts', (err, user) => {
-      if (!user.contacts.includes(req.body.id)) {
-        user.contacts.push(req.body.id);
+  /* POST(ajax) client add business to contact list*/
+  app.post('/search/add', isLoggedIn, isClient, isContactIdValid,  async (req, res, next) => {
+    try {
+      const contacts = req.user.contacts.map(id => id.toString()); //converting array of objects to array of strings
+      if (contacts.includes(req.body.id)) {
+        return res.json({
+          success: false,
+          message: 'This business is already in your contact list'
+        });
       }
-      user.save((err, update) => {
-        if (err) return handleError(err);
-        res.send('Contact has been added');
+      const user = await User.findById(req.user.id, 'contacts');
+      user.contacts.push(req.body.id);
+      await user.save();
+      res.json({
+        success: true,
+        message: 'Contact has been added'
       });
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
-  /* POST(ajax) client remove contact request*/
-  app.post('/search/remove', isLoggedIn, isClient, (req, res) => {
-    User.findById(req.user.id, 'contacts', (err, user) => {
-      if (err) throw err;
-      let i = user.contacts.indexOf(req.body.id);
+  /* POST(ajax) client remove business from contact list*/
+  app.post('/search/remove', isLoggedIn, isClient, isContactIdValid, async (req, res, next) => {
+    try {
+      const contacts = req.user.contacts.map(id => id.toString()); //converting array of objects to array of strings
+      const i = contacts.indexOf(req.body.id);
+      if (i === -1) {
+        return res.json({
+          success: false,
+          message: 'This id is not in your contact list'
+        });
+      }
+      const user = await User.findById(req.user.id, 'contacts');
       user.contacts.splice(i, 1);
-      user.save((err, update) => {
-        if (err) return handleError(err);
-        res.send('Contact has been removed');
+      await user.save();
+      res.json({
+        success: true,
+        message: 'Contact has been removed'
       });
-    });
-    //res.send(req.body);
+    } catch(err) {
+      next(err);
+    }
   });
+
+  /* GET client contacts page */
+  app.get('/contacts', isLoggedIn, isClient, async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.email' }).exec();
+      res.render('client-contacts', {
+        contacts: user.contacts,
+      });
+    } catch(err) {
+      next(err);
+    }
+  });
+
   /* GET client book page (no contacts) */
   app.get('/book/nocontacts', isLoggedIn, isClient, (req, res) => {
     res.render('client-booking-nocontacts', {
@@ -344,32 +398,35 @@ module.exports = (app, passport) => {
   });
 
   /* GET client book page */
-  app.get('/book/:id', isLoggedIn, isClient, (req, res) => {
-    Business.findById(req.params.id).populate('appointments').exec((err, business) => { 
-      if (err) throw err;
-      User.findById(req.user.id).populate({ path: 'contacts', select: 'local.username' }).exec((err, user) => {
-        if (err) throw err;
-        let date = new Date()
-        date.setSeconds(0);
-        date.setMilliseconds(0);
-        res.render('client-booking', {
-          contacts: user.contacts,
-          chosenContact: business.local.username,
-          workhours: business.workhours,
-          days: business.createMonth(),
-          dateObj: date,
-        });
+  app.get('/book/:id', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
+    try {
+      const results = await Promise.all([
+        User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec(),
+        Business.findById(req.params.id).populate('appointments').exec(),
+      ]);
+      const date = new Date();
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+      res.render('client-booking', {
+        contacts: results[0].contacts,
+        chosenContact: results[1].local.email,
+        workhours: results[1].workhours,
+        days: results[1].createMonth(),
+        dateObj: date,
       });
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* POST(ajax) client book nextmonth request */
-  app.post('/book/:id/month', isLoggedIn, isClient, (req, res) => {
-    Business.findById(req.params.id, (err, business) => {
-      let date = new Date(req.body.dateISO);
+  app.post('/book/:id/month', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
+    try {
+      const business = await Business.findById(req.params.id);
+      const date = new Date(req.body.dateISO);
       let month = date.getMonth();
       let year = date.getFullYear();
-      if (req.body.month == 'next') {
+      if (req.body.month === 'next') {
         if (month + 1 > 11) {
           month = 0;
           year++;
@@ -377,7 +434,7 @@ module.exports = (app, passport) => {
           month++;
         }
       }
-      if (req.body.month == 'prev') {
+      if (req.body.month === 'prev') {
         if (year > new Date().getFullYear()) {
           if (month - 1 < 0) {
             month = 11;
@@ -392,71 +449,98 @@ module.exports = (app, passport) => {
       date.setFullYear(year);
       date.setMonth(month);
       res.json({ 
+        success: true,
         days: business.createMonth(date),
         dateISO: date.toISOString(),
       });
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* POST(ajax) client book another day request */
-  app.post('/book/:id/day', isLoggedIn, isClient, (req, res) => {
-    Business.findById(req.params.id).populate('appointments').exec((err, business) => {
-      if (err) throw err;
-      let date = new Date(req.body.dateISO);
+  app.post('/book/:id/day', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
+    try {
+      const business = await Business.findById(req.params.id).populate('appointments').exec();
+      const date = new Date(req.body.dateISO);
       date.setDate(parseInt(req.body.day));
       res.json({ 
+        success: true,
         hours: business.createDay(date),
         dateISO: date.toISOString(),
       });
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* POST(ajax) client book request */
-  app.post('/book/:id/book', isLoggedIn, isClient, (req, res) => {
-    User.findById(req.user.id, 'appointments', (err, user) => {
-      if (err) throw err;
-      Business.findById(req.params.id, '_id appointments', (err, business) => {
-        if (err) throw err;
-        let newAppnt = new Appointment();
-        newAppnt.user = req.user.id;
-        newAppnt.business = business._id;
-        newAppnt.date = req.body.date;
-        newAppnt.reason = req.body.reason;
-        newAppnt.canceled = false;
-        newAppnt.timeMMM = new Date(req.body.date).getTime();
-        newAppnt.save((err, appointment) => {
-          if (err) throw err;
-          user.appointments.push(appointment._id);
-          user.save((err, result) => {
-            if (err) throw err;
-            business.appointments.push(appointment._id);
-            business.save((err, result) => {
-              if (err) throw err;
-              res.send(`Your appointment is scheduled on ${new Date(appointment.date).toLocaleDateString()}
-                at ${new Date(appointment.date).toLocaleTimeString().substring(0,8)}`);
-            });
+  app.post('/book/:id/book', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
+    try {
+      const user = await User.findById(req.user.id, 'appointments');
+      const business = await Business.findById(req.params.id).populate('appointments').exec();
+      
+      const date = new Date(req.body.dateISO);
+      if ( !business.isWorkday(date) 
+        || business.isHoliday(date)
+        || business.isBooked(date)
+        || business.isLate(date)) {
+          return res.json({
+            success: false,
+            message: 'Requested time is not available for appointment'
           });
-        });
+        }
+      const newAppnt = new Appointment();
+      newAppnt.user = req.user.id;
+      newAppnt.business = business._id;
+      newAppnt.date = req.body.dateISO;
+      newAppnt.reason = req.body.reason;
+      newAppnt.canceled = false;
+      newAppnt.timeMs = date.getTime();
+      const appointment = await newAppnt.save();
+
+      user.appointments.push(appointment._id);
+      await user.save();
+
+      business.appointments.push(appointment._id);
+      await business.save();
+
+      res.json({
+        success: true,
+        message: `Your appointment is scheduled on ${date.toLocaleDateString()}
+          at ${date.toLocaleTimeString().substring(0,8)}`
       });
-    });
-    //res.send(req.body);    
+    } catch(err) {
+      next(err);
+    }
   });
 
-  /* GET client contacts page */
-  app.get('/contacts', isLoggedIn, isClient, (req, res) => {
-    User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.username' }).exec((err, user) => {
-      res.render('client-contacts', {
-        contacts: user.contacts,
+  /* POST cancel appointment */
+  app.post('/home/cancel', isLoggedIn, async (req, res, next) => { 
+    try {
+      const patt = /^[0-9a-z]{24}$/;
+      if (!patt.test(req.body.appointmentId)) {
+        return res.json({
+          success: false,
+          message: 'Invalid appointment id'
+        });
+      }
+      const appointment = await Appointment.findById(req.body.appointmentId, 'canceled');
+      if (appointment.canceled) {
+        return res.json({
+          success: false,
+          message: 'This appointment is already canceled'
+        });
+      }
+      appointment.canceled = true;
+      await appointment.save();
+      res.json({
+        success: true,
+        message: 'This appointment has been calceled'
       });
-    });
-  })
-
-  /* POST delete account*/
-  app.get('/delete', isLoggedIn, (req, res) => {
-    User.findByIdAndRemove(req.user._id, (err) => { 
-      if (err) throw err;
-      res.redirect('/');
-    });
+    } catch(err) {
+      next(err);
+    }
   });
 
   /* GET Log Out */
@@ -466,35 +550,96 @@ module.exports = (app, passport) => {
   });
 
   /* Error page */
-  app.get('/error/:code', (req, res) => {
-      res.render('error', {
-        code: req.params.code, 
-      });
+  app.get('/error/:status', (req, res) => {
+    res.render('error', {
+      code: req.params.code,
+    });
   });
-  /* 404 page */
-  app.get('*', function(req, res) {
+
+  /* Error 404 page */
+  app.get('*', (req, res) => {
     res.statusCode = 404;
-    res.render('404');
+    res.render('error', {
+      code: 404, 
+    });
   });
 
   function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
       return next();
     }
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({
+        success: false,
+        message: 'You are not logged in'
+      });
+    }
     res.redirect('/');
   }
+
   function isBusiness(req, res, next) {
     if (req.user.kind === 'Business') {
       return next();
     }
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({
+        success: false,
+        message: 'You are not business'
+      });
+    }
     res.redirect('/');
   }
+
   function isClient(req, res, next) {
     if (req.user.kind !== 'Business') {
       return next();
     }
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({
+        success: false,
+        message: 'You are not client'
+      });
+    }
     res.redirect('/');
   }
+
+  function isBusinessIdValid(req, res, next) {
+    const patt = /^[0-9a-z]{24}$/;
+    if (patt.test(req.params.id)) {
+      return next();
+    }
+    if (req.headers['content-type'] === 'application/json') {
+      return res.json({
+        success: false,
+        message: 'Invalid business id'
+      });
+    }
+    res.redirect('/error/404');
+  }
+
+  function isContactIdValid(req, res, next) {
+    if (!req.body.id) {
+      return res.json({
+        success: false,
+        message: 'No id is sent'
+      });
+    }
+    if (typeof req.body.id !== 'string') {
+      return res.json({
+        success: false,
+        message: 'Sent id not a string'
+      });
+    }
+    const patt = /^[0-9a-z]{24}$/;
+    if (!patt.test(req.body.id)) {
+      return res.json({
+        success: false,
+        message: 'Validation problem'
+      });
+    }
+    return next();
+  }
+
   function isEmailValid(req, res, next) {
     if (typeof req.body.email === 'string' && validator.isEmail(req.body.email)) {
       return next();
@@ -504,29 +649,68 @@ module.exports = (app, passport) => {
       message: 'The entered email is not valid'
     });
   }
+
   function isPasswordValid(req, res, next) {
-    if (req.body.password !== req.body.confirm) {
-      res.json({ 
+    if (!req.body.password) {
+      return res.json({ 
         success: false,
-        message: 'The entered passwords do not match.'
+        message: 'No password is sent'
       });
-    } else if (!(/^[a-zA-Z0-9@#$]+$/).test(req.body.password)) {
-      res.json({ 
+    }
+    if (!(/^[a-zA-Z0-9@#]+$/).test(req.body.password)) {
+      return res.json({ 
         success: false,
-        message: 'The entered password must contain only a-zA-Z0-9@#$ characters'
+        message: 'Password must contain only a-zA-Z0-9@# characters'
       });
-    } else if (req.body.password.length < 6) {
-      res.json({ 
+    }
+    if (req.body.password.length < 6) {
+      return res.json({ 
         success: false,
         message: 'Password must be at least 6 characters long'
       });
-    } else if (req.body.password.length > 20) {
-      res.json({ 
+    }
+    if (req.body.password.length > 20) {
+      return res.json({ 
         success: false,
         message: 'Password must be less than 20 characters long'
       });
-    } else {
-      return next();
-    }
+    } 
+    return next();
   }
+
+  function isConfirmPasswordValid(req, res, next) {
+    if (!req.body.confirm) {
+      return res.json({ 
+        success: false,
+        message: 'No confirmation password is sent'
+      });
+    }
+    if (!(/^[a-zA-Z0-9@#]+$/).test(req.body.confirm)) {
+      return res.json({ 
+        success: false,
+        message: 'Confirmation password must contain only a-zA-Z0-9@# characters'
+      });
+    }
+    
+    if (req.body.password !== req.body.confirm) {
+      return res.json({ 
+        success: false,
+        message: 'The entered passwords do not match.'
+      });
+    }
+    if (req.body.password.length < 6) {
+      return res.json({ 
+        success: false,
+        message: 'Password must be at least 6 characters long'
+      });
+    }
+    if (req.body.password.length > 20) {
+      return res.json({ 
+        success: false,
+        message: 'Password must be less than 20 characters long'
+      });
+    } 
+    return next();
+  }
+
 }

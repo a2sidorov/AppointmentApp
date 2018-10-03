@@ -1,10 +1,8 @@
 /* Business schedule */
 const schedule = {
-  message: document.getElementById('message'),
   days: [],
   time: [],
   holidays: [],
-
   saveBtn: document.getElementById(saveBtn),
   updateDays: function(el, dayNum, isAvailable) {
     el.classList.toggle('checked');
@@ -20,7 +18,6 @@ const schedule = {
     }
     console.log(this.days);
   },
-
   updateTime: function(el, time, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
@@ -35,7 +32,6 @@ const schedule = {
       this.time[index].isAvailable = this.time[index].isAvailable ? false : true;
     }
   },
-
   updateHolidays: function(el, holidayDate, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
@@ -50,29 +46,16 @@ const schedule = {
     }
     console.log(this.holidays);
   },
-
   save: function() {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
-        const parsedRes = JSON.parse(this.responseText);
-        if (parsedRes.error) {
-          return displayError(parsedRes.message);
-        }
-        if (!parsedRes.success) {
-          return message.innerHTML = parsedRes.message;
-        }
+        console.log(this.responseText);
         saveBtn.style.display = 'none';
       }
     };
-
     xhttp.open("POST", `${window.location}/update`, true);
-    xhttp.setRequestHeader("Content-type", "application/json");
-    const data = JSON.stringify({
-      days: this.days,
-      time: this.time,
-      holidays: this.holidays
-    });
-    xhttp.send(data);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    xhttp.send(`days=${JSON.stringify(this.days)}&time=${JSON.stringify(this.time)}&holidays=${JSON.stringify(this.holidays)}`);
   }
 };
