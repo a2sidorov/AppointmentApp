@@ -11,31 +11,23 @@ function reset() {
       const parsedRes = JSON.parse(this.responseText);
 
       if (parsedRes.error) {
-        const txt = document.createTextNode(parsedRes.message);
-        const div = document.createElement('div');
-        div.style.color = 'red';
-        div.appendChild(txt);
-        removeChildren(main);
-        main.appendChild(div);
+        return displayError(parsedRes.message);
       }
 
       if (!parsedRes.success) {
-        message.innerHTML = parsedRes.message;
+        return message.innerHTML = parsedRes.message;
       }
-
-      if (parsedRes.success) {
-        const txt = document.createTextNode(parsedRes.message);
-        const div = document.createElement('div');
-        div.style.color = 'green';
-        div.appendChild(txt);
-        const login = document.createTextNode('Go to login page');
-        const a = document.createElement('a');
-        a.href = ('/');
-        a.appendChild(login);
-        removeChildren(main);
-        main.appendChild(div);
-        main.appendChild(a);
-      } 
+      const txt = document.createTextNode(parsedRes.message);
+      const div = document.createElement('div');
+      div.style.color = 'green';
+      div.appendChild(txt);
+      const login = document.createTextNode('Go to login page');
+      const a = document.createElement('a');
+      a.href = ('/');
+      a.appendChild(login);
+      removeChildren(main);
+      main.appendChild(div);
+      main.appendChild(a);
     }
   };
   xhttp.open('POST', location.href, true);

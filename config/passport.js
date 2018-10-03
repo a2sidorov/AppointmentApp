@@ -23,7 +23,7 @@ module.exports = function(passport) {
       try {
         const user = await User.findOne({ 'local.email': username });
         if (user) return done(null, false, 'This email is alredy signed up');
-        if (req.body.isBusiness === 'on') {
+        if (req.body.isBusiness) {
           const newBusiness = new Business();
           newBusiness.local.email = username;
           newBusiness.local.password = newBusiness.generateHash(password);

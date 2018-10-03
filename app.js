@@ -75,9 +75,17 @@ app.use(function(err, req, res, next) {
 //});.
 });
 
+app.on('listening',function(){
+  console.log('ok, server is running');
+});
+
+app.listen(3000);
+
+/*
 app.listen(port, () => {
 	console.info(`listening on port ${port}`);
 });
+*/
 
 module.exports = app; // for testing
 

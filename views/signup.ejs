@@ -3,7 +3,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Sign Up</title>
+	<title>Sign up</title>
 	<% include partials/head %>
 </head>
 <body>
@@ -14,13 +14,13 @@
     <main id="main">
       <div class="signup-form">
         <label>Email</label>
-        <input id="email" type="text" name="email" required value="business@gmail.com">
+        <input id="email" type="text" name="email" required value="client@gmail.com">
         <label>Password</label>
         <input id="password" type="password" name="password" required value="noldor">
         <label>Confirm Password</label>
         <input id="confirm" type="password" name="confirm" required value="noldor">
-        <input id="isClient" type="radio" name="type" value="on"> Client<br>
-        <input id="isBusiness" type="radio" name="type" value="on" checked> Business<br>
+        <input id="isClient" type="radio" name="kind" value="client" checked> Client<br>
+        <input id="isBusiness" type="radio" name="kind" value="business"> Business<br>
         <button id="signupBtn" type="button" onclick="signup()">Signup</button>
       </div>
       <div class="recovery">
@@ -30,5 +30,6 @@
     </main>
   </div>
   <script src="/public/scripts/signup.js"></script>
+  <script src="/public/scripts/shared.js"></script>
 </body>
 </html>

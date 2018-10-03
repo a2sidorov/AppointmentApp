@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Doctors</title>
+  <title>Contacts</title>
   <% include partials/head %>
 </head>
 <body>
@@ -17,15 +17,17 @@
         <ul>
           <% contacts.forEach((contact) => { %>
             <div class="contacts-list">
-              <li><%= contact.local.username %></li>
+              <li><%= contact.local.email %></li>
               <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
             </div>
           <% }); %>
         </ul>
-      </div> 
+      </div>
+      <div id="message"></div>
     </main>
   </div> 
   <script src="/public/scripts/navbar.js"></script>
   <script src="/public/scripts/search.js"></script>
+  <script src="/public/scripts/shared.js"></script>
 </body>
 </html>

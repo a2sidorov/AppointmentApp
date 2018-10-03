@@ -236,7 +236,7 @@ describe('Testing routes', () => {
 					email: 'business0@test.com',
 					password: 'password',
 					confirm: 'password',
-					isBusiness: 'on'
+					isBusiness: true
 				});
       assert.isTrue(res.body.success);
 		});
@@ -248,7 +248,7 @@ describe('Testing routes', () => {
 					email: 'business0@test.com',
 					password: 'password',
 					confirm: 'password',
-					isBusiness: 'on'
+					isBusiness: true
 				});
       assert.isFalse(res.body.success);
 		});
@@ -1106,6 +1106,15 @@ describe('Testing routes', () => {
 				});
       find.restore();
       assert.isTrue(res.body.error);
+		});
+		it('should fail if no match found', async () => {
+      const res = await client0.session
+				.post('/search')
+				.set('Content-type', 'application/json')
+				.send({
+					pattern: 'nonexist',
+				});
+      assert.isFalse(res.body.success);
     });
     it('should get matching businesses', async () => {
       const res = await client0.session
@@ -1115,6 +1124,15 @@ describe('Testing routes', () => {
 					pattern: 'b',
 				});
       assert.equal(res.body.results[0].local.email, business0.email);
+		});
+		it('should send success notification if a match found', async () => {
+      const res = await client0.session
+				.post('/search')
+				.set('Content-type', 'application/json')
+				.send({
+					pattern: 'b',
+				});
+      assert.isTrue(res.body.success);
     });
     after(async () => {
       await User.remove({});
@@ -1663,7 +1681,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 				});
       assert.isFalse(res.body.success);
     });
@@ -1672,7 +1690,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 				});
       assert.isFalse(res.body.success);
     });
@@ -1683,7 +1701,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 				});
       findById.restore();
       assert.isTrue(res.body.error);
@@ -1693,7 +1711,7 @@ describe('Testing routes', () => {
 				.post('/book/incorrectid/book')
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 				});
       assert.isFalse(res.body.success);
     });
@@ -1702,7 +1720,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 					reason: 'reason'
 				});
 			const appointment = await Appointment.findOne({ 'business': business0.id });
@@ -1719,7 +1737,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 					reason: 'reason'
 				});
 			assert.isFalse(res.body.success);
@@ -1730,7 +1748,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 					reason: 'reason'
 				});
 				clock.restore();
@@ -1750,7 +1768,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					date: business0.firstAvailableTime.toISOString(),
+					dateISO: business0.firstAvailableTime.toISOString(),
 					reason: 'reason'
 				});
       assert.isTrue(res.body.success);
@@ -1907,7 +1925,7 @@ function DummyClient (email, password) {
 			.post(`/book/${businessId}/book`)
 			.set('Content-type', 'application/json')
 			.send({
-				date: date.toISOString(),
+				dateISO: date.toISOString(),
 				reason: 'reason'
 			});
 
@@ -1940,7 +1958,7 @@ function DummyBusiness (email, password) {
 			email: this.email,
 			password: this.password,
 			confirm: this.password,
-			isBusiness: 'on'
+			isBusiness: true
 		});
 		const business = await Business.findOne({ 'local.email': this.email }, '_id');
   	this.id = business._id.toString();

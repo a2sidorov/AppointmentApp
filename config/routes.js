@@ -124,25 +124,29 @@ module.exports = (app, passport) => {
   app.get('/home', isLoggedIn, async (req, res, next) => {
     try {
       if (req.user.kind === 'Business') {
-        const appointments = Appointment
+        const appointments = await Appointment
           .find({ business: req.user.id })
-          .populate({ path: 'user', select: 'firstname lastname' })
+          .populate({ path: 'user', select: 'local.email' })
           .exec();
         res.setHeader('view', 'business-home');
         return res.render('business-home', {
           appointments: appointments,
+          message: "",
         });
       }
+      /*
       const user = User.findById(req.user.id)
         .populate({ path: 'contacts', select: 'local.email' })
         .exec();
-      const appointments = Appointment.find({ user: req.user.id })
-        .populate({ path: 'business', select: 'firstname lastname' })
+      */
+      const appointments = await Appointment.find({ user: req.user.id })
+        .populate({ path: 'business', select: 'local.email' })
         .exec();
       res.setHeader('view', 'client-home');
       return res.render('client-home', {
         contacts: req.user.contacts,
         appointments: appointments,
+        message: "",
         //contacts: user.contacts,
       });
     } catch(err) {
@@ -312,7 +316,14 @@ module.exports = (app, passport) => {
     try {
       const pattern = new RegExp(req.body.pattern, "gi");
       const businesses = await Business.find({ 'local.email': pattern }, '_id local.email');
+      if (businesses.length === 0) {
+        return res.json({
+          success: false,
+          message: 'No match found.'
+        });
+      }
       res.json({
+        success: true,
         results: businesses,
         contacts: req.user.contacts,
       });
@@ -367,12 +378,11 @@ module.exports = (app, passport) => {
   });
 
   /* GET client contacts page */
-  app.get('/contacts', isLoggedIn, isClient, (req, res, next) => {
+  app.get('/contacts', isLoggedIn, isClient, async (req, res, next) => {
     try {
-      User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.username' }).exec((err, user) => {
-        res.render('client-contacts', {
-          contacts: user.contacts,
-        });
+      const user = await User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.email' }).exec();
+      res.render('client-contacts', {
+        contacts: user.contacts,
       });
     } catch(err) {
       next(err);
@@ -391,7 +401,7 @@ module.exports = (app, passport) => {
   app.get('/book/:id', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
       const results = await Promise.all([
-        User.findById(req.user.id).populate({ path: 'contacts', select: 'local.username' }).exec(),
+        User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec(),
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
       const date = new Date();
@@ -399,7 +409,7 @@ module.exports = (app, passport) => {
       date.setMilliseconds(0);
       res.render('client-booking', {
         contacts: results[0].contacts,
-        chosenContact: results[1].local.username,
+        chosenContact: results[1].local.email,
         workhours: results[1].workhours,
         days: results[1].createMonth(),
         dateObj: date,
@@ -470,7 +480,7 @@ module.exports = (app, passport) => {
       const user = await User.findById(req.user.id, 'appointments');
       const business = await Business.findById(req.params.id).populate('appointments').exec();
       
-      const date = new Date(req.body.date);
+      const date = new Date(req.body.dateISO);
       if ( !business.isWorkday(date) 
         || business.isHoliday(date)
         || business.isBooked(date)
@@ -483,10 +493,10 @@ module.exports = (app, passport) => {
       const newAppnt = new Appointment();
       newAppnt.user = req.user.id;
       newAppnt.business = business._id;
-      newAppnt.date = req.body.date;
+      newAppnt.date = req.body.dateISO;
       newAppnt.reason = req.body.reason;
       newAppnt.canceled = false;
-      newAppnt.timeMMM = new Date(req.body.date).getTime();
+      newAppnt.timeMs = date.getTime();
       const appointment = await newAppnt.save();
 
       user.appointments.push(appointment._id);
@@ -497,8 +507,8 @@ module.exports = (app, passport) => {
 
       res.json({
         success: true,
-        message: `Your appointment is scheduled on ${new Date(appointment.date).toLocaleDateString()}
-          at ${new Date(appointment.date).toLocaleTimeString().substring(0,8)}`
+        message: `Your appointment is scheduled on ${date.toLocaleDateString()}
+          at ${date.toLocaleTimeString().substring(0,8)}`
       });
     } catch(err) {
       next(err);
@@ -542,7 +552,7 @@ module.exports = (app, passport) => {
   /* Error page */
   app.get('/error/:status', (req, res) => {
     res.render('error', {
-      status: req.params.code, 
+      code: req.params.code,
     });
   });
 

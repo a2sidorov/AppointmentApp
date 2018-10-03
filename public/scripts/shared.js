@@ -6,3 +6,12 @@ function removeChildren(e) {
   }
 }
 
+function displayError(message) {
+  const txt = document.createTextNode(message);
+  const div = document.createElement('div');
+  div.style.color = 'red';
+  div.appendChild(txt);
+  removeChildren(main);
+  main.appendChild(div);
+}
+

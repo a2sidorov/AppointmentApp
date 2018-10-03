@@ -57,20 +57,12 @@ const schedule = {
       if (this.readyState == 4 && this.status == 200) {
         const parsedRes = JSON.parse(this.responseText);
         if (parsedRes.error) {
-          const txt = document.createTextNode(parsedRes.message);
-          const div = document.createElement('div');
-          div.style.color = 'red';
-          div.appendChild(txt);
-          removeChildren(main);
-          main.appendChild(div);
+          return displayError(parsedRes.message);
         }
         if (!parsedRes.success) {
-          console.log(parsedRes)
-          schedule.message.innerHTML = parsedRes.message;
+          return message.innerHTML = parsedRes.message;
         }
-        if (parsedRes.success) {
-          saveBtn.style.display = 'none';
-        }
+        saveBtn.style.display = 'none';
       }
     };
 
@@ -81,7 +73,6 @@ const schedule = {
       time: this.time,
       holidays: this.holidays
     });
-    console.log(data)
     xhttp.send(data);
   }
 };

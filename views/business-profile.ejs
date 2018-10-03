@@ -11,19 +11,21 @@
       <% include partials/business-navbar %>
     </header>
     <main id="main">
-      <div class="title">
+      <div class="page-title">
         <H2>Profile</H2>
       </div>
       <div class="profile-form">
-        <label for="firstname">First Name</label>
+        <label>First Name</label>
         <input id="firstname" type="text" name="firstname" value="<%= firstname %>" oninput="showSaveBtn()">  
-        <label for="lastname">Last Name</label>
+        <label>Last Name</label>
         <input id="lastname" type="text" name="lastname" value="<%= lastname %>" oninput="showSaveBtn()">  
         <button id="saveBtn" type="button" onclick="updateProfile()">Save</button>
       </div>
+      <div id="message"></div>
     </main>
   </div>
   <script src="/public/scripts/navbar.js"></script>
   <script src="/public/scripts/profile.js"></script>
+  <script src="/public/scripts/shared.js"></script>
 </body>
 </html>
