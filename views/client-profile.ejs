@@ -11,7 +11,7 @@
       <% include partials/client-navbar %>
     </header>
     <main id="main">
-      <div class="title">
+      <div class="page-title">
         <H2>Profile</H2>
       </div>
       <div class="profile-form">
@@ -21,6 +21,12 @@
         <input id="lastname" type="text" name="lastname" value="<%= lastname %>" oninput="showSaveBtn()">  
         <button id="saveBtn" type="button" onclick="updateProfile()">Save</button>
       </div>
+      <div class="delete-form">
+          <button class="showBtn" type="button" onclick="showDeleteForm()">Delete account</button>
+          <input id="password" type="password" placeholder="Enter password">
+          <button id="deleteBtn" type="button" onclick="deleteAccount()">Delete</button>
+      </div>
+      
       <div id="message"></div>
     </main>
   </div>

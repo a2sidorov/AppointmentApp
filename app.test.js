@@ -727,7 +727,7 @@ describe('Testing routes', () => {
 	
 	});
 	
-	describe('POST /schedule/suspend', () => {
+	describe('POST /schedule/status', () => {
     const business0 = new DummyBusiness('business0@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
 		before( async () => {
@@ -739,25 +739,25 @@ describe('Testing routes', () => {
 		});
     it('should fail if user is not logged in', async () => {
       const res = await request(app)
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
-					suspended: true
+					started: true
 				});
 				assert.isFalse(res.body.success);
 		});
     it('should fail if user is not business0', async () => {
       const res = await client0.session
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
-					suspended: true
+					started: true
 				});
       assert.isFalse(res.body.success);
 		});
     it('should fail if no data sent', async () => {
       const res = await business0.session
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
 				});
@@ -765,10 +765,10 @@ describe('Testing routes', () => {
 		});
 		it('should fail if sent data is not boolean type', async () => {
       const res = await business0.session
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
-					suspended: 0
+					started: 0
 				});
       assert.isFalse(res.body.success);
 		});
@@ -776,40 +776,40 @@ describe('Testing routes', () => {
       const findById = sinon.stub(Business, 'findById');
       findById.throws(new Error('test error'));
       const res = await business0.session
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
-					suspended: true
+					started: true
 				});
-      findById.restore();
+			findById.restore();
       assert.isTrue(res.body.error);
-		});
-    it('should suspend business schedule', async () => {
-      const res = await business0.session
-				.post('/schedule/suspend')
-				.set('Content-type', 'application/json')
-				.send({
-					suspended: true
-				});
-      const business = await Business.findOne({ 'local.email': business0.email });
-      assert.isTrue(business.suspended);
 		});
 		it('should start business schedule', async () => {
       const res = await business0.session
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
-					suspended: false
+					started: true
 				});
 			const business = await Business.findOne({ 'local.email': business0.email });
-      assert.isFalse(business.suspended);
+      assert.isTrue(business.started);
+		});
+		it('should stop business schedule', async () => {
+      const res = await business0.session
+				.post('/schedule/status')
+				.set('Content-type', 'application/json')
+				.send({
+				  started: false
+				});
+      const business = await Business.findOne({ 'local.email': business0.email });
+      assert.isFalse(business.started);
 		});
     it('should send success notification', async () => {
       const res = await business0.session
-				.post('/schedule/suspend')
+				.post('/schedule/status')
 				.set('Content-type', 'application/json')
 				.send({
-					suspended: true
+					started: true
 				});
       assert.isTrue(res.body.success);
 		});

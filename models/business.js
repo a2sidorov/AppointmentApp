@@ -12,7 +12,7 @@ const businessSchema = new mongoose.Schema({
   holidays: [mongoose.Schema.Types.Mixed],
   //holidays: { type: [mongoose.Schema.Types.Mixed], default: defaultHolidays() },
   appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
-  suspended: { type: Boolean, default: false },
+  active: { type: Boolean, default: false },
 }, options);
 
 function defaultWorkdays() {

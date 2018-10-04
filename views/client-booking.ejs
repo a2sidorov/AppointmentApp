@@ -26,61 +26,6 @@
           <% }); %>
         </div>
       </div>
-      <div class="calendar">
-        <div class="title">
-          <h3>Today is <%= dateObj.toDateString() %> </h3>
-        </div>
-        <div class="month">
-          <% const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul","Aug", "Sep", "Oct", "Nov", "Dec"] %>
-          <button type="button" onclick="getDays('<%= dateObj.toISOString() %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
-          <span id="month"><%= monthNames[dateObj.getMonth()] %></span>
-          <button type="button" onclick="getDays('<%= dateObj.toISOString() %>', 'next')" class="material-icons">keyboard_arrow_right</button>
-        </div>
-        <ul class="days"> 
-          <li>Mo</li>
-          <li>Tu</li>
-          <li>We</li>
-          <li>Th</li>
-          <li>Fr</li>
-          <li>Sa</li>
-          <li>Su</li>
-        </ul>
-        <ul id="days" class="days">
-          <% (function() { %>
-            <% days.forEach((day) => { %>
-              <li>
-                <% if (day.isAvailable) { %> 
-                    <div class="availableDays" onclick="setDay('<%= dateObj.toISOString() %>', this)"><%= day.num %></div> 
-                <% } else { %>
-                    <div><%= day.num %></div>
-                <% } %>
-              </li>
-            <% }); %>
-          <% })(); %>
-        </ul>
-      </div>
-      <div class="time">
-        <div class="title">
-          <h3>Time</h3>
-        </div>    
-        <ul id="timetable">
-          <% (function() { %>
-              <% workhours.forEach((hour) => { %>
-                  <% if (hour.isAvailable) { %>
-                    <li><%= hour.time %></li>
-                  <% } %>
-              <% }); %>
-          <% })(); %>
-        </ul>
-      <div class="reasonForVisit">
-        <div class="title">
-          <h3>Reason for visit</h3>
-        </div>
-        <div>
-          <textarea id="reason" rows="4" name="reason"></textarea>
-        </div>
-      </div>
-      <button class="submitBtn" type="button" onclick="book()">Book Now</button>
       <div id="message"></div>
     </main>   
   </div>   

@@ -42,6 +42,11 @@
             <% let x = 0; %>
             <% let y = 0; %>
             <% let d = 75; %>
+            <% if (active) { %>
+              <button class="active" type="button" onclick="schedule.toggleStatus(this)">Stop</button>
+            <% } else { %>
+              <button type="button" onclick="schedule.toggleStatus(this)">Start</button>
+            <% } %>
             <% workhours.forEach((time) => { %>
                 <% txt = time.time.split(':')[1] === '30' ? '30' : time.time.split(':')[0]; %>
                 <% rad = angle * (Math.PI / 180); %>

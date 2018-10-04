@@ -392,27 +392,14 @@ module.exports = (app, passport) => {
   });
 
   /* GET client book page (no contacts) */
-  /*
   app.get('/book/nocontacts', isLoggedIn, isClient, (req, res) => {
     res.render('client-booking-nocontacts', {
       contacts: req.user.contacts,
       message: 'You don\'t have contacts to make an appointment.',
     });
   });
-  */
-  
+
   /* GET client book page */
-  app.get('/book', isLoggedIn, isClient, async (req, res, next) => {
-    try {
-      const user = await User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.email' }).exec();
-      res.render('client-booking', {
-        contacts: user.contacts,
-      });
-    } catch(err) {
-      next(err);
-    }
-  });
-  /*
   app.get('/book/:id', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
       const results = await Promise.all([
@@ -439,7 +426,7 @@ module.exports = (app, passport) => {
       next(err);
     }
   });
-  */
+
   /* POST(ajax) client book nextmonth request */
   app.post('/book/:id/month', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
