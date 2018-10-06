@@ -706,8 +706,8 @@ describe('Testing routes', () => {
 					time: '',
 					holidays: ''
 				});
-      const business = await User.findOne({ 'local.email': business0.email });
-      assert.isTrue(business.workdays[6].isAvailable);
+			const business = await User.findOne({ 'local.email': business0.email });
+      assert.isTrue(business.workdays[5].isAvailable);
 		});
     it('should send success notification', async () => {
       const res = await business0.session
@@ -727,7 +727,7 @@ describe('Testing routes', () => {
 	
 	});
 	
-	describe('POST /schedule/status', () => {
+	describe('POST /schedule/active', () => {
     const business0 = new DummyBusiness('business0@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
 		before( async () => {
@@ -739,25 +739,25 @@ describe('Testing routes', () => {
 		});
     it('should fail if user is not logged in', async () => {
       const res = await request(app)
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-					started: true
+					active: true
 				});
 				assert.isFalse(res.body.success);
 		});
     it('should fail if user is not business0', async () => {
       const res = await client0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-					started: true
+					active: true
 				});
       assert.isFalse(res.body.success);
 		});
     it('should fail if no data sent', async () => {
       const res = await business0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
 				});
@@ -765,10 +765,10 @@ describe('Testing routes', () => {
 		});
 		it('should fail if sent data is not boolean type', async () => {
       const res = await business0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-					started: 0
+					active: 0
 				});
       assert.isFalse(res.body.success);
 		});
@@ -776,40 +776,40 @@ describe('Testing routes', () => {
       const findById = sinon.stub(Business, 'findById');
       findById.throws(new Error('test error'));
       const res = await business0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-					started: true
+					active: true
 				});
 			findById.restore();
       assert.isTrue(res.body.error);
 		});
 		it('should start business schedule', async () => {
       const res = await business0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-					started: true
+					active: true
 				});
 			const business = await Business.findOne({ 'local.email': business0.email });
-      assert.isTrue(business.started);
+      assert.isTrue(business.active);
 		});
 		it('should stop business schedule', async () => {
       const res = await business0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-				  started: false
+				  active: false
 				});
       const business = await Business.findOne({ 'local.email': business0.email });
-      assert.isFalse(business.started);
+      assert.isFalse(business.active);
 		});
     it('should send success notification', async () => {
       const res = await business0.session
-				.post('/schedule/status')
+				.post('/schedule/active')
 				.set('Content-type', 'application/json')
 				.send({
-					started: true
+					active: true
 				});
       assert.isTrue(res.body.success);
 		});
@@ -940,9 +940,11 @@ describe('Testing routes', () => {
 		before( async () => {
 			await business0.signup();
 			await business0.login();
+			await business0.activateSchedule();
 
 			await business1.signup();
 			await business1.login();
+			await business1.activateSchedule();
 
 			await client0.signup();
 			await client0.login();
@@ -1667,14 +1669,22 @@ describe('Testing routes', () => {
   });
 
   describe('POST /book/:id/book', () => {
-    const business0 = new DummyBusiness('business0@test.com', 'password');
+		const business0 = new DummyBusiness('business0@test.com', 'password');
+		const business1 = new DummyBusiness('business1@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
 		before( async () => {
 			await business0.signup();
 			await business0.login();
+			await business0.activateSchedule();
+			await business0.getFirstAvailableTime();
+			
+			await business1.signup();
+			await business1.login();
+			await business1.getFirstAvailableTime();
+
 			await client0.signup();
 			await client0.login();
-			await business0.getFirstAvailableTime();
+			
 		});
     it('should get an error if user is not logged in', async () => {
       const res = await request(app)
@@ -1732,6 +1742,16 @@ describe('Testing routes', () => {
 			assert.property(appointment, 'reason');
 			assert.property(appointment, 'canceled');
 		});
+		it('should fail if business schedule is not active', async () => {
+      const res = await client0.session
+				.post(`/book/${business1.id}/book`)
+				.set('Content-type', 'application/json')
+				.send({
+					dateISO: business1.firstAvailableTime.toISOString(),
+					reason: 'reason'
+				});
+			assert.isFalse(res.body.success);
+		});
 		it('should fail if requested time already booked', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
@@ -1785,8 +1805,11 @@ describe('Testing routes', () => {
 		before( async () => {
 			await business0.signup();
 			await business0.login();
+			await business0.activateSchedule();
+
 			await client0.signup();
 			await client0.login();
+
 			await business0.getFirstAvailableTime();
 			await client0.makeAppointment(business0.id, business0.firstAvailableTime);
 			await business0.getFirstAvailableTime();
@@ -2000,6 +2023,22 @@ function DummyBusiness (email, password) {
 		date.setHours(parseInt(hour));
 		date.setMinutes(parseInt(minute));
 		this.firstAvailableTime = date;
+	};
+	this.activateSchedule = async function () {
+		await this.session
+				.post('/schedule/active')
+				.set('Content-type', 'application/json')
+				.send({
+					active: true
+				});
+	};
+	this.deactivateSchedule = async function () {
+		await this.session
+				.post('/schedule/active')
+				.set('Content-type', 'application/json')
+				.send({
+					active: false
+				});
 	};
 }
 

@@ -20,7 +20,6 @@ const schedule = {
         schedule.active = parsedRes.active;
         btn.classList.toggle('active');
         btn.innerHTML = parsedRes.active ? 'Stop' : 'Start';
-        console.log(parsedRes.message)
       }
     };
     xhttp.open("POST", '/schedule/active', true);
@@ -43,7 +42,6 @@ const schedule = {
     } else {
       this.days[index].isAvailable = this.days[index].isAvailable ? false : true;
     }
-    console.log(this.days);
   },
 
   updateTime: function(el, time, isAvailable) {

@@ -214,7 +214,7 @@ module.exports = (app, passport) => {
     }
   });
 
-  /* GET suspend service */
+  /* POST activate and deactivate schedule */
   app.post('/schedule/active', isLoggedIn, isBusiness, async (req, res, next) => {
     try {
       if (typeof req.body.active !== 'boolean') {
@@ -285,7 +285,7 @@ module.exports = (app, passport) => {
       if (!user.validPassword(req.body.password)) {
         return res.json({
           success: false,
-          message: 'Wrong password'
+          message: 'Wrong password.'
         })
       }
       if (req.user.kind  === 'Business') {
@@ -392,45 +392,27 @@ module.exports = (app, passport) => {
   });
 
   /* GET client book page (no contacts) */
-  /*
   app.get('/book/nocontacts', isLoggedIn, isClient, (req, res) => {
     res.render('client-booking-nocontacts', {
       contacts: req.user.contacts,
       message: 'You don\'t have contacts to make an appointment.',
     });
   });
-  */
   
   /* GET client book page */
-  app.get('/book', isLoggedIn, isClient, async (req, res, next) => {
-    try {
-      const user = await User.findById(req.user._id, 'contacts').populate({ path: 'contacts', select: 'local.email' }).exec();
-      res.render('client-booking', {
-        contacts: user.contacts,
-      });
-    } catch(err) {
-      next(err);
-    }
-  });
-  /*
   app.get('/book/:id', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
       const results = await Promise.all([
         User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec(),
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
-      if (!results[1].active) {
-        return res.json({ 
-          success: false,
-          message: 'This business is not currently available for booking'
-        });
-      }
       const date = new Date();
       date.setSeconds(0);
       date.setMilliseconds(0);
       res.render('client-booking', {
         contacts: results[0].contacts,
         chosenContact: results[1].local.email,
+        active: results[1].active,
         workhours: results[1].workhours,
         days: results[1].createMonth(),
         dateObj: date,
@@ -439,7 +421,7 @@ module.exports = (app, passport) => {
       next(err);
     }
   });
-  */
+
   /* POST(ajax) client book nextmonth request */
   app.post('/book/:id/month', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
@@ -500,6 +482,13 @@ module.exports = (app, passport) => {
     try {
       const user = await User.findById(req.user.id, 'appointments');
       const business = await Business.findById(req.params.id).populate('appointments').exec();
+
+      if (!business.active) {
+          return res.json({
+            success: false,
+            message: 'This business is not currently available for booking.'
+          });
+        }
       
       const date = new Date(req.body.dateISO);
       if ( !business.isWorkday(date) 
@@ -508,7 +497,7 @@ module.exports = (app, passport) => {
         || business.isLate(date)) {
           return res.json({
             success: false,
-            message: 'Requested time is not available for appointment'
+            message: 'Requested time is not available for appointment.'
           });
         }
       const newAppnt = new Appointment();

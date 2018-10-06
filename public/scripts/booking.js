@@ -11,7 +11,7 @@ function getDays(dateISO, month) {
   if (appointment.date === undefined) {
     appointment.date = new Date(dateISO);
   }
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul','Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const monthNames = ["January", "February", "March", "April", "May", "June", "Jule","August", "September", "Octocber", "November", "December"];
   const days = document.getElementById('days');
   const message = document.getElementById('message');
   const xhttp = new XMLHttpRequest();
@@ -164,6 +164,6 @@ function book() {
 }
 
 function showDropdown() {
-  document.getElementById('content').classList.toggle("show");
+  document.querySelector("[class*='other']").classList.toggle("show");
 }
 

@@ -2,6 +2,10 @@
   --main-color: #4CAF90;
   --main-active-color: #4CAF50;
   --main-inactive-color: #808080;
+  --main-inactive-color: #ccc;
+  /*
+  --main-inactive-color: #808080;
+  */
 }
 * {
   margin: 0;
@@ -27,28 +31,53 @@
     margin: auto;
     max-width: 425px; 
   }
-  main .page-title {
-    text-align: center;
-    margin-bottom: 5px;
-  }
-  main .title {
-    padding: 10px 0px;
-  }
-
-  /*----------------------------------------*/
-  /*    Login/recovery/reset page    */
-  /*----------------------------------------*/
   .main-title h2 {
     padding: 10px 0px;
     text-align: center;
     font-size:20px;
   }
+  main .page-title {
+    text-align: center;
+    margin-bottom: 5px;
+  }
+  main .section-title {
+    padding: 10px 0px;
+  }
+  input[type=email], input[type=password], input[type=text] {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+  }
+  button {
+    width: 100%;
+    background-color: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border: none;
+    outline: none;
+  }
+  
+
+  /*----------------------------------------*/
+  /*    Login/recovery/reset page    */
+  /*----------------------------------------*/
+  /*
+  .main-title h2 {
+    padding: 10px 0px;
+    text-align: center;
+    font-size:20px;
+  }
+  */
+  /*
   .login input[type=text], input[type=password], input[type=email] {
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     border: 1px solid #ccc;
   }
+  
   .login form button {
     width: 100%;
     background-color: var(--main-color);
@@ -57,9 +86,6 @@
     margin: 8px 0;
     border: none;
   }
-  #message {
-    color: #ff0000;
-  } 
   .recovery {
     width: 90%;
     margin: auto;
@@ -67,16 +93,18 @@
   .recovery p {
     padding-top: 10px;
   }
-
+  */
   /*---------------------------*/
   /*   Login                   */
   /*---------------------------*/
+  /*
   .login-form input[type=email], input[type=password], input[type=text] {
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     border: 1px solid #ccc;
   }
+  
   .login-form button {
     width: 100%;
     background-color: var(--main-color);
@@ -85,16 +113,19 @@
     margin: 8px 0;
     border: none;
   }
-  
+  */
   /*---------------------------*/
   /*   Signup                  */
   /*---------------------------*/
+  /*
   .signup-form input[type=email], input[type=password], input[type=text] {
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     border: 1px solid #ccc;
   }
+  */
+  /*
   .signup-form button {
     width: 100%;
     background-color: var(--main-color);
@@ -103,10 +134,12 @@
     margin: 8px 0;
     border: none;
   }
+  */
 
   /*---------------------------*/
   /*   Password recovery       */
   /*---------------------------*/
+  /*
   .recovery-form input[type=email], input[type=password], input[type=text] {
     width: 100%;
     padding: 12px 20px;
@@ -121,10 +154,12 @@
     margin: 8px 0;
     border: none;
   }
+  */
 
   /*---------------------------*/
   /*   Password reset       */
   /*---------------------------*/
+  /*
   .reset-form input[type=email], input[type=password], input[type=text] {
     width: 100%;
     padding: 12px 20px;
@@ -139,6 +174,7 @@
     margin: 8px 0;
     border: none;
   }
+  */
 
   /*---------------------------*/
   /*   Navbar                  */
@@ -160,64 +196,64 @@
   /*------------------*/
   /* Home page        */
   /*------------------*/
+  
 
   .appointments .appointment-list {
     display: flex;
-    border: 1px solid var(--main-inactive-color);
-    margin-top: 10px;
   }
+
   .appointments .appointment-list li {
-    width: 75%;
+    border: 1px solid var(--main-inactive-color);
+    width: 80%;
+    margin: 8px 0;
+    padding: 12px 20px;
+  }
+  .appointments .appointment-list button {
+    padding-left: 15px;
+    width: 20%;
   }
   .appointments .appointment-list .active {
-    border: none;
     background-color: var(--main-color);
-    color: #fff;
-    width: 25%;
   }
   .appointments .appointment-list .canceled {
-    border: none;
-    border-left: 1px solid var(--main-inactive-color);
-    width: 25%;
+    background-color: var(--main-inactive-color);
   }
+  
 
   /*---------------------------*/
   /*   Profile page            */
   /*---------------------------*/
+  /*
   .profile-form input {
     border: 1px solid var(--main-inactive-color);
     width: 100%;
     height: 25px;
     margin-bottom: 10px;
   }
+  */
   .profile-form button {
     display: none;
-    background-color: var(--main-color);
-    color: #fff;
-    padding: 10px;
-    margin: auto;
-    border: none;
-    width: 100%;
-  }
-  .delete-form showBtn {
-    border: none;
-    margin-top: 40px;
-    text-align: right;
   }
   .delete-form {
-    margin-top: 50px;
-  }
-  .delete-form showBtn {
-    border: none;
-    padding: 0;
-    border: none;
-    background: none;
+    margin-top: 80px;
   }
   .delete-form #password {
     display: none;
   }
   .delete-form #deleteBtn {
     display: none;
+  }
+  /*
+  
+  
+  .delete-form showBtn {
+    border: none;
+    padding: 0;
+    border: none;
+    background: none;
+  }
+  
+  
     background-color: var(--main-color);
     color: #fff;
     padding: 10px;
@@ -225,11 +261,14 @@
     border: none;
     width: 100%;
   }
+  */
 
   
   /*---------------------------*/
   /*   Schedule page           */
   /*---------------------------*/
+
+
 
   .schedule .workdays ul {
     display: flex;
@@ -262,8 +301,8 @@
     height: 100px;
     color: #fff;
     border-radius: 50%;
+    outline: none;
     background-color: var(--main-inactive-color);
-    
   }
   .schedule .workhours .active {
     background-color: var(--main-active-color);
@@ -320,20 +359,33 @@
   /* Search page      */
   /*------------------*/
 
+  
   .search .search-bar {
     display: flex;
   }
+  
   .search .search-bar input {
     width: 80%;
-    margin: 0px;
   }
   .search .search-bar button {
-    border: 1px solid var(--main-inactive-color);
-    border-left: none;
-    background-color: var(--main-color);
-    color: #fff;
     width: 20%;
   }
+  
+  .search .search-result {
+    display: flex;
+    
+    
+  }
+  .search .search-result li {
+    border: 1px solid var(--main-inactive-color);
+    width: 80%;
+    margin: 8px 0;
+    padding: 12px 20px;
+  }
+  .search .search-result button {
+    width: 20%;
+  }
+  /*
   .search .search-result {
     display: flex;
     border: 1px solid var(--main-inactive-color);
@@ -350,46 +402,73 @@
     width: 20%;
   }
 
+
+  */
+  
+
   /*------------------*/
   /* Booking page     */
   /*------------------*/
 
-  .booking .contacts .bar {
+  .booking .contacts .first {
     display: flex;
+  }
+  .booking .contacts .first li {
     border: 1px solid var(--main-inactive-color);
-  }
-  .booking .contacts span {
     width: 80%;
+    margin: 8px 0;
+    padding: 12px 20px;
   }
-  .booking .contacts span p {
-    padding-top: 2px;
-    padding-left: 5px;
-  }
-  .booking .contacts button {
-    border: none;
-    background-color: var(--main-color);
-    color: #fff;
+  .booking .contacts .first button {
     width: 20%;
+    padding: 0px 0px;
   }
-  .booking .contacts .content {
+  .booking .contacts .other {
     display: none;
   }
-  .booking .contacts .content a {
+  .booking .contacts .other a {
     display: block;
     text-decoration: none;
-    vertical-align: middle;
-    padding-top: 12px;
-    padding-left: 5px; 
+    padding: 12px 20px;
+    border: 1px solid var(--main-inactive-color);
   }
   .booking .contacts .show {
     display: block;
   }
+  .booking .statusMessage {
+    padding-top: 20px;
+  }
+  /*
   .booking .calendar h3 {
     display: block;
     padding-left: 5px;
     padding-top: 5px;
     padding-bottom: 10px;
   }
+  */
+  .booking .calendar .month {
+    display: flex;
+    width: 40%;
+    margin: auto;
+    
+  }
+  /*
+  .booking .calendar .month * {
+    text-decoration: none;
+    vertical-align: middle;
+    display: inline-block;
+  }
+  */
+  
+  .booking .calendar .month span {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+  .booking .calendar .month button {
+    border: none;
+    padding: 0px 0px;
+  }
+  /*
   .booking .calendar .month {
     width: 100%;
     text-align: center;
@@ -399,14 +478,21 @@
     vertical-align: middle;
     display: inline-block;
   }
+  
   .booking .calendar .month span {
     padding: 0px 10px;
     font-size: 18px;
   }
+  
   .booking .calendar .month button {
     border: none;
     background-color: #fff
   }
+  .booking .calendar .month button {
+    border: none;
+    background-color: var(--main-inactive-color);
+  }
+  */
   .booking .calendar .days li {
     text-align: center;
     float: left;
@@ -458,7 +544,8 @@
     width: 100%;
     margin-bottom: 15px;
     border: 1px solid var(--main-inactive-color);
-  }  
+  }
+  /*
   .booking .submitBtn {
     background-color: var(--main-color);
     color: #fff;
@@ -467,9 +554,10 @@
     border: none;
     width: 100%;
   }
+  */
   
   /*----------------------*/
-  /* Client contacts      */
+  /*  Client contacts      */
   /*----------------------*/
 
   .contacts .contacts-list {

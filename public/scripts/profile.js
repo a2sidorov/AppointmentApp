@@ -51,7 +51,6 @@ function deleteAccount() {
       if (!parsedRes.success) {
         message.innerHTML = parsedRes.message;
       }
-      message.style.color = "green";
       message.innerHTML = parsedRes.message;
     }
   };
