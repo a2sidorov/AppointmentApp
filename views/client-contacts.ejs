@@ -16,7 +16,7 @@
         </div>
         <ul>
           <% contacts.forEach((contact) => { %>
-            <div class="contacts-list">
+            <div class="contact">
               <li><%= contact.local.email %></li>
               <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
             </div>

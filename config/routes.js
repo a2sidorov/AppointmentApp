@@ -484,11 +484,18 @@ module.exports = (app, passport) => {
       const business = await Business.findById(req.params.id).populate('appointments').exec();
 
       if (!business.active) {
-          return res.json({
-            success: false,
-            message: 'This business is not currently available for booking.'
-          });
-        }
+        return res.json({
+          success: false,
+          message: 'This business is not currently available for booking.'
+        });
+      }
+
+      if (!isReasonValid(req.body.reason)) {
+        return res.json({
+          success: false,
+          message: 'Reason text must not contain words longer than 30 characters.'
+        });
+      }
       
       const date = new Date(req.body.dateISO);
       if ( !business.isWorkday(date) 
@@ -721,6 +728,19 @@ module.exports = (app, passport) => {
       });
     } 
     return next();
+  }
+
+  function isReasonValid(str) {
+    let result = true;
+    const array = str.split(" ");
+
+    array.forEach((word) => {
+      if (word.length > 30) {
+        result = false;
+      }
+    });
+
+    return result;
   }
 
 }

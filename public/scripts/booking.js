@@ -91,7 +91,6 @@ function getTimetable(dayNum) {
       removeChildren(timetable);
 
       let txt, list;
-      console.log(parsedRes.hours)
       parsedRes.hours.forEach((hour) => {
         list = document.createElement('LI');
         txt = document.createTextNode(hour.time);
@@ -131,7 +130,7 @@ function checkTime(el) {
 function book() {
   if (appointment.isDayChosen && appointment.isTimeChosen) {
     const main = document.getElementById('main');
-    const reason = document.getElementById('reason').innerHTML;
+    const reason = document.getElementById('reason').value;
     const message = document.getElementById('message');
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -151,6 +150,8 @@ function book() {
       main.appendChild(div);
       }
     }
+
+
     xhttp.open("POST", `${window.location}/book`, true);
     xhttp.setRequestHeader("Content-type", "application/json");
     const data = JSON.stringify({
@@ -166,4 +167,5 @@ function book() {
 function showDropdown() {
   document.querySelector("[class*='other']").classList.toggle("show");
 }
+
 

@@ -2,10 +2,12 @@
   --main-color: #4CAF90;
   --main-active-color: #4CAF50;
   --main-inactive-color: #808080;
-  --main-inactive-color: #ccc;
   /*
-  --main-inactive-color: #808080;
+  --main-inactive-color: #ccc;
   */
+  
+  --main-inactive-color: #808080;
+  
 }
 * {
   margin: 0;
@@ -53,10 +55,11 @@
     width: 100%;
     background-color: var(--main-color);
     color: #fff;
-    padding: 12px 20px;
+    padding: 12px 4px;
     margin: 8px 0;
     border: none;
     outline: none;
+    cursor: pointer;
   }
   
 
@@ -196,21 +199,15 @@
   /*------------------*/
   /* Home page        */
   /*------------------*/
-  
 
   .appointments .appointment-list {
-    display: flex;
+    margin: 20px 0px;
   }
-
   .appointments .appointment-list li {
     border: 1px solid var(--main-inactive-color);
-    width: 80%;
-    margin: 8px 0;
-    padding: 12px 20px;
   }
   .appointments .appointment-list button {
-    padding-left: 15px;
-    width: 20%;
+    margin: 0;
   }
   .appointments .appointment-list .active {
     background-color: var(--main-color);
@@ -218,7 +215,6 @@
   .appointments .appointment-list .canceled {
     background-color: var(--main-inactive-color);
   }
-  
 
   /*---------------------------*/
   /*   Profile page            */
@@ -295,7 +291,7 @@
   }
   .schedule .workhours button {
     position: absolute;
-    top: -35px;
+    top: -45px;
     right: -55px;
     width: 100px;
     height: 100px;
@@ -380,7 +376,6 @@
     border: 1px solid var(--main-inactive-color);
     width: 80%;
     margin: 8px 0;
-    padding: 12px 20px;
   }
   .search .search-result button {
     width: 20%;
@@ -497,6 +492,7 @@
     text-align: center;
     float: left;
     width: 14.2857%;
+    
   }
   .booking .calendar .days li div {
     margin: 5px auto;
@@ -507,11 +503,14 @@
     border-radius: 50%;
     width: 23px;
     height: 23px;
+    cursor: pointer;
+    
   }
 
   .booking .calendar .days .availableDays {
     background: var(--main-color);
     color: #fff;
+    
   }
   .booking #checkedDay {
     background: var(--main-active-color);
@@ -527,6 +526,7 @@
     width: 20%;
     text-align: center;
     margin: 5px;
+    cursor: pointer;
   }
   .booking .availableTime {
     background: var(--main-color);
@@ -559,7 +559,20 @@
   /*----------------------*/
   /*  Client contacts      */
   /*----------------------*/
-
+  .contacts .contact {
+    display: flex;
+  }
+  .contacts .contact li {
+    width: 80%;
+    border: 1px solid var(--main-inactive-color);
+    width: 80%;
+    margin: 8px 0;
+    padding: 12px 20px;
+  }
+  .contacts .contact button {
+    width: 20%;
+  }
+  /*
   .contacts .contacts-list {
     display: flex;
     border: 1px solid var(--main-inactive-color);
@@ -575,7 +588,7 @@
     color: #fff;
     width: 20%;
   }
-  
+  */
 /*
 }
 */

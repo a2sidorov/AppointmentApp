@@ -16,6 +16,8 @@ function findUser() {
         message.innerHTML = parsedRes.message;
       }
       if (parsedRes.success) {
+        removeChildren(searchResults);
+
         let div, list, listTxt, btn, btnTxt;
         parsedRes.results.forEach((result) => {
           div = document.createElement('div');

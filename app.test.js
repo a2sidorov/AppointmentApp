@@ -1668,7 +1668,7 @@ describe('Testing routes', () => {
     });
   });
 
-  describe('POST /book/:id/book', () => {
+  describe.only('POST /book/:id/book', () => {
 		const business0 = new DummyBusiness('business0@test.com', 'password');
 		const business1 = new DummyBusiness('business1@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
@@ -1724,17 +1724,29 @@ describe('Testing routes', () => {
 					dateISO: business0.firstAvailableTime.toISOString(),
 				});
       assert.isFalse(res.body.success);
-    });
-    it('should create an apoointment', async () => {
+		});
+		it.only('should fail if reason has words longer than 30 characters', async () => {
+      const res = await client0.session
+				.post(`/book/${business0.id}/book`)
+				.set('Content-type', 'application/json')
+				.send({
+					dateISO: business1.firstAvailableTime.toISOString(),
+					reason: '0123456789012345678901234567890'
+				});
+				console.log(res.body)
+			assert.isFalse(res.body.success);
+		});
+    it.only('should create an apoointment', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
 					dateISO: business0.firstAvailableTime.toISOString(),
-					reason: 'reason'
+					reason: '012345678901234567890123456789'
 				});
+			console.log(res.body)
 			const appointment = await Appointment.findOne({ 'business': business0.id });
-			assert.equal(appointment.reason, 'reason');
+			assert.equal(appointment.reason, '012345678901234567890123456789');
 			assert.isFalse(appointment.canceled);
       assert.property(appointment, 'user');
 			assert.property(appointment, 'business');
@@ -1792,7 +1804,8 @@ describe('Testing routes', () => {
 					reason: 'reason'
 				});
       assert.isTrue(res.body.success);
-    });
+		});
+		
     after(async () => {
 			await User.remove({});
 			await Appointment.remove({});
