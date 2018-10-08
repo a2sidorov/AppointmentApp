@@ -1,7 +1,7 @@
 'use strict';
 
 const assert = require('chai').assert;
-const passwordRecovery = require('./passwordRecovery');
+const passwordReset = require('./passwordReset');
 const User = require('../models/user');
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/test', { useNewUrlParser: true });

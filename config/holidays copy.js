@@ -2,8 +2,6 @@
 
 const {google} = require('googleapis');
 const fs = require('fs');
-const { promisify } = require("util");
-const readFile = promisify(fs.readFile);
 const path = require('path');
 const filePath = path.join(__dirname, 'holidayList');
 
@@ -37,7 +35,7 @@ module.exports = {
       eventDate.isAvailable = false; //adding addtional property
       return eventDate;  
     });
-    this.cached = holidays;
+    cached = holidays;
     return holidays;
   }, 
   writeToFile: function(data) {

@@ -5,13 +5,12 @@ const Appointment = require('../models/appointment');
 const Business = require('../models/business');
 
 module.exports = {
-  removeOldAppointments: function() {
-    return new Promise((resolve, reject) => {
-      Appointment.deleteMany({ timeMs: { $lt: new Date().getTime() } }, (err, result) => {
-        if (err) reject(err);
-        resolve(result);
-      });
-    });
+  removeOldAppointments: async () => {
+    try {
+      return await Appointment.deleteMany({ timeMs: { $lt: new Date().getTime() } });
+    } catch(err) {
+      return err;
+    }
   },
   updateUsersHolidays: function() {
     return new Promise((resolve, reject) => {
@@ -29,4 +28,25 @@ module.exports = {
       });
     });
   }
+  /*
+  /.does not work
+  updateUsersHolidays: async () => { 
+    try {
+      const businesses = await Business.find({});
+      const newHolidays = await holidays.readFromFile();
+      //console.log('businesses[0].holidays ' + businesses[0].holidays)
+      //console.log('newHolidays ' + newHolidays)
+
+      businesses.forEach(async (business) => {
+        business.holidays = newHolidays;
+        business.markModified('holidays');
+        const res = await business.save(); // does not save first item in array
+      });
+      console.log('Holidays has been updated successfully')
+
+    } catch(err) {
+      return err;
+    }
+  }
+  */
 }

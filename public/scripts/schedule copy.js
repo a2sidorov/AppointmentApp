@@ -1,12 +1,12 @@
 /* Business schedule */
 const schedule = {
+  message: document.getElementById('message'),
+  saveBtn: document.getElementById(saveBtn),
   days: [],
   time: [],
   holidays: [],
-}
 
-  function toggleStatus(btn) {
-    const message = document.getElementById('message');
+  toggleStatus: function(btn) {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
@@ -28,56 +28,51 @@ const schedule = {
       active: btn.innerHTML === 'Start' ? true : false
     });
     xhttp.send(data);
-  }
+  },
 
-  function updateDays(el, dayNum, isAvailable) {
-    const saveBtn = document.getElementById('saveBtn');
+  updateDays: function(el, dayNum, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    const index = schedule.days.findIndex((day) => {
+    const index = this.days.findIndex((day) => {
       return day.dayNum === dayNum;
     });
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
-      schedule.days.push({dayNum: dayNum, isAvailable: isAvailable});
+      this.days.push({dayNum: dayNum, isAvailable: isAvailable});
     } else {
-      schedule.days[index].isAvailable = schedule.days[index].isAvailable ? false : true;
+      this.days[index].isAvailable = this.days[index].isAvailable ? false : true;
     }
-  }
+  },
 
-  function updateTime(el, time, isAvailable) {
-    const saveBtn = document.getElementById('saveBtn');
+  updateTime: function(el, time, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    const index = schedule.time.findIndex((hour) => {
+    const index = this.time.findIndex((hour) => {
       return hour.time === time;
     });
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
-      schedule.time.push({time: time, isAvailable: isAvailable});
+      this.time.push({time: time, isAvailable: isAvailable});
     } else {
-      schedule.time[index].isAvailable = schedule.time[index].isAvailable ? false : true;
+      this.time[index].isAvailable = this.time[index].isAvailable ? false : true;
     }
-  }
+  },
 
-  function updateHolidays(el, holidayDate, isAvailable) {
-    const saveBtn = document.getElementById('saveBtn');
+  updateHolidays: function(el, holidayDate, isAvailable) {
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    const index = schedule.holidays.findIndex((event) => {
+    const index = this.holidays.findIndex((event) => {
       return event.date === holidayDate;
     });
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
-      schedule.holidays.push({date: holidayDate, isAvailable: isAvailable});
+      this.holidays.push({date: holidayDate, isAvailable: isAvailable});
     } else {
-      schedule.holidays[index].isAvailable = schedule.holidays[index].isAvailable ? false : true;
+      this.holidays[index].isAvailable = this.holidays[index].isAvailable ? false : true;
     }
-  }
+  },
 
-  function save() {
-    const message = document.getElementById('message');
-    const saveBtn = document.getElementById('saveBtn');
+  save: function() {
     const xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
       if (this.readyState == 4 && this.status == 200) {
@@ -94,9 +89,10 @@ const schedule = {
     xhttp.open("POST", '/schedule/update', true);
     xhttp.setRequestHeader("Content-type", "application/json");
     const data = JSON.stringify({
-      days: schedule.days,
-      time: schedule.time,
-      holidays: schedule.holidays
+      days: this.days,
+      time: this.time,
+      holidays: this.holidays
     });
     xhttp.send(data);
   }
+};

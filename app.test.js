@@ -1668,7 +1668,7 @@ describe('Testing routes', () => {
     });
   });
 
-  describe.only('POST /book/:id/book', () => {
+  describe('POST /book/:id/book', () => {
 		const business0 = new DummyBusiness('business0@test.com', 'password');
 		const business1 = new DummyBusiness('business1@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
@@ -1725,7 +1725,7 @@ describe('Testing routes', () => {
 				});
       assert.isFalse(res.body.success);
 		});
-		it.only('should fail if reason has words longer than 30 characters', async () => {
+		it('should fail if reason has words longer than 30 characters', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
@@ -1736,7 +1736,7 @@ describe('Testing routes', () => {
 				console.log(res.body)
 			assert.isFalse(res.body.success);
 		});
-    it.only('should create an apoointment', async () => {
+    it('should create an apoointment', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
@@ -1925,9 +1925,7 @@ describe('Testing routes', () => {
 			await Appointment.remove({});
     });
   });
-	
 });
-
 
 function DummyClient (email, password) {
 	this.email = email;
