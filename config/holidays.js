@@ -2,8 +2,6 @@
 
 const {google} = require('googleapis');
 const fs = require('fs');
-const { promisify } = require("util");
-const readFile = promisify(fs.readFile);
 const path = require('path');
 const filePath = path.join(__dirname, 'holidayList');
 
@@ -13,7 +11,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const calendar = google.calendar({
         version: 'v3',
-        auth: 'AIzaSyBSIlWZPfU1EcP62SvePNCmgM1y_a0L65I', //process.env.CALENDAR_KEY,
+        auth: process.env.CALENDAR_KEY,
       });
       calendar.events.list({
         calendarId: 'en.usa#holiday@group.v.calendar.google.com',
@@ -37,7 +35,7 @@ module.exports = {
       eventDate.isAvailable = false; //adding addtional property
       return eventDate;  
     });
-    this.cached = holidays;
+    cached = holidays;
     return holidays;
   }, 
   writeToFile: function(data) {
