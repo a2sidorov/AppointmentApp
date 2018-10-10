@@ -43,9 +43,9 @@
     "sinon": "^6.3.5",
     "sinon-mongoose": "^2.2.1",
     "supertest": "^3.3.0",
-    "supertest-session": "^3.3.0"
+    "supertest-session": "^3.3.0",
+    "dotenv": "^6.1.0"
   },
   "devDependencies": {
-    "dotenv": "^6.1.0"
   }
 }
