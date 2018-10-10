@@ -38,14 +38,14 @@
     "chai": "^4.2.0",
     "chai-http": "^2.0.1",
     "mongodb": "^2.1.16",
-    "object-assign":"4.1.0"
-  },
-  "devDependencies": {
-    "dotenv": "^6.1.0",
+    "object-assign":"4.1.0",
     "request": "^2.88.0",
     "sinon": "^6.3.5",
     "sinon-mongoose": "^2.2.1",
     "supertest": "^3.3.0",
     "supertest-session": "^3.3.0"
+  },
+  "devDependencies": {
+    "dotenv": "^6.1.0"
   }
 }
