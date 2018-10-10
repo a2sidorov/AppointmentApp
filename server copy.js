@@ -1,4 +1,4 @@
-'user strict';
+'use strict';
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').load();
@@ -44,7 +44,7 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-require('./config/routes.js')(app, passport);
+require('./config/routes')(app, passport);
 
 //app.use((err, req, res, next) => {
 //  console.error(err.message);

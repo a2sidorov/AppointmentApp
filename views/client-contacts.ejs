@@ -11,12 +11,12 @@
     </header>
     <main id="main" class="contacts">
       <div class="contacts">
-        <div class="title">
+        <div class="page-title">
           <H2>My contacts</H2>
         </div>
         <ul>
           <% contacts.forEach((contact) => { %>
-            <div class="contacts-list">
+            <div class="contact">
               <li><%= contact.local.email %></li>
               <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
             </div>
@@ -26,7 +26,6 @@
       <div id="message"></div>
     </main>
   </div> 
-  <script src="/public/scripts/navbar.js"></script>
   <script src="/public/scripts/search.js"></script>
   <script src="/public/scripts/shared.js"></script>
 </body>

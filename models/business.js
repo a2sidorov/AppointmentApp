@@ -12,17 +12,21 @@ const businessSchema = new mongoose.Schema({
   holidays: [mongoose.Schema.Types.Mixed],
   //holidays: { type: [mongoose.Schema.Types.Mixed], default: defaultHolidays() },
   appointments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Appointment'}],
-  suspended: { type: Boolean, default: false },
+  active: { type: Boolean, default: false },
 }, options);
 
 function defaultWorkdays() {
   const workdays = [];
-  for (let d = 0; d <= 6; d++) {
+  for (let d = 1; d <= 7; d++) {
     if (d >= 1 && d <= 5) {
       workdays.push({dayNum: d.toString(), isAvailable: true});
     } else {
-      workdays.push({dayNum: d.toString(), isAvailable: false});
-    }     
+      if (d === 7) {
+        workdays.push({dayNum: "0", isAvailable: false});
+      } else {
+        workdays.push({dayNum: d.toString(), isAvailable: false});
+      }   
+    }
   }
   return workdays;
 }
@@ -65,11 +69,10 @@ businessSchema.methods.createMonth = function(dateObj) {
   const yyyy = dateObj.getFullYear();
   const mm = dateObj.getMonth();
   const lastDay = new Date(yyyy, mm + 1, 0).getDate();
-  let i;
   let day = {}; 
   let firstMonday = new Date(yyyy, mm, 1).getDay();
   firstMonday = (firstMonday === 0) ? 7 : firstMonday;
-    for (i = 1 - firstMonday + 1; i <= lastDay; i++) {
+    for (let i = 1 - firstMonday + 1; i <= lastDay; i++) {
       day = {};
       if (i > 0) {
         dateObj.setDate(i);

@@ -160,6 +160,7 @@ module.exports = (app, passport) => {
       workdays: req.user.workdays,
       workhours: req.user.workhours,
       holidays: req.user.holidays,
+      active: req.user.active,
     });
   });
 
@@ -213,22 +214,23 @@ module.exports = (app, passport) => {
     }
   });
 
-  /* GET suspend service */
-  app.post('/schedule/suspend', isLoggedIn, isBusiness, async (req, res, next) => {
+  /* POST activate and deactivate schedule */
+  app.post('/schedule/active', isLoggedIn, isBusiness, async (req, res, next) => {
     try {
-      if (typeof req.body.suspended !== 'boolean') {
+      if (typeof req.body.active !== 'boolean') {
         return res.json({
           success: false,
           message: 'Invalid data'
         });
       }
-      const business = await Business.findById(req.user.id, 'suspended');
-      business.suspended = req.body.suspended;
+      const business = await Business.findById(req.user.id, 'active');
+      business.active = req.body.active;
       await business.save();
       
-      const msg = req.body.suspended ? 'Your schedule has been suspended' : 'Your schedule has been activated';
+      const msg = business.active ? 'Your schedule has been activated' : 'Your schedule has been suspended';
       res.json({
         success: true,
+        active: business.active,
         message: msg
       });
 
@@ -283,7 +285,7 @@ module.exports = (app, passport) => {
       if (!user.validPassword(req.body.password)) {
         return res.json({
           success: false,
-          message: 'Wrong password'
+          message: 'Wrong password.'
         })
       }
       if (req.user.kind  === 'Business') {
@@ -297,7 +299,7 @@ module.exports = (app, passport) => {
       req.logout();
       res.json({
         success: true,
-        message: 'Your account has benn successfully deleted'
+        message: 'Your account has benn successfully deleted.'
       });
     } catch(err) {
       next(err);
@@ -396,7 +398,7 @@ module.exports = (app, passport) => {
       message: 'You don\'t have contacts to make an appointment.',
     });
   });
-
+  
   /* GET client book page */
   app.get('/book/:id', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
@@ -410,6 +412,7 @@ module.exports = (app, passport) => {
       res.render('client-booking', {
         contacts: results[0].contacts,
         chosenContact: results[1].local.email,
+        active: results[1].active,
         workhours: results[1].workhours,
         days: results[1].createMonth(),
         dateObj: date,
@@ -479,6 +482,20 @@ module.exports = (app, passport) => {
     try {
       const user = await User.findById(req.user.id, 'appointments');
       const business = await Business.findById(req.params.id).populate('appointments').exec();
+
+      if (!business.active) {
+        return res.json({
+          success: false,
+          message: 'This business is not currently available for booking.'
+        });
+      }
+
+      if (!isReasonValid(req.body.reason)) {
+        return res.json({
+          success: false,
+          message: 'Reason text must not contain words longer than 30 characters.'
+        });
+      }
       
       const date = new Date(req.body.dateISO);
       if ( !business.isWorkday(date) 
@@ -487,7 +504,7 @@ module.exports = (app, passport) => {
         || business.isLate(date)) {
           return res.json({
             success: false,
-            message: 'Requested time is not available for appointment'
+            message: 'Requested time is not available for appointment.'
           });
         }
       const newAppnt = new Appointment();
@@ -711,6 +728,19 @@ module.exports = (app, passport) => {
       });
     } 
     return next();
+  }
+
+  function isReasonValid(str) {
+    let result = true;
+    const array = str.split(" ");
+
+    array.forEach((word) => {
+      if (word.length > 30) {
+        result = false;
+      }
+    });
+
+    return result;
   }
 
 }

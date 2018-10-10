@@ -11,7 +11,7 @@ module.exports = {
     return new Promise((resolve, reject) => {
       const calendar = google.calendar({
         version: 'v3',
-        auth: 'AIzaSyBSIlWZPfU1EcP62SvePNCmgM1y_a0L65I', //process.env.CALENDAR_KEY,
+        auth: process.env.CALENDAR_KEY,
       });
       calendar.events.list({
         calendarId: 'en.usa#holiday@group.v.calendar.google.com',

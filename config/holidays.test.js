@@ -1,6 +1,7 @@
 'use strict';
 
 const assert = require('chai').assert;
+const sinon = require('sinon');
 const fs = require('fs');
 const path = require('path');
 const filePath = path.join(__dirname, 'holidayList');
@@ -19,7 +20,7 @@ describe('holidays test', () => {
     it('should only have date and name properties', (done) => {
       holidays.fetchData().then((data) => {
         const filteredData = holidays.filterResponse(data);
-        assert.deepEqual(Object.keys(filteredData[0]), ['date', 'name']);
+        assert.deepEqual(Object.keys(filteredData[0]), ['date', 'name', 'isAvailable']);
         done();
       });
     });
@@ -59,7 +60,7 @@ describe('holidays test', () => {
       assert.isArray(fileData);
     });
     it('should have date and name properties', () => {
-      assert.deepEqual(Object.keys(fileData[0]), ['date', 'name']);
+      assert.deepEqual(Object.keys(fileData[0]), ['date', 'name', 'isAvailable']);
     });
   });
 });

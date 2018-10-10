@@ -11,7 +11,7 @@
       <% include partials/business-navbar %>
     </header>
     <main id="main" class="appointments">
-      <div class="title">
+      <div class="page-title">
         <H2>Upcoming clients</H2>
       </div>
       <ul>
@@ -19,7 +19,7 @@
           <% appointments.forEach((appointment) => { %>
           <div class="appointment-list">
             <% let date = new Date(appointment.date);%>
-            <li><%= date.toString().substring(0, 10) %> at <%= date.toString().substring(16, 21) %> with <%= appointment.user.local.email %></li>
+            <li><%= date.toString().substring(0, 10) %> at <%= date.toString().substring(16, 21) %> with <%= appointment.user.local.email %> Reason: <%= appointment.reason %></li>
               <% if (appointment.canceled === false) { %>
                 <button class="active" type="button" onclick="cancel(this, '<%= appointment._id %>')">Cancel</button>
               <% } else { %>
@@ -34,7 +34,6 @@
       <div id="message"><%= message %></div>
     </main>
   </div>
-  <script src="/public/scripts/navbar.js"></script>
   <script src="/public/scripts/home.js"></script>
   <script src="/public/scripts/shared.js"></script>
 </body>

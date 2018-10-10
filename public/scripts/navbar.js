@@ -1,6 +1,32 @@
 'use strict';
 
 /* Nav bar*/
+document.querySelectorAll('[href]').forEach(icon => {
+  const location = (window.path.match(/^\/\w+/g));
+});
+ // if (icon.getAttribute('href') === endpoint) {
+
+ // }
+
+
+
+
+/*
+  document.querySelectorAll('[href]').forEach(icon => {
+    button.onclick = function() {
+        document.querySelectorAll("[class*='category']").forEach(div => {
+            if (this.getAttribute('data-filter') === 'all')
+                div.style.display = "block";
+            else
+                if (div.classList.contains(this.getAttribute('data-filter')))
+                    div.style.display = "block";
+                else
+                    div.style.display = "none";
+        });  
+    }
+});
+*/
+/*
 (function() {
   const path = window.location.pathname;
   const endpoint = (path.match(/^\/\w+/g));
@@ -27,6 +53,7 @@
     }
   }
 })();
+*/
 
 
 
