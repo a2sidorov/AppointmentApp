@@ -56,6 +56,7 @@ if (mongoURL == null) {
 }
 
 // Connect to mongodb via mongoose
+let db = null;
 let initDb = function(callback) {
   if (mongoURL == null) return;
 
@@ -65,7 +66,7 @@ let initDb = function(callback) {
   };
   connect();
 
-  let db = mongoose.connection;
+  db = mongoose.connection;
 
   db.on('error', function(error){
     callback(err);
