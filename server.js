@@ -18,7 +18,7 @@ const path = require('path');
 
 let port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL || "mongodb://localhost:27017/mydb",
+    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
     mongoURLLabel = "";
 
 if (mongoURL == null) {
@@ -59,18 +59,28 @@ if (mongoURL == null) {
 }
 
 // Connect to mongodb via mongoose
-let connect = function () {
-  mongoose.connect(mongoURL, { useNewUrlParser: true });
+let initDb = function(callback) {
+  if (mongoURL == null) return;
+
+  let connect = function () {
+    console.log(mongoURL);
+    mongoose.connect(mongoURL, { useNewUrlParser: true });
+  };
+  connect();
+
+  let db = mongoose.connection;
+
+  db.on('error', function(error){
+    callback(err);
+    console.log("Error loading the db - "+ error);
+  });
+
+  db.on('disconnected', connect);
 };
-connect();
 
-let db = mongoose.connection;
-
-db.on('error', function(error){
-  console.log("Error loading the db - "+ error);
-});
-
-db.on('disconnected', connect);
+if (!db) {
+  initDb(function(err){});
+}
 
 //mongoose.connect('mongodb://localhost:27017/mydb', { useNewUrlParser: true });
 

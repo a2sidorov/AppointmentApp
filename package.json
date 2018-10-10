@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "IP=0.0.0.0 PORT=3030 mocha --recursive ./*/*.test.js"
+    "test": "IP=0.0.0.0 PORT=3030 mocha --timeout 5000 tests/*_test.js"
   },
   "repository": {
     "type": "git",
@@ -38,14 +38,15 @@
     "chai": "^4.2.0",
     "chai-http": "^2.0.1",
     "mongodb": "^2.1.16",
-    "object-assign":"4.1.0",
+    "object-assign":"4.1.0"
+  },
+  "devDependencies": {
     "request": "^2.88.0",
     "sinon": "^6.3.5",
     "sinon-mongoose": "^2.2.1",
     "supertest": "^3.3.0",
     "supertest-session": "^3.3.0",
     "dotenv": "^6.1.0"
-  },
-  "devDependencies": {
+    
   }
 }
