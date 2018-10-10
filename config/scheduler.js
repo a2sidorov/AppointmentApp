@@ -18,7 +18,7 @@ const updateHolidaysFileYearly = schedule.scheduleJob('* 1 1 1 *', () => { // at
 
 const updateUsersHolidaysYearly = schedule.scheduleJob('* 2 1 1 *', () => { // at 2:00 AM on January 1st every year
   utils.updateUsersHolidays()
-    .then(() => console.info('Users holidays have been updated.'))
+    .then(() => console.log('Users holidays have been updated.'))
     .catch(err => console.error(err));
 });
 
