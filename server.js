@@ -103,9 +103,11 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
-require('./config/routes')(app, passport);
 */
+//require('./config/routes')(app, passport);
+require('./config/routes')(app);
 
+/*
 app.get('/', (req, res) => {
   res.render('login');
 });
@@ -130,6 +132,7 @@ app.get('/get', async (req, res) => {
   const result = await User.find();
   res.send(result);
 });
+*/
 
 // error handling
 app.use(function(err, req, res, next) {
