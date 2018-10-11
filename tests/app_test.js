@@ -18,14 +18,4 @@ describe('Basic routes tests', function() {
         })
 
     })
-
-    it('GET to /signup should return 200', function(done){
-        chai.request(reqServer)
-        .get('/signup')
-        .end(function(err, res) {
-            res.should.have.status(200);
-            done();
-        })
-
-    })
 })
