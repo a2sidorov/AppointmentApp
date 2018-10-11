@@ -5,7 +5,7 @@ app = express(),
 morgan = require('morgan'),
 mongoose = require('mongoose');
 
-app.engine('html', require('ejs').renderFile);
+//app.engine('html', require('ejs').renderFile);
 app.use(morgan('dev'))
 
 const User = require('./models/user');
@@ -19,6 +19,8 @@ const session = require('express-session');
 const favicon = require('serve-favicon');
 const path = require('path');
 */
+
+
 
 
 
@@ -81,10 +83,11 @@ db.once('open', function() {
 /*
 require('./config/passport')(passport);
 require('./config/scheduler');
+*/
 
 app.set('view engine', 'ejs');
-app.set('/views', path.join(__dirname, 'views')); 
-
+app.set('./views'); 
+/*
 app.use('/public', express.static(path.join(__dirname, '/public')))
 app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
 app.use(morgan('dev'));
@@ -103,6 +106,10 @@ require('./config/routes')(app, passport);
 */
 
 app.get('/', (req, res) => {
+  res.render('login');
+});
+
+app.get('/status', (req, res) => {
   res.send("Working...")
 });
 
