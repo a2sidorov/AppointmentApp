@@ -1,0 +1,35 @@
+<% 'use strict'; %>
+
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Sign up</title>
+	<% include partials/head %>
+</head>
+<body>
+  <div class="grid-container">
+    <header class="main-title">
+        <H2>AppointmentApp</H2>
+    </header>
+    <main id="main">
+      <div class="signup-form">
+        <label>Email</label>
+        <input id="email" type="email" name="email" required value="business0@gmail.com">
+        <label>Password</label>
+        <input id="password" type="password" name="password" required value="noldor">
+        <label>Confirm Password</label>
+        <input id="confirm" type="password" name="confirm" required value="noldor">
+        <input id="isClient" type="radio" name="kind" value="client" checked> Client<br>
+        <input id="isBusiness" type="radio" name="kind" value="business"> Business<br>
+        <button id="signupBtn" type="button" onclick="signup()">Signup</button>
+      </div>
+      <div class="recovery">
+        <p>Already have an account? <a href="/">Login</a></p>
+      </div>  
+        <div id="message"></div>
+    </main>
+  </div>
+  <script src="/public/scripts/signup.js"></script>
+  <script src="/public/scripts/shared.js"></script>
+</body>
+</html>

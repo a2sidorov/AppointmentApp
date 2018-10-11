@@ -10,12 +10,14 @@ app.use(morgan('dev'))
 
 const User = require('./models/user');
 
-/*
+
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
-const flash = require('connect-flash');
 const session = require('express-session');
+/*
+const flash = require('connect-flash');
+
 const favicon = require('serve-favicon');
 const path = require('path');
 */
@@ -80,8 +82,9 @@ db.once('open', function() {
   console.log('mongoose: connected to %s', mongoURL);
 });
 
-/*
+
 require('./config/passport')(passport);
+/*
 require('./config/scheduler');
 */
 
@@ -92,6 +95,7 @@ app.use('/public', express.static('./public'));
 /*
 app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
 app.use(morgan('dev'));
+*/
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -102,10 +106,12 @@ app.use(session({
 }));
 app.use(passport.initialize());
 app.use(passport.session());
+
+/*
 app.use(flash());
 */
-//require('./config/routes')(app, passport);
-require('./config/routes')(app);
+
+require('./config/routes')(app, passport);
 
 /*
 app.get('/', (req, res) => {
