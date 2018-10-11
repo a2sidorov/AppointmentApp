@@ -63,7 +63,7 @@ if (mongoURL == null) {
 
 /* Mongoose set up */
 if (process.env.NODE_ENV !== 'production') {
-  mongoURL = process.env.LOCAL_MONGODB_URL;
+  mongoURL = 'mongodb://localhost:27017/mydb';
 }
 mongoose.connect(mongoURL, { useNewUrlParser: true });
 let db = mongoose.connection;
