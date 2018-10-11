@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Login</title>
+	<% include partials/head %>
+</head>
+<body>
+  <div class="grid-container">
+      <header class="main-title">
+        <H2>AppointmentApp</H2>
+      </header>
+      <main id="main">
+        <div class="login-form">
+          <label>Email</label>
+          <input id="email" type="email" placeholder="Enter your email" required value="client0@gmail.com">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Enter password" requred value="noldor">
+          <button id="loginBtn" type="button" onclick="login()">Login</button>
+        </div>
+        <div class="recovery">
+          <a href="/forgot">Forgot password?</a><!--
+          --><p>Need an account? <a href="/signup">Signup</a></p>
+        </div>
+        <div id="message"></div>
+      </main>
+  </div>
+  <script src="/public/scripts/login.js"></script>
+  <script src="/public/scripts/shared.js"></script>
+</body>
+</html>
