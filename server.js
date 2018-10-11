@@ -8,7 +8,7 @@ mongoose = require('mongoose');
 app.engine('html', require('ejs').renderFile);
 app.use(morgan('dev'))
 
-const User1 = require('./models/user1');
+const User = require('./models/user');
 
 /*
 const bodyParser = require('body-parser');
@@ -108,7 +108,7 @@ app.get('/', (req, res) => {
 
 app.get('/signup', async (req, res, next) => {
   try {
-  let newUser = new User1();
+  let newUser = new User();
   newUser.firstname = "Hulk";
   await newUser.save();
   res.send('User saved');
@@ -119,7 +119,7 @@ app.get('/signup', async (req, res, next) => {
 });
 
 app.get('/get', async (req, res) => {
-  const result = await User1.find();
+  const result = await User.find();
   res.send(result);
 });
 
