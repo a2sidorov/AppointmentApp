@@ -1,23 +1,17 @@
 'use strict';
 
-/*
 const User = require('../models/user');
 const Business = require('../models/business');
 const Appointment = require('../models/appointment');
 const crypto = require('crypto');
 const validator = require('validator');
-const passwordReset = require('./passwordReset');
-*/
+//const passwordReset = require('./passwordReset');
 
 module.exports = (app, passport) => {
 
   /* GET login page. */
   app.get('/', (req, res) => {
     res.render('login');
-  });
-
-  app.get('/secret', (req, res) => {
-    res.send(process.env.SECRET_KEY);
   });
 
   /* POST(ajax) login */

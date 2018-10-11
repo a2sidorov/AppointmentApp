@@ -100,7 +100,7 @@ app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({ 
-	secret: 'abcd1234',
+	secret: process.env.SECRET_KEY || 'abcd1234',
 	resave: true,
 	saveUninitialized: true,
 }));

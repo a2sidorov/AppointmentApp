@@ -1,9 +1,9 @@
 'use strict';
 
 const mongoose = require('mongoose');
-//const bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt-nodejs');
 const options = {discriminatorKey: 'kind'};
-//const validator = require('validator');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
   local: {
