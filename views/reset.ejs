@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reset password</title>
+  <% include partials/head %>
+</head>
+<body>
+  <div class="grid-container">
+    <header class="main-title">
+      <H2>AppointmentApp</H2>
+    </header>
+    <main id="main">
+      <div class="page-title">
+        <H2>Password recovery</H2>
+      </div>
+      <div class="reset-form">
+        <label>New password</label>
+        <input id="password" type="password" name="password" placeholder="New password">
+        <label>Confirm password</label>
+        <input id="confirm" type="password" name="confirm" placeholder="Confirm password">
+        <button type="button" onclick="reset()">Update Password</button>
+      </div>
+      <a href="/">Cancel</a>
+      <div id="message"></div>
+    </main>
+  </div>
+  <script src="/public/scripts/reset.js"></script>
+  <script src="/public/scripts/shared.js"></script>
+</body>
+</html>

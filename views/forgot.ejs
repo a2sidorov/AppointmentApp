@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <% include partials/head %>
+</head>
+<body>
+  <div class="grid-container">
+    <header class="main-title">
+        <H2>AppointmentApp</H2>
+    </header> 
+    <main id="main">
+      <div class="title">
+        <H2>Password recovery</H2>
+      </div>
+      <div class="recovery-form">
+        <input id="email" type="email" name="email" placeholder="Enter your email" value="sr3x75oginvqbjbo@ethereal.email">
+        <button id="sendBtn" type="button" onclick="sendEmail()">Send</button>
+      </div>
+      <div class="recovery">
+        <a href="/">Cancel</a>
+      </div>
+        <div id="message"></div>
+    </main>
+  </div>
+  <script src="/public/scripts/forgot.js"></script>
+  <script src="/public/scripts/shared.js"></script>
+</body>
+</html>

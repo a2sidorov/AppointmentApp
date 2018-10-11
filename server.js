@@ -23,10 +23,6 @@ const path = require('path');
 */
 
 
-
-
-
-
 /* Openshift server set up */
 let port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
     ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
@@ -112,33 +108,6 @@ app.use(flash());
 */
 
 require('./config/routes')(app, passport);
-
-/*
-app.get('/', (req, res) => {
-  res.render('login');
-});
-
-app.get('/status', (req, res) => {
-  res.send("Working...")
-});
-
-app.get('/signup', async (req, res, next) => {
-  try {
-  let newUser = new User();
-  newUser.firstname = "Hulk";
-  await newUser.save();
-  res.send('User saved');
-  } catch(err) {
-    next(err);
-  }
-
-});
-
-app.get('/get', async (req, res) => {
-  const result = await User.find();
-  res.send(result);
-});
-*/
 
 // error handling
 app.use(function(err, req, res, next) {

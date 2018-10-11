@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Contacts</title>
+  <% include partials/head %>
+</head>
+<body>
+  <div class="grid-container">
+    <header class="header">
+      <% include partials/client-navbar %>
+    </header>
+    <main id="main" class="contacts">
+      <div class="contacts">
+        <div class="page-title">
+          <H2>My contacts</H2>
+        </div>
+        <ul>
+          <% contacts.forEach((contact) => { %>
+            <div class="contact">
+              <li><%= contact.local.email %></li>
+              <button onclick="removeUser(this, '<%= contact._id%>')">Remove</button>
+            </div>
+          <% }); %>
+        </ul>
+      </div>
+      <div id="message"></div>
+    </main>
+  </div> 
+  <script src="/public/scripts/search.js"></script>
+  <script src="/public/scripts/shared.js"></script>
+</body>
+</html>
