@@ -87,8 +87,9 @@ require('./config/scheduler');
 
 app.set('view engine', 'ejs');
 app.set('./views'); 
+
+app.use('/public', express.static('./public'));
 /*
-app.use('/public', express.static(path.join(__dirname, '/public')))
 app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({ extended: true}));
