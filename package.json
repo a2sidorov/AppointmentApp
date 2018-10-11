@@ -20,6 +20,8 @@
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
+    "chai": "^4.2.0",
+    "chai-http": "^2.0.1",
     "connect-flash": "^0.1.1",
     "cookie-parser": "^1.4.3",
     "ejs": "^2.6.1",
@@ -34,11 +36,7 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "serve-favicon": "^2.5.0",
-    "validator": "^10.8.0",
-    "chai": "^4.2.0",
-    "chai-http": "^2.0.1",
-    "mongodb": "^2.1.16",
-    "object-assign":"4.1.0"
+    "validator": "^10.8.0"
   },
   "devDependencies": {
     "request": "^2.88.0",
@@ -47,6 +45,5 @@
     "supertest": "^3.3.0",
     "supertest-session": "^3.3.0",
     "dotenv": "^6.1.0"
-    
   }
 }

@@ -1,15 +1,10 @@
 'use strict';
 
+const express = require('express'), //+
+app = express(), //+
+morgan = require('morgan'); //+
 
-if (process.env.NODE_ENV !== 'production') {
-  require('dotenv').load();
-}
-
-const express = require('express'),
-app = express(),
-morgan = require('morgan'),
-mongoose = require('mongoose');
-
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
@@ -18,10 +13,9 @@ const session = require('express-session');
 const favicon = require('serve-favicon');
 const path = require('path');
 
-/* Openshift server set up */
-let port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || process.env.LOCAL_PORT,
-    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || process.env.LOCAL_IP,
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
+let port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
+    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
+    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL || 'mongodb://127.0.0.1:27017/mydb',
     mongoURLLabel = "";
 
 if (mongoURL == null) {
@@ -61,17 +55,32 @@ if (mongoURL == null) {
   }
 }
 
-/* Mongoose set up */
-if (process.env.NODE_ENV !== 'production') {
-  mongoURL = process.env.LOCAL_MONGODB_URL;
-}
-mongoose.connect(mongoURL, { useNewUrlParser: true });
-let db = mongoose.connection;
-db.on('error', console.error.bind(console, 'mongoose: connection error'));
-db.once('open', function() {
-  console.log('mongoose: connected to %s', mongoURL);
-});
+// Connect to mongodb via mongoose
+let db = null;
+let initDb = function(callback) {
+  if (mongoURL == null) return;
 
+  let connect = function () {
+    console.log(mongoURL);
+    mongoose.connect(mongoURL, { useNewUrlParser: true });
+  };
+  connect();
+
+  db = mongoose.connection;
+
+  db.on('error', function(error){
+    callback(err);
+    console.log("Error loading the db - "+ error);
+  });
+
+  db.on('disconnected', connect);
+};
+
+if (!db) {
+  initDb(function(err){});
+}
+
+//mongoose.connect('mongodb://localhost:27017/mydb', { useNewUrlParser: true });
 
 require('./config/passport')(passport);
 require('./config/scheduler');
@@ -81,12 +90,12 @@ app.set('/views', path.join(__dirname, 'views'));
 
 app.use('/public', express.static(path.join(__dirname, '/public')))
 app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
-app.use(morgan('dev'));
+app.use(morgan('combined'));
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({ 
-	secret: process.env.SECRET_KEY,
+	secret: 'abcd1234',
 	resave: true,
 	saveUninitialized: true,
 }));

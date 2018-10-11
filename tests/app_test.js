@@ -19,7 +19,7 @@ describe('Basic routes tests', function() {
 
     })
 
-    it('GET to /pagecount should return 200', function(done){
+    it('GET to /signup should return 200', function(done){
         chai.request(reqServer)
         .get('/signup')
         .end(function(err, res) {
