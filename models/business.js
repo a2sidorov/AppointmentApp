@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 const User = require('./user');
 const options = require('./user');
-//const holidays = require('../config/holidays');
+const holidays = require('../config/holidays');
 
 const businessSchema = new mongoose.Schema({
   workdays: { type: [mongoose.Schema.Types.Mixed], default: defaultWorkdays() },

@@ -233,6 +233,7 @@
     border: 1px solid var(--main-inactive-color);
     width: 80%;
     margin: 8px 0;
+    padding: 12px 20px;
   }
   .search .search-result button {
     width: 20%;

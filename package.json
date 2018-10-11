@@ -13,6 +13,7 @@
     "ejs": "^2.4.1",
     "express": "^4.16.4",
     "express-session": "^1.15.6",
+    "googleapis": "^34.0.0",
     "mocha": "^2.4.5",
     "mongodb": "^2.1.16",
     "mongoose": "^5.3.2",
