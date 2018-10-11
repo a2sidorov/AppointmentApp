@@ -36,14 +36,14 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "serve-favicon": "^2.5.0",
-    "validator": "^10.8.0"
+    "validator": "^10.8.0",
+    "dotenv": "^6.1.0"
   },
   "devDependencies": {
     "request": "^2.88.0",
     "sinon": "^6.3.5",
     "sinon-mongoose": "^2.2.1",
     "supertest": "^3.3.0",
-    "supertest-session": "^3.3.0",
-    "dotenv": "^6.1.0"
+    "supertest-session": "^3.3.0"
   }
 }
