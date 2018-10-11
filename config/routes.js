@@ -16,6 +16,10 @@ module.exports = (app, passport) => {
     res.render('login');
   });
 
+  app.get('/secret', (req, res) => {
+    res.send(process.env.SECRET_KEY);
+  });
+
   /* POST(ajax) login */
   app.post('/login', isEmailValid, isPasswordValid, (req, res, next) => {
     passport.authenticate('local-login', (err, user, info) => {
