@@ -5,6 +5,12 @@ app = express(),
 morgan = require('morgan'),
 mongoose = require('mongoose');
 
+app.engine('html', require('ejs').renderFile);
+app.use(morgan('dev'))
+
+const User1 = require('./models/user1');
+
+/*
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
@@ -12,6 +18,10 @@ const flash = require('connect-flash');
 const session = require('express-session');
 const favicon = require('serve-favicon');
 const path = require('path');
+*/
+
+
+
 
 /* Openshift server set up */
 let port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
@@ -68,7 +78,7 @@ db.once('open', function() {
   console.log('mongoose: connected to %s', mongoURL);
 });
 
-
+/*
 require('./config/passport')(passport);
 require('./config/scheduler');
 
@@ -90,6 +100,28 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 require('./config/routes')(app, passport);
+*/
+
+app.get('/', (req, res) => {
+  res.send("Working...")
+});
+
+app.get('/signup', async (req, res, next) => {
+  try {
+  let newUser = new User1();
+  newUser.firstname = "Hulk";
+  await newUser.save();
+  res.send('User saved');
+  } catch(err) {
+    next(err);
+  }
+
+});
+
+app.get('/get', async (req, res) => {
+  const result = await User1.find();
+  res.send(result);
+});
 
 // error handling
 app.use(function(err, req, res, next) {
