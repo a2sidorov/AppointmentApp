@@ -5,13 +5,21 @@ const Business = require('../models/business');
 const Appointment = require('../models/appointment');
 const crypto = require('crypto');
 const validator = require('validator');
-//const passwordReset = require('./passwordReset');
+const passwordReset = require('./passwordReset');
 
 module.exports = (app, passport) => {
 
   /* GET login page. */
   app.get('/', (req, res) => {
     res.render('login');
+  });
+  /* GET login page. */
+  app.get('/time', (req, res) => {
+    res.json({
+      hours: new Date().getHours(),
+      iso: new Date().toISOString(),
+      offset: new Date().getTimezoneOffset(),
+    });
   });
 
   /* POST(ajax) login */

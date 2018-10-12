@@ -8,16 +8,14 @@ mongoose = require('mongoose');
 //app.engine('html', require('ejs').renderFile);
 app.use(morgan('dev'))
 
-const User = require('./models/user');
-
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const passport = require('passport');
 const session = require('express-session');
-/*
-const flash = require('connect-flash');
 
+const flash = require('connect-flash');
+/*
 const favicon = require('serve-favicon');
 const path = require('path');
 */
@@ -104,9 +102,9 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-/*
+
 app.use(flash());
-*/
+
 
 require('./config/routes')(app, passport);
 
