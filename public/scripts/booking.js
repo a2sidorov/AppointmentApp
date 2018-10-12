@@ -8,6 +8,7 @@ const appointment = {
 };
 /* Setting month */
 function getDays(dateISO, month) {
+  console.log(dateISO);
   if (appointment.date === undefined) {
     appointment.date = new Date(dateISO);
   }
@@ -57,6 +58,7 @@ function getDays(dateISO, month) {
 
 /* Setting day */
 function setDay(dateISO, el) {
+  console.log(dateISO);
   if (appointment.date === undefined) {
     appointment.date = new Date(dateISO);
   }
