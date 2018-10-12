@@ -413,7 +413,7 @@ module.exports = (app, passport) => {
         User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec(),
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
-      const date = new Date();
+      const date = new Date(new Date().toISOString());
       date.setSeconds(0);
       date.setMilliseconds(0);
       res.render('client-booking', {
