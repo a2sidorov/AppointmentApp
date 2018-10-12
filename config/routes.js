@@ -414,7 +414,10 @@ module.exports = (app, passport) => {
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
 
-      const localeDate = new Date(new Date().getTime() + req.user.local.timezoneOffset * 60 * 60 * 1000);
+      let localeDate = new Date(new Date().getTime() + req.user.local.timezoneOffset * 60 * 60 * 1000);
+      if (process.env.NODE_ENV !== 'production') {
+        localeDate = new Date();
+      }
       localeDate.setSeconds(0);
       localeDate.setMilliseconds(0);
 
