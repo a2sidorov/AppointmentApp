@@ -19,7 +19,7 @@ module.exports = (app, passport) => {
       hours: new Date().getHours(),
       iso: new Date().toISOString(),
       offset: new Date().getTimezoneOffset(),
-      
+
     });
   });
 
@@ -510,8 +510,9 @@ module.exports = (app, passport) => {
           message: 'Reason text must not contain words longer than 30 characters.'
         });
       }
-      
+      console.log('req.body.dateISO ' + req.body.dateISO);
       const date = new Date(req.body.dateISO);
+      console.log('date ' + date);
       if ( !business.isWorkday(date) 
         || business.isHoliday(date)
         || business.isBooked(date)
