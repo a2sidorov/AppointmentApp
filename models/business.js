@@ -159,10 +159,14 @@ businessSchema.methods.isBooked = function(dateObj) {
 }
 
 businessSchema.methods.isLate = function(dateObj) {
+
   let localeDate = new Date(new Date().getTime() + this.local.timezoneOffset * 60 * 60 * 1000);
+  console.log('localeDate ' + localeDate)
+  console.log('dateObj ' + dateObj)
   if (process.env.NODE_ENV !== 'production') {
     localeDate = new Date();
   }
+  console.log()
   return ((dateObj.getTime() - localeDate.getTime()) < (30 * 60 * 1000)); //checking if an appointment starts in less than 30 minutes;
 }
 

@@ -19,6 +19,7 @@ module.exports = (app, passport) => {
       hours: new Date().getHours(),
       iso: new Date().toISOString(),
       offset: new Date().getTimezoneOffset(),
+      
     });
   });
 
