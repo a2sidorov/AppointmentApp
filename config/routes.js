@@ -413,16 +413,26 @@ module.exports = (app, passport) => {
         User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec(),
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
-      const date = new Date(new Date().toISOString());
-      date.setSeconds(0);
-      date.setMilliseconds(0);
+      //
+      /*
+      const militaryDate = new Date();
+      militaryDate.setSeconds(0);
+      militaryDate.setMilliseconds(0);
+      */
+
+      const localeDate = new Date();
+      localeDate.setHours(new Date().getHours() + req.user.local.timezoneOffset);
+      localeDate.setSeconds(0);
+      localeDate.setMilliseconds(0);
+
       res.render('client-booking', {
         contacts: results[0].contacts,
         chosenContact: results[1].local.email,
         active: results[1].active,
         workhours: results[1].workhours,
         days: results[1].createMonth(),
-        dateObj: date,
+        //dateObj: militaryDate,
+        dateObj: localeDate,
       });
     } catch(err) {
       next(err);

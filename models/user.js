@@ -14,7 +14,8 @@ const userSchema = new mongoose.Schema({
     }},
     password: { type: String, required: true }, 
     resetPasswordToken: String,
-    resetPasswordExpires: Date
+    resetPasswordExpires: Date,
+    timezoneOffset: { type: Number, required: true }
   },
   firstname: { type: String, maxlength: 20, validate: {
     validator: function(value) {
