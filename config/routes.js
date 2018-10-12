@@ -413,15 +413,8 @@ module.exports = (app, passport) => {
         User.findById(req.user.id).populate({ path: 'contacts', select: 'local.email' }).exec(),
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
-      //
-      /*
-      const militaryDate = new Date();
-      militaryDate.setSeconds(0);
-      militaryDate.setMilliseconds(0);
-      */
 
-      const localeDate = new Date();
-      localeDate.setHours(new Date().getHours() + req.user.local.timezoneOffset);
+      const localeDate = new Date(new Date().getTime() + req.user.local.timezoneOffset * 60 * 60 * 1000);
       localeDate.setSeconds(0);
       localeDate.setMilliseconds(0);
 
