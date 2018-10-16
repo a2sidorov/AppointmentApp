@@ -2,7 +2,7 @@
 
 const {google} = require('googleapis');
 const fs = require('fs');
-//const path = require('path');
+const path = require('path');
 
 module.exports = {
   cached: undefined,
@@ -39,7 +39,7 @@ module.exports = {
   }, 
   writeToFile: function(data) {
     return new Promise((resolve, reject) => {
-      fs.writeFile('./config/holidayList', JSON.stringify(data), (err) => {
+      fs.writeFile(path.join(__dirname, 'holidayList'), JSON.stringify(data), (err) => {
         if (err) reject(err);
         resolve('Holidays are saved to the file');
       });
@@ -48,7 +48,7 @@ module.exports = {
   readFromFile: function() {
     return new Promise((resolve, reject) => {
       if (this.cached) resolve(this.cached);
-      fs.readFile('./config/holidayList', 'utf8', (err, data) => {
+      fs.readFile(path.join(__dirname, 'holidayList'), 'utf8', (err, data) => {
         if (err) reject(err);
         resolve(JSON.parse(data));
       });

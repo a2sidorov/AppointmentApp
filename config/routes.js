@@ -16,8 +16,12 @@ module.exports = (app, passport) => {
   /* GET login page. */
   app.get('/time', (req, res) => {
     res.json({
+      obj: new Date(),
       hours: new Date().getHours(),
       iso: new Date().toISOString(),
+      JSON: new Date().toJSON(),
+      Locale: new Date().toLocaleString(),
+      objFromLocale: new Date(new Date().toLocaleString()),
       offset: new Date().getTimezoneOffset(),
 
     });
@@ -40,8 +44,8 @@ module.exports = (app, passport) => {
     res.render('signup');
   });
 
-  /* POST sign up */
-  app.post('/signup', isEmailValid, isPasswordValid, isConfirmPasswordValid, (req, res, next) => {
+   /* POST sign up */
+   app.post('/signup', isEmailValid, isPasswordValid, isConfirmPasswordValid, isTimezoneOffsetValid, (req, res, next) => {
     passport.authenticate('local-signup', (err, user, info) => {
       if (err) return next(err);
       if (!user) return res.json({ success: false, message: info });
@@ -415,21 +419,22 @@ module.exports = (app, passport) => {
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
 
-      let localeDate = new Date(new Date().getTime() + req.user.local.timezoneOffset * 60 * 60 * 1000);
-      if (process.env.NODE_ENV !== 'production') {
-        localeDate = new Date();
-      }
-      localeDate.setSeconds(0);
-      localeDate.setMilliseconds(0);
+      //const date = new Date(Date.now() + results[1].local.timezoneOffsetMs);
+      //const date = new Date();
+      //date.setMilliseconds(0);
+      //date.setSeconds(0);
+
+      //const monthNum = date.getMonth();
 
       res.render('client-booking', {
         contacts: results[0].contacts,
         chosenContact: results[1].local.email,
         active: results[1].active,
         workhours: results[1].workhours,
-        days: results[1].createMonth(),
+        days: results[1].createMonth(date.toISOString()),
         //dateObj: militaryDate,
-        dateObj: localeDate,
+        dateISO: date.toISOString(),
+        monthNum: monthNum,
       });
     } catch(err) {
       next(err);
@@ -441,8 +446,10 @@ module.exports = (app, passport) => {
     try {
       const business = await Business.findById(req.params.id);
       const date = new Date(req.body.dateISO);
+      
       let month = date.getMonth();
       let year = date.getFullYear();
+      
       if (req.body.month === 'next') {
         if (month + 1 > 11) {
           month = 0;
@@ -463,11 +470,18 @@ module.exports = (app, passport) => {
           month--;
         }
       }
+      console.log('book/:id/month offset %s', date.getTimezoneOffset())
       date.setFullYear(year);
       date.setMonth(month);
+      console.log('book/:id/month offset %s', date.getTimezoneOffset())
+
+      console.log('book/:id/month object %s', date)
+      console.log('book/:id/month ISO %s', date.toISOString())
+      
+
       res.json({ 
         success: true,
-        days: business.createMonth(date),
+        days: business.createMonth(date.toISOString()),
         dateISO: date.toISOString(),
       });
     } catch(err) {
@@ -479,12 +493,13 @@ module.exports = (app, passport) => {
   app.post('/book/:id/day', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
       const business = await Business.findById(req.params.id).populate('appointments').exec();
-      const date = new Date(req.body.dateISO);
-      date.setDate(parseInt(req.body.day));
+      //const date = new Date(req.body.dateISO);
+      //console.log('date %s', date)
+      //date.setDate(parseInt(req.body.day));
       res.json({ 
         success: true,
-        hours: business.createDay(date),
-        dateISO: date.toISOString(),
+        hours: business.createDay(req.body.dateISO),
+        //dateISO: date.toISOString(),
       });
     } catch(err) {
       next(err);
@@ -510,13 +525,15 @@ module.exports = (app, passport) => {
           message: 'Reason text must not contain words longer than 30 characters.'
         });
       }
-      console.log('req.body.dateISO ' + req.body.dateISO);
-      const date = new Date(req.body.dateISO);
-      console.log('date ' + date);
-      if ( !business.isWorkday(date) 
-        || business.isHoliday(date)
-        || business.isBooked(date)
-        || business.isLate(date)) {
+      console.log('book dateISO ' + req.body.dateISO);
+      console.log('book dateObj ' + new Date(req.body.dateISO));
+      //const date = new Date(new Date(req.body.dateISO).getTime() + business.local.timezoneOffsetMs);
+      //const date = new Date(req.body.dateISO);
+      console.log('book date ' + date);
+      if ( !business.isWorkday(req.body.dateISO) 
+        || business.isHoliday(req.body.dateISO)
+        || business.isBooked(req.body.dateISO)
+        || business.isLate(req.body.dateISO)) {
           return res.json({
             success: false,
             message: 'Requested time is not available for appointment.'
@@ -539,8 +556,7 @@ module.exports = (app, passport) => {
 
       res.json({
         success: true,
-        message: `Your appointment is scheduled on ${date.toLocaleDateString()}
-          at ${date.toLocaleTimeString().substring(0,8)}`
+        message: `Your appointment is scheduled on ${req.body.dateISO}`
       });
     } catch(err) {
       next(err);
@@ -756,6 +772,16 @@ module.exports = (app, passport) => {
     });
 
     return result;
+  }
+
+  function isTimezoneOffsetValid(req, res, next) {
+    if (!(/^[0-9]+$/).test(req.body.timezoneOffsetMs)) {
+      return res.json({ 
+        success: false,
+        message: 'Timezone offset must be a number in milliseconds.'
+      });
+    }
+    return next();
   }
 
 }

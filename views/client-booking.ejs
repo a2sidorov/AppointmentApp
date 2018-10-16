@@ -29,13 +29,13 @@
       <% if (active) { %>
         <div class="calendar">
           <div class="section-title">
-            <h3>Today is <%= dateObj.toLocaleDateString() %> <%= dateObj.toLocaleTimeString() %></h3>
+            <h3>Today is <%= dateISO %></h3>
           </div>
           <div class="month">
             <% const monthNames = ["January", "February", "March", "April", "May", "June", "Jule","August", "September", "Octocber", "November", "December"] %>
-            <button type="button" onclick="getDays('<%= dateObj.toISOString() %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
-            <span id="month"><%= monthNames[dateObj.getMonth()] %></span>
-            <button type="button" onclick="getDays('<%= dateObj.toISOString() %>', 'next')" class="material-icons">keyboard_arrow_right</button>
+            <button type="button" onclick="getDays('<%= dateISO %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
+            <span id="month"><%= monthNames[monthNum] %></span>
+            <button type="button" onclick="getDays('<%= dateISO %>', 'next')" class="material-icons">keyboard_arrow_right</button>
           </div>
           <ul class="days"> 
             <li>Mo</li>
@@ -51,7 +51,7 @@
               <% days.forEach((day) => { %>
                 <li>
                   <% if (day.isAvailable) { %> 
-                      <div class="availableDays" onclick="setDay('<%= dateObj.toISOString() %>', this)"><%= day.num %></div> 
+                      <div class="availableDays" onclick="setDay('<%= dateISO %>', this)"><%= day.num %></div> 
                   <% } else { %>
                       <div><%= day.num %></div>
                   <% } %>

@@ -30,7 +30,7 @@ function signup() {
     password: password,
     confirm: confirm,
     isBusiness: isBusiness,
-    timezoneOffset: - new Date().getTimezoneOffset()/60,
+    timezoneOffsetMs: - new Date().getTimezoneOffset() * 60 * 1000,
   });
   xhttp.send(data);
 }

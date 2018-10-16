@@ -1,5 +1,73 @@
 'use strict';
 
+function getSchedule(businessId) {
+  const message = document.getElementById('message');
+  const xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      const parsedRes = JSON.parse(this.responseText);
+      
+      if (parsedRes.error) {
+        return displayError(parsedRes.message);
+      }
+      if (!parsedRes.success) {
+        return message.innerHTML = parsedRes.message;
+      }
+
+      /* Creating calendar*/
+      let div, txt, list;
+      const monthNames = ["January", "February", "March", "April", "May", "June", "Jule","August", "September", "Octocber", "November", "December"];
+      div = document.createElement('DIV');
+      div.classList.add('month');
+
+        //Prev month button
+      const prevMonthBtn = document.createElement('BUTTON');
+      txt = document.createTextNode('keyboard_arrow_left');
+      prevMonthBtn.appendChild(txt);
+      prevMonthBtn.classList.add('material-icons');
+      prevMonthBtn.onclick = function() { getDays('prev') };
+      div.appendChild(prevMonthBtn);
+
+        //Month name
+      const monthName = document.createElement('SPAN');
+      monthName.id = 'month';
+      txt = document.createTextNode(monthNames[parsedRes.monthNum]);
+      monthName.appendChild(txt);
+      div.appendChild(monthName);
+
+        //Next month button
+      const nextMonthBtn = document.createElement('BUTTON');
+      txt = document.createTextNode('keyboard_arrow_right');
+      nextMonthBtn.appendChild(txt);
+      nextMonthBtn.classList.add('material-icons');
+      nextMonthBtn.onclick = function() { getDays('next') };
+      div.appendChild(nextMonthBtn);
+      
+      /* Creating day buttons*/
+      parsedRes.days.forEach((day) => {
+        txt = document.createTextNode(day.num);
+        div = document.createElement('DIV');
+        list = document.createElement('LI');
+        div.appendChild(txt);
+        if (day.isAvailable) {
+          div.classList.add('availableDays');
+          div.onclick = function() {setDay(parsedRes.dateISO, this)};
+        }
+        list.appendChild(div);
+        days.appendChild(list);
+      });
+    }
+  };
+  xhttp.open('POST', `${window.location}/month`, true);
+  xhttp.setRequestHeader("Content-type", "application/json");
+
+  const data = JSON.stringify({
+    businessId: businessId,
+  });
+  xhttp.send(data);
+
+}
+
 /* Client booking */
 const appointment = {
   date: undefined,
@@ -8,6 +76,7 @@ const appointment = {
 };
 /* Setting month */
 function getDays(dateISO, month) {
+  console.log(dateISO);
   if (appointment.date === undefined) {
     appointment.date = new Date(dateISO);
   }
@@ -25,7 +94,6 @@ function getDays(dateISO, month) {
       if (!parsedRes.success) {
         return message.innerHTML = parsedRes.message;
       }
-      console.log('getDays %s', parsedRes.dateISO)
 
       appointment.date = new Date(parsedRes.dateISO);
       document.getElementById('month').innerHTML = monthNames[appointment.date.getMonth()];
@@ -88,8 +156,6 @@ function getTimetable(dayNum) {
       if (!parsedRes.success) {
         return message.innerHTML = parsedRes.message;
       }
-
-      console.log('getTimetable %s', parsedRes.dateISO)
 
       appointment.date = new Date(parsedRes.dateISO);
       removeChildren(timetable);
@@ -158,7 +224,6 @@ function book() {
 
     xhttp.open("POST", `${window.location}/book`, true);
     xhttp.setRequestHeader("Content-type", "application/json");
-    console.log('appointment.date %s', appointment.date)
     const data = JSON.stringify({
       dateISO: appointment.date.toISOString(),
       reason: reason,
