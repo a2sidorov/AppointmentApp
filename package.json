@@ -45,5 +45,10 @@
   "bugs": {
     "url": "http://github.com/a2sidorov/AppointmentApp/issues"
   },
-  "homepage": "http://github.com/a2sidorov/AppointmentApp"
+  "homepage": "http://github.com/a2sidorov/AppointmentApp",
+  "devDependencies": {
+    "sinon": "^7.0.0",
+    "supertest": "^3.3.0",
+    "supertest-session": "^3.3.0"
+  }
 }

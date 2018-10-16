@@ -1,15 +1,12 @@
 'use strict';
 const assert = require('chai').assert;
 const moment = require('moment-timezone');
-//const mongoose = require('mongoose');
 const Business = require('../models/business');
-
 
 describe('Business model test', () => {
   let newBusiness;
 
   before(async () => {
-    //mongoose.connect('mongodb://localhost:27017/mydb', { useNewUrlParser: true });
     newBusiness = new Business();
     newBusiness.local.email = 'test@test.com';
     newBusiness.local.password = 'password';;
@@ -19,50 +16,43 @@ describe('Business model test', () => {
   });
 
   describe('workdays test', () => {
-    it('should be an array', (done) => {
+    it('should be an array', () => {
       assert.isArray(newBusiness.workdays);
-      done();
     });
-    it('should have length 7', (done) => {
+    it('should have length 7', () => {
       assert.lengthOf(newBusiness.workdays, 7);
-      done();
     });
   });
 
   describe('workhours test', () => {
-    it('should be an array', (done) => {
+    it('should be an array', () => {
       assert.isArray(newBusiness.workhours);
-      done();
     });
-    it('should have length 48', (done) => {
+    it('should have length 48', () => {
       assert.lengthOf(newBusiness.workhours, 48);
-      done();
     });
   });
 
   describe('holidays test', () => {
-    it('should be an array', (done) => {
+    it('should be an array', () => {
       assert.isArray(newBusiness.holidays);
-      done();
     });
-    it('should not be empty', (done) => {
+    it('should not be empty', () => {
       assert.deepEqual(Object.keys(newBusiness.holidays[0]), ['date', 'name', 'isAvailable']);
-      done();
     });
   });
 
   describe('appointments test', () => {
-    it('should return an array', (done) => {
+    it('should return an array', () => {
       assert.isArray(newBusiness.appointments);
-      done();
     });
   });
 
-  describe.only('createMonth method test', () => {
+  describe('createMonth method test', () => {
     it('it should return an array', () => {
       assert.isArray(newBusiness.createMonth());
     });
-    it.only('with arguments DST ON', () => {
+    it('with arguments DST ON', () => {
       const m = moment();
       assert.isArray(newBusiness.createMonth(m.year(), 9));
     });
@@ -74,8 +64,19 @@ describe('Business model test', () => {
 
   describe('createDay method test', () => {
     it('should return an array', () => {
-      const date = moment().format('YYYY-MM-DD');
-      assert.isArray(newBusiness.createDay(date));
+      const m = moment();
+      assert.isArray(newBusiness.createDay(m.format('YYYY-MM-DD')));
+    });
+    it('should return an array DST on', () => {
+      const m = moment();
+      m.add(1, 'year');
+      m.month(7);
+      assert.isArray(newBusiness.createDay(m.format('YYYY-MM-DD')));
+    });
+    it('should return an array DST off', () => {
+      const m = moment();
+      m.month(11);
+      assert.isArray(newBusiness.createDay(m.format('YYYY-MM-DD')));
     });
   });
 
@@ -105,21 +106,18 @@ describe('Business model test', () => {
 
   describe('isBooked method test', () => {
     it('should return boolean', () => {
-      assert.isBoolean(newBusiness.isBooked(new Date()));
+      
+      assert.isBoolean(newBusiness.isBooked());
     });
   });
 
   describe('isLate method test', () => {
-    it('should return boolean', (done) => {
-      assert.isBoolean(newBusiness.isLate(new Date()));
+    it('should return boolean', function (done) {
+      const dateString = moment().tz(newBusiness.timezone).format();
+      console.log(dateString)
+      assert.isBoolean(newBusiness.isLate(dateString));
       done();
     });
   });
-  /*
-  after((done) => {
-    mongoose.connection.close();
-    done();
-  });
-  */
 });
 

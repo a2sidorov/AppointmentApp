@@ -17,8 +17,9 @@ const session = require('express-session');
 const flash = require('connect-flash');
 /*
 const favicon = require('serve-favicon');
-const path = require('path');
 */
+const path = require('path');
+
 
 
 /* Openshift server set up */
@@ -83,10 +84,12 @@ require('./config/scheduler');
 */
 
 app.set('view engine', 'ejs');
-app.set('./views'); 
+//app.set('/views', path.join(__dirname, 'views')); 
+app.set('views', path.join(__dirname, '/views'));
 
 //app.use('/public', express.static('./public'));
-app.use('/public', express.static('public'));
+//app.use('/public', express.static('public'));
+app.use('/public', express.static(path.join(__dirname, 'public')));
 /*
 app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
 app.use(morgan('dev'));

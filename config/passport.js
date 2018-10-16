@@ -26,7 +26,7 @@ module.exports = function(passport) {
           const newBusiness = new Business();
           newBusiness.local.email = username;
           newBusiness.local.password = newBusiness.generateHash(password);
-          newBusiness.local.timezoneOffsetMs = req.body.timezoneOffsetMs;
+          newBusiness.timezone = req.body.timezone;
           //newBusiness.holidays = await holidays.readFromFile();
           await newBusiness.setHolidays();
           await newBusiness.save();
@@ -35,7 +35,6 @@ module.exports = function(passport) {
           const newUser = new User();
           newUser.local.email = username;
           newUser.local.password = newUser.generateHash(password);
-          newUser.local.timezoneOffsetMs = req.body.timezoneOffsetMs;
           newUser.save();
           return done(null, newUser);
         }

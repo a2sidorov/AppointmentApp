@@ -45,7 +45,7 @@ module.exports = (app, passport) => {
   });
 
    /* POST sign up */
-   app.post('/signup', isEmailValid, isPasswordValid, isConfirmPasswordValid, isTimezoneOffsetValid, (req, res, next) => {
+   app.post('/signup', isEmailValid, isPasswordValid, isConfirmPasswordValid, (req, res, next) => {
     passport.authenticate('local-signup', (err, user, info) => {
       if (err) return next(err);
       if (!user) return res.json({ success: false, message: info });
@@ -773,15 +773,16 @@ module.exports = (app, passport) => {
 
     return result;
   }
-
-  function isTimezoneOffsetValid(req, res, next) {
-    if (!(/^[0-9]+$/).test(req.body.timezoneOffsetMs)) {
+  /*
+  function isTimezoneValid(req, res, next) {
+    if (!(/^[a-zA-Z/_]+$/).test(req.body.timezoneOffsetMs)) {
       return res.json({ 
         success: false,
-        message: 'Timezone offset must be a number in milliseconds.'
+        message: 'Timezone is needed to be sent.'
       });
     }
     return next();
   }
+  */
 
 }

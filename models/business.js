@@ -50,24 +50,6 @@ function defaultWorkhours() {
   } 
   return workhours;
 }
-/*
-function defaultWorkhours() {
-  const workhours = [];
-  for (let h = 0; h <= 24; h++) {
-    if (h >= 8 && h <= 17) {
-      workhours.push({time:`${h}:00`, isAvailable: true});
-      workhours.push({time:`${h}:30`, isAvailable: false});
-    } else {
-      if (h !== 0) {
-      workhours.push({time:`${h}:00`, isAvailable: false});
-    }
-    if (h === 24) break;
-    workhours.push({time:`${h}:30`, isAvailable: false});
-    }     
-  } 
-  return workhours;
-}
-*/
 
 businessSchema.methods.setHolidays = async function() {
   const events = await holidays.readFromFile();
@@ -118,42 +100,16 @@ businessSchema.methods.createMonth = function(year, month) {
 };
 
 businessSchema.methods.createDay = function(date) { // arg: String YYYY-MM-DD
-  //const m = moment({ year: year, month: month, day: day }).tz(this.timezone);
-
   const availableWorkhours = this.workhours.filter(hour => hour.isAvailable);
+  let dateString;
   availableWorkhours.forEach((hour) => {
-    //let h = parseInt(hour.time.substring(0, 2));
-    //let m = parseInt(hour.time.substring(3, 5));
-    //m.hour(h);
-
-    //dateObj.setHours(h);
-    //dateObj.setMinutes(m);
-
-    
-    if (this.isBooked(date + ' ' + hour.time + '+0300') || this.isLate(date + ' ' + hour.time + '+0300')) {
+    dateString = moment.tz(date + ' ' + hour.time, this.timezone).format();
+    if (this.isBooked(dateString) || this.isLate(dateString)) {
       hour.isAvailable = false;
     }
   });
   return availableWorkhours;
 }
-
-/*
-businessSchema.methods.createDay = function(dateObj) {
-  const availableWorkhours = this.workhours.filter((hour) => {
-    return hour.isAvailable;
-  });
-  availableWorkhours.forEach((hour) => {
-    let h = parseInt(hour.time.substring(0, 2));
-    let m = parseInt(hour.time.substring(3, 5));
-    dateObj.setHours(h);
-    dateObj.setMinutes(m);
-    if (this.isBooked(dateObj) || this.isLate(dateObj)) {
-      hour.isUnavailable = true;
-    }
-  });
-  return availableWorkhours;
-}
-*/
 
 /*  Auxiliary functions */
 businessSchema.methods.isWorkday = function(dayNum) { // arg: int
@@ -166,7 +122,7 @@ businessSchema.methods.isWorkday = function(dayNum) { // arg: int
   return workdaysArr.includes(dayNum);
 }
 
-businessSchema.methods.isHoliday = function(date) { // arg: String YYYY-MM-DD
+businessSchema.methods.isHoliday = function(date) { // arg: String YYYY-MM-DDTHH:mm:ss+-HHmm
   const holidaysArr = [];
   this.holidays.forEach((holiday) => {
     if (!holiday.isAvailable) {
@@ -176,7 +132,7 @@ businessSchema.methods.isHoliday = function(date) { // arg: String YYYY-MM-DD
   return holidaysArr.includes(date);
 }
 
-businessSchema.methods.isBooked = function(time) { // arg: String YYYY-MM-DD HH:mm+-HHmm
+businessSchema.methods.isBooked = function(time) { // arg: String YYYY-MM-DDTHH:mm:ss+-HHmm
   const activeAppointments = this.appointments.map((appointment) => {
     if (!appointment.canceled) {
        return appointment.date;
@@ -186,11 +142,7 @@ businessSchema.methods.isBooked = function(time) { // arg: String YYYY-MM-DD HH:
 }
 
 businessSchema.methods.isLate = function(time) { // arg: String YYYY-MM-DD HH:mm+-HHmm
-
-  //const test = moment().tz(this.timezone).format();
-
   const m = moment(time);
-  //const m = moment(time);
   const currentMoment = moment().tz(this.timezone).format();
   return m.diff(currentMoment, 'minutes') < 30; //checking if an appointment starts in less than 30 minutes;
 }
