@@ -525,15 +525,15 @@ module.exports = (app, passport) => {
           message: 'Reason text must not contain words longer than 30 characters.'
         });
       }
-      console.log('book dateISO ' + req.body.dateISO);
-      console.log('book dateObj ' + new Date(req.body.dateISO));
+      //console.log('book dateISO ' + req.body.dateISO);
+      //console.log('book dateObj ' + new Date(req.body.dateISO));
       //const date = new Date(new Date(req.body.dateISO).getTime() + business.local.timezoneOffsetMs);
       //const date = new Date(req.body.dateISO);
-      console.log('book date ' + date);
-      if ( !business.isWorkday(req.body.dateISO) 
-        || business.isHoliday(req.body.dateISO)
-        || business.isBooked(req.body.dateISO)
-        || business.isLate(req.body.dateISO)) {
+      //console.log('book date ' + date);
+      if ( !business.isWorkday(req.body.dateString) 
+        || business.isHoliday(req.body.dateString)
+        || business.isBooked(req.body.dateString)
+        || business.isLate(req.body.dateString)) {
           return res.json({
             success: false,
             message: 'Requested time is not available for appointment.'
@@ -542,10 +542,10 @@ module.exports = (app, passport) => {
       const newAppnt = new Appointment();
       newAppnt.user = req.user.id;
       newAppnt.business = business._id;
-      newAppnt.date = req.body.dateISO;
+      newAppnt.date = req.body.dateString;
       newAppnt.reason = req.body.reason;
       newAppnt.canceled = false;
-      newAppnt.timeMs = date.getTime();
+      //newAppnt.timeMs = date.getTime();
       const appointment = await newAppnt.save();
 
       user.appointments.push(appointment._id);

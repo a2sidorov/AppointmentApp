@@ -723,7 +723,7 @@ describe('Testing routes', () => {
 				.post('/schedule/update')
 				.set('Content-type', 'application/json')
 				.send({
-					days: [{dayNum: '6', isAvailable: true}],
+					days: [{dayNum: 6, isAvailable: true}],
 					time: '',
 					holidays: ''
 				});
@@ -735,15 +735,15 @@ describe('Testing routes', () => {
 				.post('/schedule/update')
 				.set('Content-type', 'application/json')
 				.send({
-					days: [{dayNum: '6', isAvailable: false}],
+					days: [{dayNum: 6, isAvailable: false}],
 					time: '',
 					holidays: ''
 				});
       assert.isTrue(res.body.success);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
 	
 	});
@@ -1713,7 +1713,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
     });
@@ -1722,7 +1722,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
     });
@@ -1733,7 +1733,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 				});
       findById.restore();
       assert.isTrue(res.body.error);
@@ -1743,7 +1743,7 @@ describe('Testing routes', () => {
 				.post('/book/incorrectid/book')
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
 		});
@@ -1752,10 +1752,9 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business1.firstAvailableTime.toISOString(),
+					dateString: business1.firstAvailableTime,
 					reason: '0123456789012345678901234567890'
 				});
-				console.log(res.body)
 			assert.isFalse(res.body.success);
 		});
     it('should create an apoointment', async () => {
@@ -1763,10 +1762,9 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 					reason: '012345678901234567890123456789'
 				});
-			console.log(res.body)
 			const appointment = await Appointment.findOne({ 'business': business0.id });
 			assert.equal(appointment.reason, '012345678901234567890123456789');
 			assert.isFalse(appointment.canceled);
@@ -1781,7 +1779,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business1.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business1.firstAvailableTime.toISOString(),
+					dateString: business1.firstAvailableTime,
 					reason: 'reason'
 				});
 			assert.isFalse(res.body.success);
@@ -1791,18 +1789,18 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 					reason: 'reason'
 				});
 			assert.isFalse(res.body.success);
 		});
 		it('should fail if appointment time starts less than in 30 minutes', async () => {
-			const clock = sinon.useFakeTimers(business0.firstAvailableTime.getTime() - 29 * 60 * 1000 );
+			const clock = sinon.useFakeTimers(moment(business0.firstAvailableTime).millisecond() - 29 * 60 * 1000 );
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 					reason: 'reason'
 				});
 				clock.restore();
@@ -1822,15 +1820,15 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
+					dateString: business0.firstAvailableTime,
 					reason: 'reason'
 				});
       assert.isTrue(res.body.success);
 		});
 		
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
 	});
 
@@ -1976,12 +1974,12 @@ function DummyClient (email, password) {
 				password: this.password
 			});
 	};
-	this.makeAppointment = async function(businessId, date) {
+	this.makeAppointment = async function(businessId, localeDateString) {
 		await this.session
 			.post(`/book/${businessId}/book`)
 			.set('Content-type', 'application/json')
 			.send({
-				dateISO: date.toISOString(),
+				dateISO: localeDateString,
 				reason: 'reason'
 			});
 
@@ -2016,7 +2014,9 @@ function DummyBusiness (email, password) {
 			confirm: this.password,
 			isBusiness: true,
 			//newBusiness.timezone = 'America/New_York',
-			timezone:  moment.tz.guess(),
+			//timezone:  moment.tz.guess(),
+			timezone: 'Europe/Moscow',
+
 		});
 		const business = await Business.findOne({ 'local.email': this.email }, '_id');
   	this.id = business._id.toString();
@@ -2030,34 +2030,23 @@ function DummyBusiness (email, password) {
 				password: this.password
 			});
 	};
-	this.getFirstAvailableTime = async function () {
-		const date = new Date();
-    date.setSeconds(0);
-		date.setMilliseconds(0);
+	this.getFirstAvailableTime = async () => {
 		const business = await Business.findById(this.id).populate('appointments').exec();
-    let monthSchedule = business.createMonth();
-		let day = monthSchedule.find(day => day.isAvailable);
-		if (!day) {
-			let month = date.getMonth();
-      let year = date.getFullYear();
-			if (month + 1 > 11) {
-				date.setMonth(0);
-				date.setFullYear(year++);
-			} else {
-				date.setMonth(month++);
+		const m = moment.tz(business.timezone);
+		let days = business.createMonth(m.format());
+		let day;
+		while(!day) {
+			day = days.find(day => day.isAvailable);
+			if(!day) {
+				m.add(1, 'month');
+				days = business.createMonth(m.format());
 			}
-			monthSchedule = business.createMonth(date);
-			day = monthSchedule.find(day => day.isAvailable);
 		}
-		this.firstAvailableDay = day.num;
-		date.setDate(day.num);
-		const daySchedule = business.createDay(date);
-		const time = daySchedule.find(time => time.isAvailable);
-		const hour = (time.time).substring(0, 2);
-		const minute = (time.time).substring(3);
-		date.setHours(parseInt(hour));
-		date.setMinutes(parseInt(minute));
-		this.firstAvailableTime = date;
+		const times = business.createDay(m.format('YYYY-MM-DD'));
+		const time = times.find(time => time.isAvailable);
+		m.hour(time.hour);
+		m.minute(time.minute);
+		this.firstAvailableTime = m.format();
 	};
 	this.activateSchedule = async function () {
 		await this.session

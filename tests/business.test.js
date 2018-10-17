@@ -11,8 +11,8 @@ describe('Business model test', () => {
     newBusiness.local.email = 'test@test.com';
     newBusiness.local.password = 'password';;
     await newBusiness.setHolidays();
-    //newBusiness.timezone = 'Europe/Moscow';
-    newBusiness.timezone = 'America/New_York';
+    newBusiness.timezone = 'Europe/Moscow';
+    //newBusiness.timezone = 'America/New_York';
   });
 
   describe('workdays test', () => {
@@ -50,34 +50,40 @@ describe('Business model test', () => {
 
   describe('createMonth method test', () => {
     it('it should return an array', () => {
-      assert.isArray(newBusiness.createMonth());
+      const m = moment();
+      assert.isArray(newBusiness.createMonth(m.format()));
     });
+    /*
     it('with arguments DST ON', () => {
       const m = moment();
-      assert.isArray(newBusiness.createMonth(m.year(), 9));
+      m.add(1, 'year');
+      m.month(5);
+      assert.isArray(newBusiness.createMonth(m.format()));
     });
     it('with arguments DST OFF', () => {
       const m = moment();
-      assert.isArray(newBusiness.createMonth(m.year(), 11));
+      m.add(1, 'year');
+      m.month(0);
+      assert.isArray(newBusiness.createMonth(m.format()));
     });
+    */
   });
 
   describe('createDay method test', () => {
     it('should return an array', () => {
       const m = moment();
-      assert.isArray(newBusiness.createDay(m.format('YYYY-MM-DD')));
+      assert.isArray(newBusiness.createDay(m.format()));
     });
+    /*
     it('should return an array DST on', () => {
-      const m = moment();
-      m.add(1, 'year');
-      m.month(7);
-      assert.isArray(newBusiness.createDay(m.format('YYYY-MM-DD')));
+      const dateString = moment().add(1, 'year').month(7).format("YYYY-MM-DD");
+      assert.isArray(newBusiness.createDay(dateString));
     });
     it('should return an array DST off', () => {
-      const m = moment();
-      m.month(11);
-      assert.isArray(newBusiness.createDay(m.format('YYYY-MM-DD')));
+      const dateString = moment().add(1, 'year').month(7).format("YYYY-MM-DD");
+      assert.isArray(newBusiness.createDay(dateString));
     });
+    */
   });
 
   describe('isWorkday method test', () => {
@@ -106,8 +112,8 @@ describe('Business model test', () => {
 
   describe('isBooked method test', () => {
     it('should return boolean', () => {
-      
-      assert.isBoolean(newBusiness.isBooked());
+      const dateString = moment().tz(newBusiness.timezone).hour(8).minute(0).format();
+      assert.isBoolean(newBusiness.isBooked(dateString));
     });
   });
 

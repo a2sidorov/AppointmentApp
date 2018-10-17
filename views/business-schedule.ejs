@@ -48,7 +48,8 @@
               <button type="button" onclick="toggleStatus(this)">Start</button>
             <% } %>
             <% workhours.forEach((time) => { %>
-                <% txt = time.time.split(':')[1] === '30' ? '30' : time.time.split(':')[0]; %>
+                <% txt = time.minute === 0 ? time.hour : time.minute %>
+                <!-- txt = time.time.split(':')[1] === '30' ? '30' : time.time.split(':')[0]; -->
                 <% rad = angle * (Math.PI / 180); %>
                 <% x = Math.cos(rad) * d; %>
                 <% y = Math.sin(rad) * d; %>
