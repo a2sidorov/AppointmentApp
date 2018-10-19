@@ -376,8 +376,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
   });
 
@@ -436,8 +436,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
   });
 
@@ -495,8 +495,8 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
   });
 
@@ -582,8 +582,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
 	});
 	
@@ -628,8 +628,8 @@ describe('Testing routes', () => {
       assert.equal(res.headers.view, 'business-home');
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
 		
   });
@@ -660,8 +660,8 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
   });
     
@@ -723,7 +723,7 @@ describe('Testing routes', () => {
 				.post('/schedule/update')
 				.set('Content-type', 'application/json')
 				.send({
-					days: [{dayNum: 6, isAvailable: true}],
+					days: [{num: 6, isAvailable: true}],
 					time: '',
 					holidays: ''
 				});
@@ -735,7 +735,7 @@ describe('Testing routes', () => {
 				.post('/schedule/update')
 				.set('Content-type', 'application/json')
 				.send({
-					days: [{dayNum: 6, isAvailable: false}],
+					days: [{num: 6, isAvailable: false}],
 					time: '',
 					holidays: ''
 				});
@@ -835,8 +835,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
 		});
   });
 
@@ -866,8 +866,8 @@ describe('Testing routes', () => {
       assert.equal(res.header.view, 'business-profile');
     });
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 
@@ -949,15 +949,17 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
     });
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
 	});
 
 	describe('POST /profile/delete', () => {
 		const business0 = new DummyBusiness('business0@test.com', 'password');
 		const business1 = new DummyBusiness('business1@test.com', 'password');
+		const business2 = new DummyBusiness('business2@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
+		const client1 = new DummyClient('client1@test.com', 'password');
 		before( async () => {
 			await business0.signup();
 			await business0.login();
@@ -967,8 +969,17 @@ describe('Testing routes', () => {
 			await business1.login();
 			await business1.activateSchedule();
 
+			await business2.signup();
+			await business2.login();
+			await business2.activateSchedule();
+
 			await client0.signup();
 			await client0.login();
+			await client0.add(business0.id);
+
+			await client1.signup();
+			await client1.login();
+			await client1.add(business0.id);
 
 			await business0.getFirstAvailableTime();
 			await client0.makeAppointment(business0.id, business0.firstAvailableTime);
@@ -1020,6 +1031,30 @@ describe('Testing routes', () => {
       findById.restore();
       assert.isTrue(res.body.error);
 		});
+		it('should delete reference to business0 from client0', async () => {
+      const res = await business0.session
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'password'
+				});
+			const client = await User.findById(client0.id);
+      assert.isTrue(client.contacts.length === 0);
+		});
+		it('should delete reference to business0 from client1', async () => {
+			const client = await User.findById(client1.id);
+      assert.isTrue(client.contacts.length === 0);
+		});
+		it('should delete business1 and cancel its appointments', async () => {
+      const res = await business1.session
+				.post('/profile/delete')
+				.set('Content-type', 'application/json')
+				.send({
+					password: 'password'
+				});
+			const appointment = await Appointment.findOne({ 'business': business1.id });
+      assert.isTrue(appointment.canceled);
+		});
     it('should delete client0 account', async () => {
       const res = await client0.session
 				.post('/profile/delete')
@@ -1030,23 +1065,13 @@ describe('Testing routes', () => {
 			const user = await User.findOne({ 'local.email': 'client0@test.com' });
       assert.isNull(user);
 		});
-		it('should cancel business0 appointments', async () => {
-      const res = await business0.session
-				.post('/profile/delete')
-				.set('Content-type', 'application/json')
-				.send({
-					password: 'password'
-				});
-			const appointment = await Appointment.findOne({ 'business': business0.id });
-      assert.isTrue(appointment.canceled);
-		});
-		it('should fail to get home page for client0s', async () => {
+		it('should fail to get home page for client0', async () => {
 			const res = await client0.session
 				.get('/home');
       assert.notEqual(res.statusCode, 200);
 		});
     it('should send success notification', async () => {
-      const res = await business1.session
+      const res = await business2.session
 				.post('/profile/delete')
 				.set('Content-type', 'application/json')
 				.send({
@@ -1055,8 +1080,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
 		});
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
 	});
 	
@@ -1085,7 +1110,7 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
     });
     after(async () => {
-      await User.remove({});
+      await User.deleteMany({});
     });
   });
 
@@ -1158,7 +1183,7 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
     });
     after(async () => {
-      await User.remove({});
+      await User.deleteMany({});
     });
   });
 
@@ -1250,7 +1275,7 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
     });
     after(async () => {
-      await User.remove({});
+      await User.deleteMany({});
     });
   });
 
@@ -1337,8 +1362,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
     });
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
 	});
 
@@ -1375,8 +1400,8 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
     });
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 
@@ -1405,8 +1430,8 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
     });
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 
@@ -1450,15 +1475,15 @@ describe('Testing routes', () => {
       assert.equal(res.statusCode, 200);
     });
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 
   describe('POST /book/:id/month', () => {
     const business0 = new DummyBusiness('business0@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
-		let date;
+		let m;
 		before( async () => {
 			await business0.signup();
 			await business0.login();
@@ -1466,17 +1491,14 @@ describe('Testing routes', () => {
 			await client0.login();
 		});
     before(async () => {
-      date = new Date();
-      date.setSeconds(0);
-      date.setMilliseconds(0);
+			m = moment.tz(business0.timezone);
     });
     it('should fail if user is not logged in', async () => {
       const res = await request(app)
 				.post(`/book/${business0.Id}/month`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
+					date: m.format(),
 				});
       assert.isFalse(res.body.success);
     });
@@ -1485,8 +1507,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/month`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
+					date: m.format(),
 				});
       assert.isFalse(res.body.success);
     });
@@ -1497,8 +1518,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/month`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
+					date: m.format(),
 				});
       findById.restore();
       assert.isTrue(res.body.error);
@@ -1508,103 +1528,35 @@ describe('Testing routes', () => {
 				.post('/book/incorrectid/month')
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
+					date: m.format(),
 				});
       assert.isFalse(res.body.success);
     });
     it('should send next month schedule', async () => {
+			m.add(1, 'months');
       const res = await client0.session
 				.post(`/book/${business0.id}/month`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
+					date: m.format(),
 				});
       assert.isArray(res.body.days);
       assert.isTrue(res.body.days.length > 0);
       assert.property(res.body.days[0], 'num');
       assert.property(res.body.days[0], 'isAvailable');
-    });
-    it('should not send prev month schedule', async () => {
-      const res = await client0.session
-				.post(`/book/${business0.id}/month`)
-				.set('Content-type', 'application/json')
-				.send({
-					dateISO: date.toISOString(),
-					month: 'prev'
-				});
-      assert.isArray(res.body.days);
-      assert.isTrue(res.body.days.length > 0);
-      assert.property(res.body.days[0], 'num');
-      assert.property(res.body.days[0], 'isAvailable');
-      assert.equal(new Date(res.body.dateISO).getMonth(), date.getMonth());
-    });
-    it('should send prev month schedule', async () => {
-      date.setMonth(date.getMonth() + 1);
-      const res = await client0.session
-				.post(`/book/${business0.id}/month`)
-				.set('Content-type', 'application/json')
-				.send({
-					dateISO: date.toISOString(),
-					month: 'prev'
-				});
-      date.setMonth(date.getMonth() - 1);
-      assert.isArray(res.body.days);
-      assert.isTrue(res.body.days.length > 0);
-      assert.property(res.body.days[0], 'num');
-      assert.property(res.body.days[0], 'isAvailable');
-      assert.equal(new Date(res.body.dateISO).getMonth(), date.getMonth());
-    });
-    it('should send schedule of January of the next year', async () => {
-      date.setMonth(11);
-      const res = await client0.session
-				.post(`/book/${business0.id}/month`)
-				.set('Content-type', 'application/json')
-				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
-				});
-      date.setMonth(new Date().getMonth());
-      assert.isArray(res.body.days);
-      assert.isTrue(res.body.days.length > 0);
-      assert.property(res.body.days[0], 'num');
-      assert.property(res.body.days[0], 'isAvailable');
-      assert.equal(new Date(res.body.dateISO).getMonth(), 0);
-      assert.equal(new Date(res.body.dateISO).getFullYear(), date.getFullYear() + 1);
-    });
-    it('should send schedule of December of the prev year', async () => {
-      date.setMonth(0);
-      date.setFullYear(new Date().getFullYear() + 1);
-      const res = await client0.session
-				.post(`/book/${business0.id}/month`)
-				.set('Content-type', 'application/json')
-				.send({
-					dateISO: date.toISOString(),
-					month: 'prev'
-				});
-      date.setMonth(new Date().getMonth());
-      date.setFullYear(new Date().getFullYear());
-      assert.isArray(res.body.days);
-      assert.isTrue(res.body.days.length > 0);
-      assert.property(res.body.days[0], 'num');
-      assert.property(res.body.days[0], 'isAvailable');
-      assert.equal(new Date(res.body.dateISO).getMonth(), 11);
-      assert.equal(new Date(res.body.dateISO).getFullYear(), date.getFullYear());
     });
     it('should send success notification', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/month`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: date.toISOString(),
-					month: 'next'
+					date: m.format(),
 				});
       assert.isTrue(res.body.success);
     });
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 
@@ -1623,8 +1575,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/day`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
-					day: business0.firstAvailableDay
+					date: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
     });
@@ -1633,8 +1584,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/day`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
-					day: business0.firstAvailableDay
+					date: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
     });
@@ -1645,8 +1595,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/day`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
-					day: business0.firstAvailableDay
+					date: business0.firstAvailableTime,
 				});
       findById.restore();
       assert.isTrue(res.body.error);
@@ -1656,8 +1605,7 @@ describe('Testing routes', () => {
 				.post('/book/incorrectid/day')
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
-					day: business0.firstAvailableDay
+					date: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
     });
@@ -1666,27 +1614,26 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/day`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
-					day: business0.firstAvailableDay
+					date: business0.firstAvailableTime,
 				});
       assert.isArray(res.body.hours);
       assert.isTrue(res.body.hours.length > 0);
-      assert.property(res.body.hours[0], 'time');
-      assert.property(res.body.hours[0], 'isAvailable');
+			assert.property(res.body.hours[0], 'hour');
+			assert.property(res.body.hours[1], 'minute');
+      assert.property(res.body.hours[2], 'isAvailable');
     });
     it('should send success notification', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/day`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateISO: business0.firstAvailableTime.toISOString(),
-					day: business0.firstAvailableDay
+					date: business0.firstAvailableTime,
 				});
       assert.isTrue(res.body.success);
     });
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 
@@ -1722,7 +1669,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
     });
@@ -1733,7 +1680,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
 				});
       findById.restore();
       assert.isTrue(res.body.error);
@@ -1743,7 +1690,7 @@ describe('Testing routes', () => {
 				.post('/book/incorrectid/book')
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
 				});
       assert.isFalse(res.body.success);
 		});
@@ -1752,7 +1699,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business1.firstAvailableTime,
+					date: business1.firstAvailableTime,
 					reason: '0123456789012345678901234567890'
 				});
 			assert.isFalse(res.body.success);
@@ -1762,7 +1709,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
 					reason: '012345678901234567890123456789'
 				});
 			const appointment = await Appointment.findOne({ 'business': business0.id });
@@ -1774,22 +1721,22 @@ describe('Testing routes', () => {
 			assert.property(appointment, 'reason');
 			assert.property(appointment, 'canceled');
 		});
-		it('should fail if business schedule is not active', async () => {
-      const res = await client0.session
-				.post(`/book/${business1.id}/book`)
-				.set('Content-type', 'application/json')
-				.send({
-					dateString: business1.firstAvailableTime,
-					reason: 'reason'
-				});
-			assert.isFalse(res.body.success);
-		});
 		it('should fail if requested time already booked', async () => {
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
+					reason: 'reason'
+				});
+			assert.isFalse(res.body.success);
+		});
+		it('should fail if business schedule is not active', async () => {
+      const res = await client0.session
+				.post(`/book/${business1.id}/book`)
+				.set('Content-type', 'application/json')
+				.send({
+					date: business1.firstAvailableTime,
 					reason: 'reason'
 				});
 			assert.isFalse(res.body.success);
@@ -1800,7 +1747,7 @@ describe('Testing routes', () => {
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
 					reason: 'reason'
 				});
 				clock.restore();
@@ -1815,17 +1762,16 @@ describe('Testing routes', () => {
 			assert.equal(client0.appointments.length, 1);
     });
     it('should send success notification', async () => {
-			await Appointment.deleteMany({});
+			await business0.getFirstAvailableTime();
       const res = await client0.session
 				.post(`/book/${business0.id}/book`)
 				.set('Content-type', 'application/json')
 				.send({
-					dateString: business0.firstAvailableTime,
+					date: business0.firstAvailableTime,
 					reason: 'reason'
 				});
       assert.isTrue(res.body.success);
 		});
-		
     after(async () => {
 			await User.deleteMany({});
 			await Appointment.deleteMany({});
@@ -1907,8 +1853,8 @@ describe('Testing routes', () => {
       assert.isTrue(res.body.success);
     });
     after(async () => {
-			await User.remove({});
-			await Appointment.remove({});
+			await User.deleteMany({});
+			//await Appointment.deleteMany({});
     });
 	});
 
@@ -1941,8 +1887,8 @@ describe('Testing routes', () => {
       assert.equal(res1.headers.location, '/');
 		});
     after(async () => {
-      await User.remove({});
-			await Appointment.remove({});
+      await User.deleteMany({});
+			await Appointment.deleteMany({});
     });
   });
 });
@@ -1974,12 +1920,12 @@ function DummyClient (email, password) {
 				password: this.password
 			});
 	};
-	this.makeAppointment = async function(businessId, localeDateString) {
+	this.makeAppointment = async function(businessId, date) {
 		await this.session
 			.post(`/book/${businessId}/book`)
 			.set('Content-type', 'application/json')
 			.send({
-				dateISO: localeDateString,
+				date: date,
 				reason: 'reason'
 			});
 
@@ -2038,11 +1984,11 @@ function DummyBusiness (email, password) {
 		while(!day) {
 			day = days.find(day => day.isAvailable);
 			if(!day) {
-				m.add(1, 'month');
+				m.add(1, 'months');
 				days = business.createMonth(m.format());
 			}
 		}
-		const times = business.createDay(m.format('YYYY-MM-DD'));
+		const times = business.createDay(m.format());
 		const time = times.find(time => time.isAvailable);
 		m.hour(time.hour);
 		m.minute(time.minute);

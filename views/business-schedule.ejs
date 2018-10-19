@@ -23,9 +23,9 @@
             <% const dayNames = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];%>
             <% workdays.forEach((day) => { %>
               <% if (day.isAvailable) { %>
-                <li class="checked" onclick="updateDays(this, '<%= day.dayNum %>', '<%= day.isAvailable %>')"><%= dayNames[day.dayNum] %></li>
+                <li class="checked" onclick="updateDays(this, '<%= day.num %>', '<%= day.isAvailable %>')"><%= dayNames[day.num] %></li>
               <% } else { %>
-                <li onclick="updateDays(this, '<%= day.dayNum %>', '<%= day.isAvailable %>')"><%= dayNames[day.dayNum] %></li>
+                <li onclick="updateDays(this, '<%= day.num %>', '<%= day.isAvailable %>')"><%= dayNames[day.num] %></li>
               <% } %>
             <% }); %>
           <% })(); %>
@@ -55,9 +55,9 @@
                 <% y = Math.sin(rad) * d; %>
                 <% position = `position: absolute; left: ${x}px; right: ${x}px; top: ${y}px; bottom: ${y}px` %>
                 <% if (time.isAvailable) { %>
-                  <li class="checked" onclick="updateTime(this, '<%= time.time %>', '<%= time.isAvailable %>')" style="<%= position %>" ><%= txt %></li>
+                  <li class="checked" onclick="updateTime(this, '<%= time.hour %>', '<%= time.minute %>', '<%= time.isAvailable %>')" style="<%= position %>" ><%= txt %></li>
                 <% } else { %>
-                  <li onclick="updateTime(this, '<%= time.time %>', '<%= time.isAvailable %>')" style="<%= position %>"><%= txt %></li>
+                  <li onclick="updateTime(this, '<%= time.hour %>', '<%= time.minute %>', '<%= time.isAvailable %>')" style="<%= position %>"><%= txt %></li>
                 <% } %>
                 <% angle = angle === 360 ? 15 : angle + 15; %>
                 <% d += 1.5; %>

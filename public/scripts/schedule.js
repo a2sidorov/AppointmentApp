@@ -30,34 +30,36 @@ const schedule = {
     xhttp.send(data);
   }
 
-  function updateDays(el, dayNum, isAvailable) {
+  function updateDays(el, num, isAvailable) {
     const saveBtn = document.getElementById('saveBtn');
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
     const index = schedule.days.findIndex((day) => {
-      return day.dayNum === dayNum;
+      return day.num === num;
     });
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
-      schedule.days.push({dayNum: dayNum, isAvailable: isAvailable});
+      schedule.days.push({num: num, isAvailable: isAvailable});
     } else {
       schedule.days[index].isAvailable = schedule.days[index].isAvailable ? false : true;
     }
+    console.log(schedule)
   }
 
-  function updateTime(el, time, isAvailable) {
+  function updateTime(el, hour, minute, isAvailable) {
     const saveBtn = document.getElementById('saveBtn');
     el.classList.toggle('checked');
     saveBtn.style.display = 'block';
-    const index = schedule.time.findIndex((hour) => {
-      return hour.time === time;
+    const index = schedule.time.findIndex((time) => {
+      return time.hour === hour && time.minute === minute;
     });
     if (index === -1) {
       isAvailable = JSON.parse(isAvailable) ? false : true;
-      schedule.time.push({time: time, isAvailable: isAvailable});
+      schedule.time.push({hour: hour, minute: minute, isAvailable: isAvailable});
     } else {
       schedule.time[index].isAvailable = schedule.time[index].isAvailable ? false : true;
     }
+    console.log(schedule)
   }
 
   function updateHolidays(el, holidayDate, isAvailable) {
@@ -73,6 +75,7 @@ const schedule = {
     } else {
       schedule.holidays[index].isAvailable = schedule.holidays[index].isAvailable ? false : true;
     }
+    console.log(schedule)
   }
 
   function save() {

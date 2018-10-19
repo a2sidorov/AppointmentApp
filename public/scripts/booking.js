@@ -6,12 +6,22 @@ const appointment = {
   isDayChosen: false,
   isTimeChosen: false,
 };
+let currentMoment;
 /* Setting month */
-function getDays(dateISO, month) {
-  if (appointment.date === undefined) {
-    appointment.date = new Date(dateISO);
+function getDays(timezone, month) {
+  if (!appointment.date) {
+    appointment.date = moment.tz(timezone);
+    currentMoment = moment.tz(timezone);
   }
-  const monthNames = ["January", "February", "March", "April", "May", "June", "Jule","August", "September", "Octocber", "November", "December"];
+
+
+  if (month === "next") {
+    appointment.date.add(1, 'months');
+  } 
+  if (month === "prev" && appointment.date.isSameOrAfter(currentMoment, 'month')) {
+    appointment.date.subtract(1, 'months');
+  } 
+  
   const days = document.getElementById('days');
   const message = document.getElementById('message');
   const xhttp = new XMLHttpRequest();
@@ -25,10 +35,8 @@ function getDays(dateISO, month) {
       if (!parsedRes.success) {
         return message.innerHTML = parsedRes.message;
       }
-      console.log('getDays %s', parsedRes.dateISO)
 
-      appointment.date = new Date(parsedRes.dateISO);
-      document.getElementById('month').innerHTML = monthNames[appointment.date.getMonth()];
+      document.getElementById('month').innerHTML = appointment.date.format('MMMM \'YY');
       removeChildren(days);
 
       let list, div, txt;
@@ -39,7 +47,7 @@ function getDays(dateISO, month) {
         div.appendChild(txt);
         if (day.isAvailable) {
           div.classList.add('availableDays');
-          div.onclick = function() {setDay(parsedRes.dateISO, this)};
+          div.onclick = function() { setDay(timezone, this); };
         }
         list.appendChild(div);
         days.appendChild(list);
@@ -50,31 +58,26 @@ function getDays(dateISO, month) {
   xhttp.setRequestHeader("Content-type", "application/json");
 
   const data = JSON.stringify({
-    dateISO: appointment.date.toISOString(),
-    month: month,
+    date: appointment.date.format(),
   });
   xhttp.send(data);
 }
 
 /* Setting day */
-function setDay(dateISO, el) {
-  console.log(dateISO);
-  if (appointment.date === undefined) {
-    appointment.date = new Date(dateISO);
+function setDay(timezone, el) {
+  if (!appointment.date) {
+    appointment.date = moment.tz(timezone);
+    currentMoment = moment.tz(timezone);
   }
-  const dayNum = el.innerHTML;
-  checkDay(el);
-  getTimetable(dayNum);
+  appointment.date.date(parseInt(el.innerHTML));
   appointment.isDayChosen = true;
-}
-function checkDay(el) {
   const checkedDay = document.getElementById('checkedDay');
+
   if (checkedDay && checkedDay !== el) {
     checkedDay.removeAttribute('id'); 
   }
   el.id = 'checkedDay';
-}
-function getTimetable(dayNum) {
+
   const timetable = document.getElementById('timetable');
   const message = document.getElementById('message');
   const xhttp = new XMLHttpRequest();
@@ -89,18 +92,15 @@ function getTimetable(dayNum) {
         return message.innerHTML = parsedRes.message;
       }
 
-      console.log('getTimetable %s', parsedRes.dateISO)
-
-      appointment.date = new Date(parsedRes.dateISO);
       removeChildren(timetable);
 
       let txt, list;
-      parsedRes.hours.forEach((hour) => {
+      parsedRes.times.forEach((time) => {
         list = document.createElement('LI');
-        txt = document.createTextNode(hour.time);
-        if (hour.isAvailable) {
+        txt = document.createTextNode(time.hour + ':' + (time.minute === 0 ? '0'+ time.minute : time.minute));
+        if (time.isAvailable) {
           list.classList.add('availableTime');
-          list.onclick = function() {setTime(this)};
+          list.onclick = function() { setTime(this) };
         }
         list.appendChild(txt);
         timetable.appendChild(list);
@@ -110,8 +110,7 @@ function getTimetable(dayNum) {
   xhttp.open("POST", `${window.location}/day`, true);
   xhttp.setRequestHeader("Content-type", "application/json");
   const data = JSON.stringify({
-    dateISO: appointment.date.toISOString(),
-    day: dayNum,
+    date: appointment.date.format(),
   });
   xhttp.send(data);
 }
@@ -120,8 +119,8 @@ function setTime(el) {
   checkTime(el);
   const hour = (el.innerHTML).substring(0, 2);
   const minute = (el.innerHTML).substring(3);
-  appointment.date.setHours(parseInt(hour));
-  appointment.date.setMinutes(parseInt(minute));
+  appointment.date.hour(parseInt(hour));
+  appointment.date.minute(parseInt(minute));
   appointment.isTimeChosen = true;
 }
 function checkTime(el) {
@@ -158,9 +157,8 @@ function book() {
 
     xhttp.open("POST", `${window.location}/book`, true);
     xhttp.setRequestHeader("Content-type", "application/json");
-    console.log('appointment.date %s', appointment.date)
     const data = JSON.stringify({
-      dateISO: appointment.date.toISOString(),
+      date: appointment.date.format(),
       reason: reason,
     });
     xhttp.send(data);

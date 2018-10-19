@@ -20,12 +20,12 @@ function defaultWorkdays() {
   const workdays = [];
   for (let d = 1; d <= 7; d++) {
     if (d >= 1 && d <= 5) {
-      workdays.push({dayNum: d, isAvailable: true});
+      workdays.push({num: d, isAvailable: true});
     } else {
       if (d === 7) {
-        workdays.push({dayNum: 0, isAvailable: false});
+        workdays.push({num: 0, isAvailable: false});
       } else {
-        workdays.push({dayNum: d, isAvailable: false});
+        workdays.push({num: d, isAvailable: false});
       }   
     }
   }
@@ -63,8 +63,8 @@ businessSchema.methods.setHolidays = async function() {
   });
 };
 
-businessSchema.methods.createMonth = function(dateString) { // arg: String YYYY-MM-DD HH:mm+-HHmm
-  const m = moment.tz(dateString, this.timezone);
+businessSchema.methods.createMonth = function(date) { // arg: ref to moment()
+  const m = moment.tz(date, this.timezone);
 
   const todayDateString = moment.tz(this.timezone).format();
   const days = [];
@@ -97,8 +97,8 @@ businessSchema.methods.createMonth = function(dateString) { // arg: String YYYY-
   return days;
 };
 
-businessSchema.methods.createDay = function(dateString) { // arg: String YYYY-MM-DD HH:mm+-HHmm
-  const m = moment.tz(dateString, this.timezone);
+businessSchema.methods.createDay = function(date) { // arg: String YYYY-MM-DD HH:mm+-HHmm
+  const m = moment.tz(date, this.timezone);
   const availableWorkhours = this.workhours.filter(hour => hour.isAvailable);
   //let localeDateAndTimeString;
   availableWorkhours.forEach((hour) => {
@@ -112,20 +112,27 @@ businessSchema.methods.createDay = function(dateString) { // arg: String YYYY-MM
   return availableWorkhours;
 }
 
-/*  Auxiliary functions */
-businessSchema.methods.isWorkday = function(dateString) { // arg: int day number
-  const m = moment.tz(dateString, this.timezone);
+businessSchema.methods.isWorkday = function(num) { // arg: int day number (0-6)
+  //const m = moment.tz(dateString, this.timezone);
+  /*
   const workdaysArr = [];
   this.workdays.forEach((day) => {
     if (day.isAvailable) {
       workdaysArr.push(day.dayNum);
     }
   }); 
-  return workdaysArr.includes(m.day());
+  return workdaysArr.includes(num);
+  */
+  const result = this.workdays
+    .filter(day => day.isAvailable)
+    .find(day => day.num === num);
+
+  return result === undefined ? false : true;
 }
 
-businessSchema.methods.isHoliday = function(dateString) { // arg: String YYYY-MM-DD
-  const m = moment.tz(dateString, this.timezone);
+businessSchema.methods.isHoliday = function(date) { // arg: String YYYY-MM-DD
+  /*
+  const m = moment.tz(date, this.timezone);
   const holidaysArr = [];
   this.holidays.forEach((holiday) => {
     if (!holiday.isAvailable) {
@@ -133,24 +140,25 @@ businessSchema.methods.isHoliday = function(dateString) { // arg: String YYYY-MM
     }
   });
   return holidaysArr.includes(m.format('YYYY-MM-DD'));
+  */
+  const result = this.holidays
+    .filter(holiday => !holiday.isAvailable)
+    .find(holiday => moment(holiday.date).isSame(date, 'day'));
+
+  return result === undefined ? false : true;
 }
 
-businessSchema.methods.isBooked = function(localeDateString) { // arg: String YYYY-MM-DDTHH:mm:ss+-HHmm
-  const activeAppointments = this.appointments.map((appointment) => {
-    if (!appointment.canceled) {
-       return appointment.date;
-    }
-  });
-  if (activeAppointments.length === 0) {
-    return false;
-  }
+businessSchema.methods.isBooked = function(date) { // arg: String YYYY-MM-DDTHH:mm:ss+-HHmm
+  const result = this.appointments
+    .filter(app => !app.canceled)
+    .find(app => moment(app.date).isSame(date, 'minutes'));
 
-  return activeAppointments.every(time => moment(time).isSame(localeDateString, 'minutes'));
+  return result === undefined ? false : true;
 }
 
-businessSchema.methods.isLate = function(localeDateString) { // arg: String YYYY-MM-DD HH:mm+-HHmm
+businessSchema.methods.isLate = function(date) { // arg: String YYYY-MM-DD HH:mm+-HHmm
   const currentMoment = moment.tz(this.timezone).format();
-  return moment(localeDateString).diff(currentMoment, 'minutes') < 30; //checking if an appointment starts in less than 30 minutes;
+  return moment(date).diff(currentMoment, 'minutes') < 30; //checking if an appointment starts in less than 30 minutes;
 }
 
 module.exports = User.discriminator('Business', businessSchema);

@@ -100,20 +100,20 @@ describe('Business model test', () => {
 
   describe('isHoliday method test', () => {
     it('should return true if date is holiday', () => {
-      const date = moment().startOf('year');
-      assert.isTrue(newBusiness.isHoliday(date.format('YYYY-MM-DD')));
+      const m = moment().startOf('year');
+      assert.isTrue(newBusiness.isHoliday(m.format()));
     });
     it('should return false if date is not holiday', () => {
-      const date = moment().startOf('year');
-      date.add(1, 'day');
-      assert.isFalse(newBusiness.isHoliday(date.format('YYYY-MM-DD')));
+      const m = moment().startOf('year');
+      m.add(1, 'day');
+      assert.isFalse(newBusiness.isHoliday(m.format()));
     });
   });
 
   describe('isBooked method test', () => {
-    it('should return boolean', () => {
-      const dateString = moment().tz(newBusiness.timezone).hour(8).minute(0).format();
-      assert.isBoolean(newBusiness.isBooked(dateString));
+    it('should return false', () => {
+      const dateString = moment().tz(newBusiness.timezone).hour(14).minute(0).format();
+      assert.isFalse(newBusiness.isBooked(dateString));
     });
   });
 

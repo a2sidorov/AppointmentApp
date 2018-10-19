@@ -6,6 +6,7 @@ const Appointment = require('../models/appointment');
 const crypto = require('crypto');
 const validator = require('validator');
 const passwordReset = require('./passwordReset');
+const moment = require('moment-timezone');
 
 module.exports = (app, passport) => {
 
@@ -186,10 +187,11 @@ module.exports = (app, passport) => {
           message: 'No changes are sent'
         });
       }
+
       if (req.body.days.length > 0) {
         business.workdays.forEach((day) => {
           req.body.days.forEach((updatedDay) => {
-            if (day.dayNum === updatedDay.dayNum) {
+            if (day.num === parseInt(updatedDay.num)) {
               day.isAvailable = updatedDay.isAvailable;
             }
           });
@@ -197,10 +199,10 @@ module.exports = (app, passport) => {
         business.markModified('workdays');
       }
       if (req.body.time.length > 0) {
-        business.workhours.forEach((hour) => {
+        business.workhours.forEach((time) => {
           req.body.time.forEach((updatedTime) => {
-            if (hour.time === updatedTime.time) {
-              hour.isAvailable = updatedTime.isAvailable;
+            if (time.hour === parseInt(updatedTime.hour) && time.minute === parseInt(updatedTime.minute)) {
+              time.isAvailable = updatedTime.isAvailable;
             }
           });
         });
@@ -218,8 +220,8 @@ module.exports = (app, passport) => {
       }
       await business.save();
       res.json({
-  success: true,
-  message: 'Your schedule has been updated'
+        success: true,
+        message: 'Your schedule has been updated'
       });
     } catch(err) {
       next(err);
@@ -301,13 +303,14 @@ module.exports = (app, passport) => {
         })
       }
       if (req.user.kind  === 'Business') {
-        const appointments = await Appointment.find({ 'business': req.user.id });
-        appointments.forEach(async appointment => {
-          appointment.canceled = true;
-          await appointment.save();
-        });
+        await Promise.all([
+          Business.findByIdAndRemove(req.user.id),
+          User.updateMany({ }, { $pull: { contacts: req.user.id } }),
+          Appointment.updateMany({ 'business': req.user.id }, { $set: { canceled: true } })
+        ]);
       }
       await User.findByIdAndRemove(req.user._id);
+
       req.logout();
       res.json({
         success: true,
@@ -419,22 +422,19 @@ module.exports = (app, passport) => {
         Business.findById(req.params.id).populate('appointments').exec(),
       ]);
 
-      //const date = new Date(Date.now() + results[1].local.timezoneOffsetMs);
-      //const date = new Date();
-      //date.setMilliseconds(0);
-      //date.setSeconds(0);
-
-      //const monthNum = date.getMonth();
+      const m = moment.tz(results[1].timezone);
 
       res.render('client-booking', {
         contacts: results[0].contacts,
         chosenContact: results[1].local.email,
         active: results[1].active,
         workhours: results[1].workhours,
-        days: results[1].createMonth(date.toISOString()),
-        //dateObj: militaryDate,
-        dateISO: date.toISOString(),
-        monthNum: monthNum,
+        days: results[1].createMonth(m.format()),
+        //days: results[1].createMonth(m),
+        date: m.format('dddd MMMM Do H:mm') + ' GMT('+ m.format('Z') +')',
+        month: m.format('MMMM'),
+        year: m.format('YY'),
+        timezone: results[1].timezone,
       });
     } catch(err) {
       next(err);
@@ -445,44 +445,10 @@ module.exports = (app, passport) => {
   app.post('/book/:id/month', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
       const business = await Business.findById(req.params.id);
-      const date = new Date(req.body.dateISO);
-      
-      let month = date.getMonth();
-      let year = date.getFullYear();
-      
-      if (req.body.month === 'next') {
-        if (month + 1 > 11) {
-          month = 0;
-          year++;
-        } else {
-          month++;
-        }
-      }
-      if (req.body.month === 'prev') {
-        if (year > new Date().getFullYear()) {
-          if (month - 1 < 0) {
-            month = 11;
-            year--;
-          } else {
-            month--;
-          }
-        } else if (year === new Date().getFullYear() && month - 1 >= new Date().getMonth()) {
-          month--;
-        }
-      }
-      console.log('book/:id/month offset %s', date.getTimezoneOffset())
-      date.setFullYear(year);
-      date.setMonth(month);
-      console.log('book/:id/month offset %s', date.getTimezoneOffset())
-
-      console.log('book/:id/month object %s', date)
-      console.log('book/:id/month ISO %s', date.toISOString())
-      
-
       res.json({ 
         success: true,
-        days: business.createMonth(date.toISOString()),
-        dateISO: date.toISOString(),
+        days: business.createMonth(req.body.date),
+        //dateISO: date.toISOString(),
       });
     } catch(err) {
       next(err);
@@ -498,7 +464,7 @@ module.exports = (app, passport) => {
       //date.setDate(parseInt(req.body.day));
       res.json({ 
         success: true,
-        hours: business.createDay(req.body.dateISO),
+        times: business.createDay(req.body.date),
         //dateISO: date.toISOString(),
       });
     } catch(err) {
@@ -530,10 +496,12 @@ module.exports = (app, passport) => {
       //const date = new Date(new Date(req.body.dateISO).getTime() + business.local.timezoneOffsetMs);
       //const date = new Date(req.body.dateISO);
       //console.log('book date ' + date);
-      if ( !business.isWorkday(req.body.dateString) 
-        || business.isHoliday(req.body.dateString)
-        || business.isBooked(req.body.dateString)
-        || business.isLate(req.body.dateString)) {
+      const m = moment.tz(req.body.date, business.timezone);
+      let check = m.format();
+      if ( !business.isWorkday(m.day()) 
+        || business.isHoliday(m.format('YYYY-MM-DD'))
+        || business.isBooked(m.format())
+        || business.isLate(m.format())) {
           return res.json({
             success: false,
             message: 'Requested time is not available for appointment.'
@@ -542,7 +510,7 @@ module.exports = (app, passport) => {
       const newAppnt = new Appointment();
       newAppnt.user = req.user.id;
       newAppnt.business = business._id;
-      newAppnt.date = req.body.dateString;
+      newAppnt.date = req.body.date;
       newAppnt.reason = req.body.reason;
       newAppnt.canceled = false;
       //newAppnt.timeMs = date.getTime();
@@ -556,7 +524,7 @@ module.exports = (app, passport) => {
 
       res.json({
         success: true,
-        message: `Your appointment is scheduled on ${req.body.dateISO}`
+        message: 'Your appointment is scheduled on ' + m.format('dddd MMMM Do H:mm') + ' GMT('+ m.format('Z') +')',
       });
     } catch(err) {
       next(err);
