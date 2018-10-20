@@ -80,7 +80,7 @@
   }
 
   /*------------------*/
-  /* Home page        */
+  /*   Home page      */
   /*------------------*/
 
   .appointments .appointment-list {
@@ -268,17 +268,21 @@
   .booking .contacts .show {
     display: block;
   }
+  .booking .calendar #year {
+    text-align: center;
+  }  
   .booking .statusMessage {
     padding-top: 20px;
   }
   .booking .calendar .month {
     display: flex;
     width: 40%;
-    margin: auto; 
+    margin: 0px auto;
   }  
   .booking .calendar .month span {
-    padding: 12px 20px;
+    text-align: center;
     font-size: 16px;
+    padding: 12px 20px;
   }
   .booking .calendar .month button {
     border: none;

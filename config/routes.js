@@ -142,6 +142,9 @@ module.exports = (app, passport) => {
           .populate({ path: 'user', select: 'local.email' })
           .exec();
         res.setHeader('view', 'business-home');
+        appointments.forEach(a => {
+          a.date = `${moment.parseZone(a.date).format('MMMM Do YYYY H:mm')} GMT(${moment.parseZone(a.date).format('Z')})`;
+        });
         return res.render('business-home', {
           appointments: appointments,
           message: "",
@@ -156,11 +159,13 @@ module.exports = (app, passport) => {
         .populate({ path: 'business', select: 'local.email' })
         .exec();
       res.setHeader('view', 'client-home');
+      appointments.forEach(a => {
+        a.date = `${moment.parseZone(a.date).format('MMMM Do YYYY H:mm')} GMT(${moment.parseZone(a.date).format('Z')})`;
+      });
       return res.render('client-home', {
         contacts: req.user.contacts,
         appointments: appointments,
         message: "",
-        //contacts: user.contacts,
       });
     } catch(err) {
       next(err);
@@ -271,17 +276,12 @@ module.exports = (app, passport) => {
   });
 
   /* POST(ajax) business/client profile*/
-  app.post('/profile/update', isLoggedIn, async (req, res, next) => {
+  app.post('/profile/update', isLoggedIn, isNameValid, async (req, res, next) => {
     try {
-      if (!req.body.firstname && !req.body.lastname) {
-        return res.json({
-          success: false,
-          message: 'No data is sent'
-        });
-      }
+      
       const user = await User.findById(req.user.id, 'firstname lastname');
-      user.firstname = req.body.firstname;
-      user.lastname = req.body.lastname;
+      user.firstname = req.body.firstname.trim();
+      user.lastname = req.body.lastname.trim();
       await user.save();
       res.json({
         success: true,
@@ -308,13 +308,17 @@ module.exports = (app, passport) => {
           User.updateMany({ }, { $pull: { contacts: req.user.id } }),
           Appointment.updateMany({ 'business': req.user.id }, { $set: { canceled: true } })
         ]);
+      } else {
+        await Promise.all([
+          User.findByIdAndRemove(req.user._id),
+          Appointment.updateMany({ 'user': req.user.id }, { $set: { canceled: true } })
+        ]);
       }
-      await User.findByIdAndRemove(req.user._id);
-
+      
       req.logout();
       res.json({
         success: true,
-        message: 'Your account has benn successfully deleted.'
+        message: 'Your account has been successfully deleted.'
       });
     } catch(err) {
       next(err);
@@ -430,10 +434,9 @@ module.exports = (app, passport) => {
         active: results[1].active,
         workhours: results[1].workhours,
         days: results[1].createMonth(m.format()),
-        //days: results[1].createMonth(m),
         date: m.format('dddd MMMM Do H:mm') + ' GMT('+ m.format('Z') +')',
         month: m.format('MMMM'),
-        year: m.format('YY'),
+        year: m.format('YYYY'),
         timezone: results[1].timezone,
       });
     } catch(err) {
@@ -448,7 +451,6 @@ module.exports = (app, passport) => {
       res.json({ 
         success: true,
         days: business.createMonth(req.body.date),
-        //dateISO: date.toISOString(),
       });
     } catch(err) {
       next(err);
@@ -459,13 +461,9 @@ module.exports = (app, passport) => {
   app.post('/book/:id/day', isLoggedIn, isClient, isBusinessIdValid, async (req, res, next) => {
     try {
       const business = await Business.findById(req.params.id).populate('appointments').exec();
-      //const date = new Date(req.body.dateISO);
-      //console.log('date %s', date)
-      //date.setDate(parseInt(req.body.day));
       res.json({ 
         success: true,
         times: business.createDay(req.body.date),
-        //dateISO: date.toISOString(),
       });
     } catch(err) {
       next(err);
@@ -491,11 +489,7 @@ module.exports = (app, passport) => {
           message: 'Reason text must not contain words longer than 30 characters.'
         });
       }
-      //console.log('book dateISO ' + req.body.dateISO);
-      //console.log('book dateObj ' + new Date(req.body.dateISO));
-      //const date = new Date(new Date(req.body.dateISO).getTime() + business.local.timezoneOffsetMs);
-      //const date = new Date(req.body.dateISO);
-      //console.log('book date ' + date);
+
       const m = moment.tz(req.body.date, business.timezone);
       let check = m.format();
       if ( !business.isWorkday(m.day()) 
@@ -509,11 +503,12 @@ module.exports = (app, passport) => {
         }
       const newAppnt = new Appointment();
       newAppnt.user = req.user.id;
+      newAppnt.userEmail = req.user.local.email;
       newAppnt.business = business._id;
+      newAppnt.businessEmail = business.local.email;
       newAppnt.date = req.body.date;
       newAppnt.reason = req.body.reason;
       newAppnt.canceled = false;
-      //newAppnt.timeMs = date.getTime();
       const appointment = await newAppnt.save();
 
       user.appointments.push(appointment._id);
@@ -741,16 +736,28 @@ module.exports = (app, passport) => {
 
     return result;
   }
-  /*
-  function isTimezoneValid(req, res, next) {
-    if (!(/^[a-zA-Z/_]+$/).test(req.body.timezoneOffsetMs)) {
+  
+  function isNameValid(req, res, next) {
+    if (!(/^[a-zA-Z0-9]+$/).test(req.body.firstname.trim())) {
       return res.json({ 
         success: false,
-        message: 'Timezone is needed to be sent.'
+        message: 'Sent first name is invalid'
+      });
+    }
+    if (!(/^[a-zA-Z0-9]+$/).test(req.body.lastname.trim())) {
+      return res.json({ 
+        success: false,
+        message: 'Sent last name is invalid'
+      });
+    }
+    if (!req.body.firstname && !req.body.lastname) {
+      return res.json({
+        success: false,
+        message: 'No data is sent'
       });
     }
     return next();
   }
-  */
+  
 
 }

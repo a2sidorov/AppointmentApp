@@ -4,7 +4,7 @@
   <title>Booking</title>
   <% include partials/head %>
 </head>
-<body>
+<body onload="startClock('<%= timezone %>')">
   <div class="grid-container">
     <header class="header">
       <% include partials/client-navbar %>
@@ -26,15 +26,17 @@
           <% }); %>
         </div>
       </div>
+      <div id="clock" >locadling...</div>
       <% if (active) { %>
         <div class="calendar">
           <div class="section-title">
-            <h3>Today is <%= date %></h3>
-          </div>
+            <h3>Calendar</h3>
+          </div>    
+          <div id="year"><%= year %></div> 
           <div class="month">
-            <button type="button" onclick="getDays('<%= timezone %>', 'prev')" class="material-icons">keyboard_arrow_left</button>
-            <span id="month"><%= month %> '<%= year %></span>
-            <button type="button" onclick="getDays('<%= timezone %>', 'next')" class="material-icons">keyboard_arrow_right</button>
+            <button type="button" onclick="getDays('prev')" class="material-icons">keyboard_arrow_left</button>
+            <span id="month"><%= month %></span>
+            <button type="button" onclick="getDays('next')" class="material-icons">keyboard_arrow_right</button>
           </div>
           <ul class="days"> 
             <li>Mo</li>
@@ -50,7 +52,7 @@
               <% days.forEach((day) => { %>
                 <li>
                   <% if (day.isAvailable) { %> 
-                      <div class="availableDays" onclick="setDay('<%= timezone %>', this)"><%= day.num %></div> 
+                      <div class="availableDays" onclick="setDay(this)"><%= day.num %></div> 
                   <% } else { %>
                       <div><%= day.num %></div>
                   <% } %>

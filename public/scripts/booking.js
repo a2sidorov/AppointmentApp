@@ -7,14 +7,20 @@ const appointment = {
   isTimeChosen: false,
 };
 let currentMoment;
+
+/* Clock */
+function startClock(timezone) {
+  appointment.date = moment.tz(timezone);
+  currentMoment = moment.tz(timezone);
+  setInterval(function() { 
+    document.getElementById('clock').innerHTML = 
+    'Today is ' + moment.tz(timezone).format('MMMM Do YYYY H:mm:ss') + 
+    ' GMT('+ moment.tz(timezone).format('Z') +')';
+  }, 1000);
+}
+
 /* Setting month */
-function getDays(timezone, month) {
-  if (!appointment.date) {
-    appointment.date = moment.tz(timezone);
-    currentMoment = moment.tz(timezone);
-  }
-
-
+function getDays(month) {
   if (month === "next") {
     appointment.date.add(1, 'months');
   } 
@@ -36,7 +42,9 @@ function getDays(timezone, month) {
         return message.innerHTML = parsedRes.message;
       }
 
-      document.getElementById('month').innerHTML = appointment.date.format('MMMM \'YY');
+      document.getElementById('year').innerHTML = appointment.date.format('YYYY');
+      document.getElementById('month').innerHTML = appointment.date.format('MMMM');
+      
       removeChildren(days);
 
       let list, div, txt;
@@ -47,7 +55,7 @@ function getDays(timezone, month) {
         div.appendChild(txt);
         if (day.isAvailable) {
           div.classList.add('availableDays');
-          div.onclick = function() { setDay(timezone, this); };
+          div.onclick = function() { setDay(this); };
         }
         list.appendChild(div);
         days.appendChild(list);
@@ -64,11 +72,7 @@ function getDays(timezone, month) {
 }
 
 /* Setting day */
-function setDay(timezone, el) {
-  if (!appointment.date) {
-    appointment.date = moment.tz(timezone);
-    currentMoment = moment.tz(timezone);
-  }
+function setDay(el) {
   appointment.date.date(parseInt(el.innerHTML));
   appointment.isDayChosen = true;
   const checkedDay = document.getElementById('checkedDay');

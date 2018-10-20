@@ -1438,7 +1438,6 @@ describe('Testing routes', () => {
   describe('GET /book/:id', () => {
     const business0 = new DummyBusiness('business0@test.com', 'password');
 		const client0 = new DummyClient('client0@test.com', 'password');
-		let date;
 		before( async () => {
 			await business0.signup();
 			await business0.login();
@@ -1616,11 +1615,11 @@ describe('Testing routes', () => {
 				.send({
 					date: business0.firstAvailableTime,
 				});
-      assert.isArray(res.body.hours);
-      assert.isTrue(res.body.hours.length > 0);
-			assert.property(res.body.hours[0], 'hour');
-			assert.property(res.body.hours[1], 'minute');
-      assert.property(res.body.hours[2], 'isAvailable');
+      assert.isArray(res.body.times);
+      assert.isTrue(res.body.times.length > 0);
+			assert.property(res.body.times[0], 'hour');
+			assert.property(res.body.times[1], 'minute');
+      assert.property(res.body.times[2], 'isAvailable');
     });
     it('should send success notification', async () => {
       const res = await client0.session
@@ -1988,8 +1987,17 @@ function DummyBusiness (email, password) {
 				days = business.createMonth(m.format());
 			}
 		}
-		const times = business.createDay(m.format());
-		const time = times.find(time => time.isAvailable);
+		m.date(day.num);
+		let check = m.format();
+		let times = business.createDay(m.format());
+		let time;
+		while(!time) {
+			time = times.find(time => time.isAvailable);
+			if(!time) {
+				m.add(1, 'days');
+				times = business.createDay(m.format());
+			}
+		}
 		m.hour(time.hour);
 		m.minute(time.minute);
 		this.firstAvailableTime = m.format();

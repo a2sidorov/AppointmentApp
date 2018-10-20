@@ -35,20 +35,16 @@ function defaultWorkdays() {
 function defaultWorkhours() {
   const workhours = [];
   for (let h = 0; h <= 24; h++) {
-    if (h >= 8 && h <= 21) {
-      //workhours.push({time:`${h < 10 ? '0' + h : h}:00`, isAvailable: true});
-      //workhours.push({time:`${h < 10 ? '0' + h : h}:30`, isAvailable: false});
+    if (h >= 8 && h <= 17) {
       workhours.push({ hour: h, minute: 0, isAvailable: true });
       workhours.push({ hour: h, minute: 30, isAvailable: false });
     } else {
       if (h !== 0) {
-        //workhours.push({time:`${h < 10 ? '0' + h : h}:00`, isAvailable: false});
         workhours.push({ hour: h, minute: 0, isAvailable: false });
       }
       if (h === 24) {
         break;
       }
-      //workhours.push({time:`${h < 10 ? '0' + h : h}:30`, isAvailable: false});
       workhours.push({ hour: h, minute: 30, isAvailable: false });
     }     
   } 
