@@ -15,7 +15,7 @@
                 "--timeout",
                 "999999",
                 "--colors",
-                "${workspaceFolder}/tests/routes.test.js"
+                "${workspaceFolder}/tests/utils.test.js"
             ],
             "internalConsoleOptions": "openOnSessionStart"
         }

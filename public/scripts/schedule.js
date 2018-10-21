@@ -43,7 +43,6 @@ const schedule = {
     } else {
       schedule.days[index].isAvailable = schedule.days[index].isAvailable ? false : true;
     }
-    console.log(schedule)
   }
 
   function updateTime(el, hour, minute, isAvailable) {
@@ -59,7 +58,6 @@ const schedule = {
     } else {
       schedule.time[index].isAvailable = schedule.time[index].isAvailable ? false : true;
     }
-    console.log(schedule)
   }
 
   function updateHolidays(el, holidayDate, isAvailable) {
@@ -75,7 +73,6 @@ const schedule = {
     } else {
       schedule.holidays[index].isAvailable = schedule.holidays[index].isAvailable ? false : true;
     }
-    console.log(schedule)
   }
 
   function save() {

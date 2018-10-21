@@ -2,12 +2,11 @@
 
 const express = require('express'),
 app = express(),
-morgan = require('morgan'),
-mongoose = require('mongoose');
+mongoose = require('mongoose'),
+morgan = require('morgan');
 
-//app.engine('html', require('ejs').renderFile);
-app.use(morgan('dev'))
-
+app.use(morgan('dev'));
+const errorLog = require('./config/logger').errorLog;
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -79,21 +78,12 @@ db.once('open', function() {
 
 
 require('./config/passport')(passport);
-/*
 require('./config/scheduler');
-*/
 
 app.set('view engine', 'ejs');
-//app.set('/views', path.join(__dirname, 'views')); 
 app.set('views', path.join(__dirname, '/views'));
-
-//app.use('/public', express.static('./public'));
-//app.use('/public', express.static('public'));
 app.use('/public', express.static(path.join(__dirname, 'public')));
-/*
-app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
-app.use(morgan('dev'));
-*/
+//app.use(favicon(path.join(__dirname, '/public/font/favicon.ico')));
 app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
@@ -114,6 +104,9 @@ require('./config/routes')(app, passport);
 // error handling
 app.use(function(err, req, res, next) {
   console.error(err);
+  if (process.env.NODE_ENV === 'production') {
+    errorLog.error(err);
+  }
   if (req.headers['content-type'] === 'application/json') {
     return res.json({
       error: true,
@@ -123,8 +116,8 @@ app.use(function(err, req, res, next) {
   res.redirect(`/error/${err.status || 500}`);
 });
 
-app.listen(port, ip); //+
-console.log('Server running on http://%s:%s', ip, port);//+
+app.listen(port, ip);
+console.log('Server running on http://%s:%s', ip, port);
 
-module.exports = app; //+
+module.exports = app;
 

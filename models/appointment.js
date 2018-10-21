@@ -7,16 +7,16 @@ const appointmentSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId, 
     ref: 'User',
   },
-  userEmail: String,
+  userEmail: { type: String, required: true },
   business: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Business',
   },
-  businessEmail: String,
-  date: String,
+  businessEmail: { type: String, required: true },
+  date: { type: String, required: true },
   reason: String,
   canceled: Boolean,
-  //timeMs: Number,
+  timestamp: { type: Number, required: true },
 });
 
 module.exports = mongoose.model('Appointment', appointmentSchema);

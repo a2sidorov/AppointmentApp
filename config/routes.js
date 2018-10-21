@@ -491,7 +491,6 @@ module.exports = (app, passport) => {
       }
 
       const m = moment.tz(req.body.date, business.timezone);
-      let check = m.format();
       if ( !business.isWorkday(m.day()) 
         || business.isHoliday(m.format('YYYY-MM-DD'))
         || business.isBooked(m.format())
@@ -509,6 +508,7 @@ module.exports = (app, passport) => {
       newAppnt.date = req.body.date;
       newAppnt.reason = req.body.reason;
       newAppnt.canceled = false;
+      newAppnt.timestamp = moment(req.body.date).unix();
       const appointment = await newAppnt.save();
 
       user.appointments.push(appointment._id);

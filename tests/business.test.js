@@ -1,4 +1,7 @@
 'use strict';
+
+/* Busiess model test */
+
 const assert = require('chai').assert;
 const moment = require('moment-timezone');
 const Business = require('../models/business');
