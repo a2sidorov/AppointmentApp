@@ -25,6 +25,7 @@
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "path": "^0.12.7",
+    "serve-favicon": "^2.5.0",
     "validator": "^10.8.0",
     "winston": "^3.1.0",
     "winston-daily-rotate-file": "^3.3.3"
