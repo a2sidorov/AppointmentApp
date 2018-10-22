@@ -1,5 +1,6 @@
 # Ignore dependencies
 node_modules/
 logs/
+.vscode/
 .env
 .DS_Store
