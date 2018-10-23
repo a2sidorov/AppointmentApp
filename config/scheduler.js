@@ -4,10 +4,11 @@ const schedule = require('node-schedule');
 const holidays = require('./holidays');
 const infoLog = require('./logger').infoLog;
 const errorLog = require('./logger').errorLog;
+const utils = require('./utils');
 
 const removeOldAppointmentsNightly = schedule.scheduleJob('* 1 * * *', () => { // at 1:00 AM every night
   utils.removeOldAppointments()
-    .then((result) => infoLog.info(`Removed old appointments ${result}`))
+    .then((result) => infoLog.info('Old appointments have been removed, qty: ' + result.n))
     .catch(err => errorLog.error(err));
 });
 
