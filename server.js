@@ -26,6 +26,7 @@ if (process.env.NODE_ENV == 'production') {
   console.log("PRODUCTION")
   port = process.env.PORT || 5000;
   mongoURI = "mongodb+srv://a2sidorov:" + process.env.DB_PASSWORD + "@cluster0-bvs0n.mongodb.net/test?retryWrites=true";
+  infoLog.info("Connectiong to " + mongoURI);
 } else {
   console.log("DEVELOPMENT")
   require('dotenv').load();
@@ -70,7 +71,6 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(flash());
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
 require('./config/routes')(app, passport);
 
 // error handling
