@@ -8,6 +8,7 @@ morgan = require('morgan');
 app.use(morgan('dev'));
 
 const errorLog = require('./config/logger').errorLog;
+const infoLog = require('./config/logger').infoLog;
 
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -33,12 +34,21 @@ if (process.env.NODE_ENV == 'production') {
 }
 
 // Connecting to mongoDB cluster
-mongoose.connect(mongoURI, { useNewUrlParser: true });
-let db = mongoose.connection;
-db.on('error', console.error.bind(console, 'mongoose: connection error'));
-db.once('open', function() {
-  console.log('mongoose: connected to mongodb');
-  
+mongoose.connect(mongoURI, { useNewUrlParser: true }, err => {
+  if (process.env.NODE_ENV == 'production') {
+    errorLog.error(err);
+  } else {
+    console.error(err);
+  }
+});
+//let db = mongoose.connection;
+//db.on('error', console.error.bind(console, 'mongoose: connection error'));
+mongoose.connection.once('open', function() {
+  if (process.env.NODE_ENV == 'production') {
+    infoLog.info('Connected to DB successfully');
+  } else {
+    console.info('Connected to DB successfully');
+  }  
 });
 
 require('./config/passport')(passport);
