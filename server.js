@@ -19,12 +19,14 @@ const favicon = require('serve-favicon');
 const path = require('path');
 
 /* Heroku server set up */
-let ip, port, mongoURI;
+let port, mongoURI;
 
 if (process.env.NODE_ENV == 'production') {
+  console.log("PRODUCTION")
   port = process.env.PORT || 5000;
   mongoURI = "mongodb+srv://a2sidorov:" + process.env.DB_PASSWORD + "@cluster0-bvs0n.mongodb.net/test?retryWrites=true";
 } else {
+  console.log("DEVELOPMENT")
   require('dotenv').load();
   port = 8080;
   mongoURI = 'mongodb://localhost:27017/mydb';
