@@ -20,15 +20,18 @@ const favicon = require('serve-favicon');
 const path = require('path');
 
 /* Heroku server set up */
+
 let port, mongoURI;
 
 if (process.env.NODE_ENV == 'production') {
-  console.log("PRODUCTION")
+  console.log("PRODUCTION");
+  infoLog.info("PRODUCTION");
   port = process.env.PORT || 5000;
   mongoURI = "mongodb+srv://a2sidorov:" + process.env.DB_PASSWORD + "@cluster0-bvs0n.mongodb.net/test?retryWrites=true";
   infoLog.info("Connectiong to " + mongoURI);
 } else {
-  console.log("DEVELOPMENT")
+  console.log("DEVELOPMENT");
+  infoLog.info("DEVELOPMENT");
   require('dotenv').load();
   port = 8080;
   mongoURI = 'mongodb://localhost:27017/mydb';
@@ -36,12 +39,15 @@ if (process.env.NODE_ENV == 'production') {
 
 // Connecting to mongoDB cluster
 mongoose.connect(mongoURI, { useNewUrlParser: true }, err => {
-  if (process.env.NODE_ENV == 'production') {
-    errorLog.error(err);
-  } else {
-    console.error(err);
+  if (err) {
+    if (process.env.NODE_ENV == 'production') {
+      errorLog.error(err);
+    } else {
+      console.error(err);
+    }
   }
 });
+
 //let db = mongoose.connection;
 //db.on('error', console.error.bind(console, 'mongoose: connection error'));
 mongoose.connection.once('open', function() {
