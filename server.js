@@ -25,13 +25,11 @@ let port, mongoURI;
 
 if (process.env.NODE_ENV == 'production') {
   console.log("PRODUCTION");
-  infoLog.info("PRODUCTION");
   port = process.env.PORT || 5000;
   mongoURI = "mongodb+srv://a2sidorov:" + process.env.DB_PASSWORD + "@cluster0-bvs0n.mongodb.net/test?retryWrites=true";
-  infoLog.info("Connectiong to " + mongoURI);
+
 } else {
   console.log("DEVELOPMENT");
-  infoLog.info("DEVELOPMENT");
   require('dotenv').load();
   port = 8080;
   mongoURI = 'mongodb://localhost:27017/mydb';
