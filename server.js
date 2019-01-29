@@ -69,7 +69,7 @@ app.use(bodyParser.urlencoded({ extended: true}));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({ 
-	secret: process.env.SECRET_KEY || 'abcd1234',
+	secret: process.env.SECRET_KEY,
 	resave: true,
 	saveUninitialized: true,
 }));
