@@ -31,7 +31,7 @@
     "winston-daily-rotate-file": "^3.3.3"
   },
   "engine": {
-    "node": "*",
+    "node": "10.x",
     "npm": "*"
   },
   "scripts": {
