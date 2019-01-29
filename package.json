@@ -35,7 +35,7 @@
     "npm": "*"
   },
   "scripts": {
-    "start": "NODE_ENV=production node server.js",
+    "start": "node server.js",
     "test": ""
   },
   "repository": {
