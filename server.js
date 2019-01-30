@@ -24,12 +24,12 @@ const path = require('path');
 let port, mongoURI;
 
 if (process.env.NODE_ENV == 'production') {
-  console.log("PRODUCTION");
+  infoLog.info("Starting in the production mode.")
   port = process.env.PORT || 5000;
   mongoURI = "mongodb+srv://a2sidorov:" + process.env.DB_PASSWORD + "@cluster0-bvs0n.mongodb.net/test?retryWrites=true";
 
 } else {
-  console.log("DEVELOPMENT");
+  console.log("Starting in the production mode.");
   require('dotenv').load();
   port = 8080;
   mongoURI = 'mongodb://localhost:27017/mydb';
@@ -38,22 +38,12 @@ if (process.env.NODE_ENV == 'production') {
 // Connecting to mongoDB cluster
 mongoose.connect(mongoURI, { useNewUrlParser: true }, err => {
   if (err) {
-    if (process.env.NODE_ENV == 'production') {
-      errorLog.error(err);
-    } else {
-      console.error(err);
-    }
+    errorLog.error(err)
   }
 });
 
-//let db = mongoose.connection;
-//db.on('error', console.error.bind(console, 'mongoose: connection error'));
 mongoose.connection.once('open', function() {
-  if (process.env.NODE_ENV == 'production') {
     infoLog.info('Connected to DB successfully');
-  } else {
-    console.info('Connected to DB successfully');
-  }  
 });
 
 require('./config/passport')(passport);
@@ -80,9 +70,7 @@ require('./config/routes')(app, passport);
 // error handling
 app.use(function(err, req, res, next) {
   console.error(err);
-  if (process.env.NODE_ENV === 'production') {
     errorLog.error(err);
-  }
   if (req.headers['content-type'] === 'application/json') {
     return res.json({
       error: true,

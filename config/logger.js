@@ -5,6 +5,7 @@ require('winston-daily-rotate-file');
 
 /* Info logger configuration */
 const infoFormat = winston.format.printf(info => {
+  console.log(info.message);
   return `${info.timestamp} ${info.message}`;
 });
 
@@ -24,6 +25,7 @@ const infoLog = winston.createLogger({
 
 /* Error logger configuration */
 const errorFormat = winston.format.printf(error => {
+  console.error(error);
   return `${error.timestamp} ${error.message} ${error.stack}`;
 });
 

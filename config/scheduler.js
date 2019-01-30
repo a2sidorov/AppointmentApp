@@ -15,7 +15,7 @@ const removeOldAppointmentsNightly = schedule.scheduleJob('0 1 * * *', () => { /
 const updateHolidaysFileYearly = schedule.scheduleJob('0 1 1 1 *', () => { // at 1:00 AM on January 1st every year
   holidays.fetchData()
     .then(data => holidays.writeToFile(holidays.filterResponse(data)))
-    .then(() => infoLog.info('File holidays have been updated.'))
+    .then(() => infoLog.info('File holidayList has been updated.'))
     .catch(err => errorLog.error(err));
 });
 

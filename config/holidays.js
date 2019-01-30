@@ -34,7 +34,7 @@ module.exports = {
       eventDate.isAvailable = false; //adding addtional property
       return eventDate;  
     });
-    cached = holidays;
+    this.cached = holidays;
     return holidays;
   }, 
   writeToFile: function(data) {
